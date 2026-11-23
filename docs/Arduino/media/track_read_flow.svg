@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 600" width="760" height="600" font-family="Microsoft YaHei, PingFang SC, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#475569"/>
+    </marker>
+    <marker id="arrowdash" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0ea5e9"/>
+    </marker>
+  </defs>
+  <rect width="760" height="600" fill="#f8fafc"/>
+  <text x="380" y="36" text-anchor="middle" font-size="21" font-weight="bold" fill="#0f172a">循迹传感器</text>
+
+  <g stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)">
+    <path d="M380,108 L380,126"/>
+    <path d="M380,178 L380,198"/>
+    <path d="M380,254 L380,274"/>
+    <path d="M380,330 L380,350"/>
+    <path d="M380,400 L380,420"/>
+    <path d="M380,476 L380,496"/>
+  </g>
+
+  <rect x="310" y="80" width="140" height="28" rx="14" fill="#1e293b" stroke="#1e293b" stroke-width="2"/>
+  <text x="380" y="99" text-anchor="middle" font-size="13" font-weight="bold" fill="#ffffff">开始</text>
+
+  <rect x="220" y="126" width="320" height="52" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+  <text x="380" y="147" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#075985">I2C 一次读回 8 位</text>
+  <text x="380" y="166" text-anchor="middle" font-size="11" fill="#0369a1">一次 I2C 读，拿回一个字节</text>
+
+  <rect x="180" y="198" width="400" height="56" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="380" y="219" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#0f172a">只取其中 5 位</text>
+  <text x="380" y="238" text-anchor="middle" font-size="11" fill="#64748b">从左到右依次是最左、左、中、右、最右</text>
+
+  <rect x="180" y="274" width="400" height="56" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+  <text x="380" y="295" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#92400e">逐位取反</text>
+  <text x="380" y="314" text-anchor="middle" font-size="11" fill="#b45309">压黑线读到低电平，取反后 1 才算「看到线」</text>
+
+  <rect x="180" y="350" width="400" height="50" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="380" y="371" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#0f172a">得到五路状态，1 表示看到线</text>
+  <text x="380" y="389" text-anchor="middle" font-size="11" fill="#64748b">五路的顺序按车上的左右排，不是按位号</text>
+
+  <rect x="200" y="420" width="360" height="56" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="380" y="441" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#166534">串口打印一行</text>
+  <text x="380" y="460" text-anchor="middle" font-size="11" fill="#15803d">A:0  B:1  C:1  D:0  E:0</text>
+
+  <rect x="250" y="496" width="260" height="46" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="380" y="525" text-anchor="middle" font-size="12.5" fill="#0f172a">延时 200 ms</text>
+
+  <path d="M380,542 L380,562 L60,562 L60,224 L176,224" stroke="#0ea5e9" stroke-width="1.8" stroke-dasharray="7 5" fill="none" marker-end="url(#arrowdash)"/>
+
+</svg>

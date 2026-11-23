@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 500" width="760" height="500" font-family="Microsoft YaHei, PingFang SC, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#475569"/>
+    </marker>
+  </defs>
+  <rect width="760" height="500" fill="#f8fafc"/>
+  <text x="380" y="38" text-anchor="middle" font-size="21" font-weight="bold" fill="#0f172a">超声波测距</text>
+  <text x="738" y="60" text-anchor="end" font-size="10.5" fill="#94a3b8">时间轴不按比例</text>
+
+  <!-- Trig 轨 -->
+  <text x="80" y="112" text-anchor="end" font-size="12" font-weight="bold" fill="#075985">Trig</text>
+  <text x="80" y="128" text-anchor="end" font-size="10.5" fill="#0369a1">IO13</text>
+  <line x1="100" y1="150" x2="700" y2="150" stroke="#e2e8f0" stroke-width="1"/>
+  <polyline points="100,150 220,150 220,108 260,108 260,150 700,150" fill="none" stroke="#0284c7" stroke-width="2.4"/>
+
+  <!-- 10 µs 尺寸线 -->
+  <line x1="220" y1="78" x2="220" y2="96" stroke="#dc2626" stroke-width="1.2"/>
+  <line x1="260" y1="78" x2="260" y2="96" stroke="#dc2626" stroke-width="1.2"/>
+  <line x1="220" y1="87" x2="260" y2="87" stroke="#dc2626" stroke-width="1.2"/>
+  <text x="240" y="72" text-anchor="middle" font-size="11" font-weight="bold" fill="#dc2626">10 µs</text>
+
+  <text x="160" y="168" text-anchor="middle" font-size="10.5" fill="#64748b">低电平</text>
+  <text x="480" y="168" text-anchor="middle" font-size="10.5" fill="#64748b">Trig 拉低后，等 Echo 变高</text>
+
+  <!-- 声波 -->
+  <text x="80" y="200" text-anchor="end" font-size="12" font-weight="bold" fill="#166534">声波</text>
+  <text x="80" y="216" text-anchor="end" font-size="10.5" fill="#15803d">40 kHz</text>
+  <path d="M260,205 q6,-11 12,0 q6,-11 12,0 q6,-11 12,0 q6,-11 12,0 q6,-11 12,0 q6,-11 12,0 q6,-11 12,0 q6,-11 12,0" fill="none" stroke="#16a34a" stroke-width="1.8"/>
+  <text x="308" y="188" text-anchor="middle" font-size="10.5" fill="#15803d">发 8 个脉冲</text>
+
+  <path d="M356,205 L516,205" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="5 4" fill="none" marker-end="url(#arrow)"/>
+  <text x="436" y="197" text-anchor="middle" font-size="10.5" fill="#15803d">撞到障碍物</text>
+
+  <path d="M520,212 Q543,230 566,212" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="5 4" fill="none"/>
+  <text x="543" y="254" text-anchor="middle" font-size="10.5" fill="#15803d">回声返回</text>
+
+  <!-- Echo 轨 -->
+  <text x="80" y="302" text-anchor="end" font-size="12" font-weight="bold" fill="#92400e">Echo</text>
+  <text x="80" y="318" text-anchor="end" font-size="10.5" fill="#b45309">IO12</text>
+  <line x1="100" y1="340" x2="700" y2="340" stroke="#e2e8f0" stroke-width="1"/>
+  <polyline points="100,340 356,340 356,292 566,292 566,340 700,340" fill="none" stroke="#d97706" stroke-width="2.4"/>
+
+  <!-- 高电平宽度 尺寸线 -->
+  <line x1="356" y1="264" x2="356" y2="282" stroke="#dc2626" stroke-width="1.2"/>
+  <line x1="566" y1="264" x2="566" y2="282" stroke="#dc2626" stroke-width="1.2"/>
+  <line x1="356" y1="273" x2="566" y2="273" stroke="#dc2626" stroke-width="1.2"/>
+  <text x="461" y="258" text-anchor="middle" font-size="11" font-weight="bold" fill="#dc2626">高电平宽度 t = 声音往返时间</text>
+
+  <text x="180" y="358" text-anchor="middle" font-size="10.5" fill="#64748b">等回响</text>
+
+  <!-- 公式 -->
+  <rect x="120" y="392" width="520" height="66" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+  <text x="380" y="416" text-anchor="middle" font-size="13" font-weight="bold" fill="#075985">距离 = t × 0.034 ÷ 2</text>
+  <text x="380" y="438" text-anchor="middle" font-size="11" fill="#0369a1">t 是 Echo 高电平的宽度（µs）；0.034 是声速 cm/µs；除以 2 去掉回程</text>
+</svg>

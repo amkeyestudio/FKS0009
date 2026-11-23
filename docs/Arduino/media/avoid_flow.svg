@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 920" width="800" height="920" font-family="Microsoft YaHei, PingFang SC, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#475569"/>
+    </marker>
+    <marker id="arrowdash" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0ea5e9"/>
+    </marker>
+  </defs>
+  <rect width="800" height="920" fill="#f8fafc"/>
+  <text x="400" y="38" text-anchor="middle" font-size="22" font-weight="bold" fill="#0f172a">超声波避障</text>
+
+  <!-- 主干向下箭头 -->
+  <g stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)">
+    <path d="M400,62 L400,88"/>
+    <path d="M400,136 L400,162"/>
+    <path d="M400,210 L400,236"/>
+    <path d="M400,372 L400,398"/>
+    <path d="M400,446 L400,472"/>
+    <path d="M400,516 L400,532"/>
+    <path d="M400,576 L400,592"/>
+    <path d="M400,634 L400,658"/>
+  </g>
+
+  <!-- 开始 -->
+  <rect x="330" y="62" width="140" height="38" rx="19" fill="#1e293b" stroke="#1e293b" stroke-width="2"/>
+  <text x="400" y="87" text-anchor="middle" font-size="14" font-weight="bold" fill="#ffffff">开始</text>
+
+  <!-- 初始化 -->
+  <rect x="205" y="90" width="390" height="46" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+  <text x="400" y="119" text-anchor="middle" font-size="13" font-weight="bold" fill="#075985">初始化：停车 · 云台回中 90° · 点阵显示爱心</text>
+
+  <!-- 测距 -->
+  <rect x="280" y="162" width="240" height="48" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+  <text x="400" y="183" text-anchor="middle" font-size="13" font-weight="bold" fill="#075985">测前方距离</text>
+  <text x="400" y="201" text-anchor="middle" font-size="11" fill="#0369a1">Trig 接 IO13 · Echo 接 IO12</text>
+
+  <!-- 菱形1：前方 <= 15 -->
+  <polygon points="400,236 558,305 400,374 242,305" fill="#fef3c7" stroke="#d97706" stroke-width="1.8"/>
+  <text x="400" y="298" text-anchor="middle" font-size="13" font-weight="bold" fill="#92400e">前方距离 ≤ 15 cm？</text>
+  <text x="400" y="318" text-anchor="middle" font-size="11" fill="#b45309">阈值 15 cm</text>
+
+  <!-- 否分支：无障碍直行（右侧） -->
+  <path d="M558,305 L590,305" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="570" y="296" text-anchor="middle" font-size="12" font-weight="bold" fill="#16a34a">否</text>
+  <rect x="592" y="283" width="180" height="46" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="682" y="304" text-anchor="middle" font-size="12" font-weight="bold" fill="#166534">无障碍：直行</text>
+  <text x="682" y="321" text-anchor="middle" font-size="11" fill="#15803d">两轮同速前进</text>
+
+  <!-- 是分支文字 -->
+  <text x="416" y="390" text-anchor="middle" font-size="12" font-weight="bold" fill="#dc2626">是</text>
+
+  <!-- 停车+感叹号 -->
+  <rect x="290" y="398" width="220" height="48" rx="8" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5"/>
+  <text x="400" y="419" text-anchor="middle" font-size="13" font-weight="bold" fill="#991b1b">停车 · 点阵显示感叹号</text>
+  <text x="400" y="437" text-anchor="middle" font-size="11" fill="#b91c1c">发现障碍</text>
+
+  <!-- 左转测距 -->
+  <rect x="270" y="472" width="260" height="44" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="400" y="499" text-anchor="middle" font-size="13" fill="#0f172a">云台左转 180° → 测左距（延时 300 ms）</text>
+
+  <!-- 右转测距 -->
+  <rect x="270" y="532" width="260" height="44" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="400" y="559" text-anchor="middle" font-size="13" fill="#0f172a">云台右转 0° → 测右距（延时 300 ms）</text>
+
+  <!-- 回中 -->
+  <rect x="290" y="592" width="220" height="42" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="400" y="618" text-anchor="middle" font-size="13" fill="#0f172a">云台回中 90°</text>
+
+  <!-- 菱形2：左距 > 右距 -->
+  <polygon points="400,658 548,724 400,790 252,724" fill="#fef3c7" stroke="#d97706" stroke-width="1.8"/>
+  <text x="400" y="729" text-anchor="middle" font-size="13" font-weight="bold" fill="#92400e">左距 &gt; 右距？</text>
+
+  <!-- 左转（是） -->
+  <path d="M252,724 L222,724" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="238" y="715" text-anchor="middle" font-size="12" font-weight="bold" fill="#16a34a">是</text>
+  <rect x="70" y="702" width="152" height="44" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="146" y="721" text-anchor="middle" font-size="12" font-weight="bold" fill="#166534">向左空间大</text>
+  <text x="146" y="738" text-anchor="middle" font-size="11" fill="#15803d">原地左转，满速</text>
+
+  <!-- 右转（否） -->
+  <path d="M548,724 L578,724" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="564" y="715" text-anchor="middle" font-size="12" font-weight="bold" fill="#dc2626">否</text>
+  <rect x="580" y="702" width="152" height="44" rx="8" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5"/>
+  <text x="656" y="721" text-anchor="middle" font-size="12" font-weight="bold" fill="#991b1b">向右空间大</text>
+  <text x="656" y="738" text-anchor="middle" font-size="11" fill="#b91c1c">原地右转，满速</text>
+
+  <!-- 返回循环：右侧（无障碍）虚线绕回测距 -->
+  <path d="M772,306 L786,306 L786,186 L522,186" stroke="#0ea5e9" stroke-width="1.8" stroke-dasharray="7 5" fill="none" marker-end="url(#arrowdash)"/>
+
+  <!-- 返回循环：左侧（避障后）虚线绕回测距 -->
+  <path d="M146,746 L146,860 L400,860" stroke="#0ea5e9" stroke-width="1.8" stroke-dasharray="7 5" fill="none"/>
+  <path d="M656,746 L656,860 L400,860" stroke="#0ea5e9" stroke-width="1.8" stroke-dasharray="7 5" fill="none"/>
+  <path d="M146,860 L60,860 L60,186 L278,186" stroke="#0ea5e9" stroke-width="1.8" stroke-dasharray="7 5" fill="none" marker-end="url(#arrowdash)"/>
+
+</svg>

@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 620" width="820" height="620" font-family="Microsoft YaHei, PingFang SC, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <rect width="820" height="620" fill="#f8fafc"/>
+  <text x="410" y="34" text-anchor="middle" font-size="22" font-weight="bold" fill="#0f172a">ESP32-S3 迷你履带坦克组成框图</text>
+  <text x="410" y="58" text-anchor="middle" font-size="12" fill="#64748b">各模块都插在 KS5039 扩展板的座子上，扩展板再叠插到主控排针（引脚以实物丝印为准）</text>
+
+  <!-- 连线：先画线，后画框，线端被框覆盖，视觉上从框边缘出发 -->
+  <g stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrow)">
+    <path d="M300,124 L250,124"/>
+    <path d="M300,204 L250,204"/>
+    <path d="M300,290 L250,290"/>
+    <path d="M300,376 L250,376"/>
+    <path d="M520,124 L570,124"/>
+    <path d="M520,204 L570,204"/>
+    <path d="M520,290 L570,290"/>
+    <path d="M520,376 L570,376"/>
+    <path d="M410,404 L410,460"/>
+  </g>
+  <!-- 无线连接用虚线 -->
+  <path d="M410,546 L410,562" stroke="#7c3aed" stroke-width="2" stroke-dasharray="7 5" fill="none" marker-end="url(#arrow)"/>
+  <text x="420" y="560" font-size="11" fill="#7c3aed">Wi-Fi</text>
+
+  <!-- 扩展板：所有外设的落点 -->
+  <rect x="300" y="76" width="220" height="328" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+  <text x="410" y="102" text-anchor="middle" font-size="15" font-weight="bold" fill="#166534">KS5039 扩展板（DRV8835）</text>
+  <text x="310" y="128" font-size="10" fill="#15803d">A 路 IO38/21</text>
+  <text x="510" y="128" text-anchor="end" font-size="10" fill="#15803d">B 路 IO40/41</text>
+  <text x="310" y="208" font-size="10" fill="#15803d">点阵 IO8/IO9</text>
+  <text x="510" y="208" text-anchor="end" font-size="10" fill="#15803d">超声波 IO12/13</text>
+  <text x="310" y="294" font-size="10" fill="#15803d">I2C IO8/IO9</text>
+  <text x="510" y="294" text-anchor="end" font-size="10" fill="#15803d">舵机 IO42</text>
+  <text x="310" y="380" font-size="10" fill="#15803d">UART IO17/18</text>
+  <text x="510" y="380" text-anchor="end" font-size="10" fill="#15803d">舵机 IO11</text>
+
+  <!-- 主控 -->
+  <rect x="300" y="460" width="220" height="86" rx="10" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+  <text x="410" y="492" text-anchor="middle" font-size="16" font-weight="bold" fill="#1e3a8a">ESP32-S3 主控</text>
+  <text x="410" y="514" text-anchor="middle" font-size="11" fill="#1e40af">Wi-Fi + BLE 5.0，双核 240MHz</text>
+  <text x="410" y="534" text-anchor="middle" font-size="11" fill="#1e40af">3.3V 逻辑，排针与扩展板对接</text>
+  <text x="423" y="447" font-size="10" fill="#64748b">排针叠插</text>
+
+  <!-- 左侧：电机、点阵、循迹、视觉 -->
+  <rect x="30" y="96" width="220" height="56" rx="9" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+  <text x="140" y="122" text-anchor="middle" font-size="13" font-weight="bold" fill="#166534">左电机（物理左轮）</text>
+  <text x="140" y="142" text-anchor="middle" font-size="10.5" fill="#15803d">电机端子 A 路</text>
+
+  <rect x="30" y="176" width="220" height="56" rx="9" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+  <text x="140" y="202" text-anchor="middle" font-size="13" font-weight="bold" fill="#92400e">8×16 点阵屏</text>
+  <text x="140" y="222" text-anchor="middle" font-size="10.5" fill="#b45309">DIN-IO8 / CLK-IO9</text>
+
+  <rect x="30" y="262" width="220" height="56" rx="9" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+  <text x="140" y="288" text-anchor="middle" font-size="13" font-weight="bold" fill="#92400e">循迹传感器</text>
+  <text x="140" y="308" text-anchor="middle" font-size="10.5" fill="#b45309">I2C：SDA-IO8 / SCL-IO9</text>
+
+  <rect x="30" y="348" width="220" height="56" rx="9" fill="#fce7f3" stroke="#db2777" stroke-width="2"/>
+  <text x="140" y="374" text-anchor="middle" font-size="13" font-weight="bold" fill="#9d174d">AI 视觉模块</text>
+  <text x="140" y="394" text-anchor="middle" font-size="10.5" fill="#be185d">UART：RX18 / TX17</text>
+
+  <!-- 右侧：电机、超声波、云台、夹爪 -->
+  <rect x="570" y="96" width="220" height="56" rx="9" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+  <text x="680" y="122" text-anchor="middle" font-size="13" font-weight="bold" fill="#166534">右电机（物理右轮）</text>
+  <text x="680" y="142" text-anchor="middle" font-size="10.5" fill="#15803d">电机端子 B 路</text>
+
+  <rect x="570" y="176" width="220" height="56" rx="9" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+  <text x="680" y="202" text-anchor="middle" font-size="13" font-weight="bold" fill="#92400e">超声波模块</text>
+  <text x="680" y="222" text-anchor="middle" font-size="10.5" fill="#b45309">Trig-IO13 / Echo-IO12</text>
+
+  <rect x="570" y="262" width="220" height="56" rx="9" fill="#fce7f3" stroke="#db2777" stroke-width="2"/>
+  <text x="680" y="288" text-anchor="middle" font-size="13" font-weight="bold" fill="#9d174d">云台舵机</text>
+  <text x="680" y="308" text-anchor="middle" font-size="10.5" fill="#be185d">IO42，0–180°</text>
+
+  <rect x="570" y="348" width="220" height="56" rx="9" fill="#fce7f3" stroke="#db2777" stroke-width="2"/>
+  <text x="680" y="374" text-anchor="middle" font-size="13" font-weight="bold" fill="#9d174d">夹爪舵机</text>
+  <text x="680" y="394" text-anchor="middle" font-size="10.5" fill="#be185d">IO11，90–140°</text>
+
+  <!-- 手机/网页 -->
+  <rect x="300" y="562" width="220" height="50" rx="9" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+  <text x="410" y="584" text-anchor="middle" font-size="13" font-weight="bold" fill="#5b21b6">手机 / 网页遥控</text>
+  <text x="410" y="601" text-anchor="middle" font-size="10" fill="#5b21b6">经 Wi-Fi 连主控</text>
+</svg>
