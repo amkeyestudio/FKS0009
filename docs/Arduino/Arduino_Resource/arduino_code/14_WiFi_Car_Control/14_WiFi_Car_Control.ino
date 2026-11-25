@@ -125,4 +125,3 @@ void goBackward(int speed) { driveMotors(-speed, -speed); }
 void spinLeft(int speed)   { driveMotors(-speed, speed); }
 void spinRight(int speed)  { driveMotors(speed, -speed); }
 void stopCar()             { driveMotors(0, 0); }
-

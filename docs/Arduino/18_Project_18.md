@@ -6,9 +6,9 @@
 
 In Lesson 7 the car followed a line with five infrared sensors pressed to the floor. Now lift the eyes: a camera aimed at the ground sees the line further ahead than a ground-hugging probe can, so the car can start steering before it is already on top of the line.
 
-The module still sends no picture — it sends three numbers: how far the line sits from the center of the frame, how tilted it is, and a validity flag. Those two measurements are enough to work out how much the left and right wheels should differ in speed.
+The module still sends no picture — it sends three numbers: how far the line sits from the center of the frame, how tilted it is, and a validity flag that equals 5 only when this frame really saw the line. With two of those you can work out how much the left and right wheels should differ in speed.
 
-PD control is the answer here. The proportional term alone will overshoot and weave; only the derivative term, watching how fast the error is changing, can settle the steering before the car crosses the centerline and starts swinging back. And when the line leaves the frame entirely, the car must search in the direction it last saw the line — spin at random and you will never find it.
+The correction uses proportional plus derivative: a big error means a big steering correction, a small error a gentle one; one more term watches how fast the error is changing and eases off early, so the body doesn't overshoot the centerline and swing back and forth. The straight-line base speed is 130, and the correction is capped at ±90.
 
 At power-on the dot matrix shows a pair of eyes; it changes to a smiley only when the line enters view and tracking begins. Lose the line and it searches on the spot using its memory; find it again and it carries on, but if the search times out it stops and shows a frown.
 
@@ -479,7 +479,7 @@ It uses "which side the line was on the last time it was seen", not "which side 
 
 `SEARCH_DEAD = 15` is the dead zone: if the last error was within ±15 the car was already straight, and searching either way is only a guess, so it stops and waits for someone to reposition it.
 
-If the line is still not found after `LOST_TIMEOUT 600` ms, give up. That is much shorter than the 1500 ms in Lesson 7 because the camera sees further: five ground sensors must wait until the nose is over the line to know, while the camera spots it from a distance, so by the time the line is truly lost the car is already beyond the end of it and more turning is useless.
+If the line is still not found after `LOST_TIMEOUT 600` ms, give up. That is much shorter than the 1500 ms in Lesson 7 because the camera sees further: five on/off sensors must wait until the nose is over the line to know, while the camera can see it from 30 cm away, so by the time the line is truly lost the car is already beyond the end of it and more turning is useless.
 
 **(10) `delay(5)` sets the control period**
 

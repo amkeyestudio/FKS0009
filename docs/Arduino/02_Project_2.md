@@ -446,6 +446,6 @@ The current action is printed to the serial port at the same time (115200). If t
 
 (2) Turning goes the opposite way: don't rush to change the program. First check channels A and B against the left and right wheels using the wiring table in Section 2.3.1, and confirm that channel A drives the left wheel.
 
-(3) It only turns one way and won't reverse: `setMotor()` writes PWM only and leaves the direction pin at its previous value. Reversing must go through a wrapper that uses `digitalWrite()`, such as `forward()` / `back()`.
+(3) It only turns one way and won't reverse: the direction pins in `driveMotors()` are written according to the sign of the speed — pass 0 or a positive value and the direction pin stays `HIGH`; reversing requires a negative value, which is exactly what `goBackward()` does with `driveMotors(-speed, -speed)`. If your own call forgets the minus sign, the car will only ever go one way.
 
 (4) The car shoots off on power on: you left `stopCar()` out at the end of `setup()`, or didn't set the duty cycle to 0 right after `ledcAttach()`.

@@ -6,38 +6,38 @@
 #define MOTOR_BIN 40  // Channel B direction: right wheel
 #define MOTOR_BEN 41  // Channel B speed: right wheel
 
-// ===== Vision module serial =====
+// ===== Vision module serial port =====
 // Controller RX <- module TX, controller TX -> module RX, common ground required
 // Modify according to actual wiring
-#define CAM_RX 18  // Controller receive pin
-#define CAM_TX 17  // Controller transmit pin
+#define CAM_RX 18  // Controller RX pin
+#define CAM_TX 17  // Controller TX pin
 
 // ===== Dot matrix pins =====
-#define CLK_Pin 9  // Clock, connected to module CLK
-#define DIN_Pin 8  // Data, connected to module DIN
+#define CLK_Pin 9  // Clock, connect to module CLK
+#define DIN_Pin 8  // Data, connect to module DIN
 
-// ===== Line tracking parameters =====
-#define BASE_SPEED   130  // Base speed for straight travel
+// ===== Line-following parameters =====
+#define BASE_SPEED   130  // Base straight-line speed
 #define KP           0.4  // Proportional coefficient
 #define KD           0.6  // Derivative coefficient, suppresses overshoot
-#define TURN_MAX      90  // Max correction per side
-#define D_MAX         50  // Derivative term clamp
+#define TURN_MAX      90  // Maximum one-side correction
+#define D_MAX         50  // Derivative term limit
 
 // ===== Line loss and search =====
-#define SEARCH_SPEED  90  // Line search rotation speed
-#define SEARCH_DEAD   15  // Line search dead zone
-#define LOST_TIMEOUT 600  // Line search timeout (ms)
+#define SEARCH_SPEED  90  // Line-search rotation speed
+#define SEARCH_DEAD   15  // Line-search dead zone
+#define LOST_TIMEOUT 600  // Line-search timeout (ms)
 
 // ===== Valid flag =====
-#define LINE_OK 5  // Third field = 5 means line recognized
+#define LINE_OK 5  // The module's third field being 5 means a line is detected
 
-// ===== Expression IDs =====
+// ===== Expression numbers =====
 #define FACE_EYES     0  // Standby: eyes
-#define FACE_SMILE    1  // Line tracking: smile
-#define FACE_SURPRISE 2  // Line search: wide eyes
+#define FACE_SMILE    1  // Following line: smiling face
+#define FACE_SURPRISE 2  // Searching for line: wide eyes
 #define FACE_SAD      3  // Timeout: sad face
 
-// 16 bytes for 16 columns, 8 bits per byte for 8 rows per column
+// 16 bytes correspond to 16 columns, each byte's 8 bits correspond to 8 rows in one column
 
 // Standby: two square eyes
 unsigned char eyes[] = {
@@ -45,13 +45,13 @@ unsigned char eyes[] = {
   0x00, 0x00, 0x1C, 0x1C, 0x00, 0x00, 0x00, 0x00
 };
 
-// Smile: tracking stably
+// Smiling face: stable on the line
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
 };
 
-// Wide eyes: searching for line
+// Wide eyes: searching for the line
 unsigned char surprise[] = {
   0x00, 0x00, 0x00, 0x00, 0x3E, 0x3E, 0x00, 0xC0,
   0xC0, 0x00, 0x3E, 0x3E, 0x00, 0x00, 0x00, 0x00
@@ -65,13 +65,13 @@ unsigned char sad[] = {
 
 AiCam aiCam(CAM_RX, CAM_TX);  // Vision module instance
 
-int lastError = 0;            // Previous error, determines search direction on line loss
+int lastError = 0;            // Last error, determines search direction when line is lost
 bool hasLast = false;         // Whether a previous error exists
-unsigned long lostStart = 0;  // Time of line loss, 0 means no loss
-int curFace = -1;             // Current expression, -1 means none shown
+unsigned long lostStart = 0;  // Time when line was lost, 0 means not lost
+int curFace = -1;             // Current expression, -1 means not shown
 
 void setup() {
-  // Pull both lines high to set the bus idle
+  // Pull both lines HIGH to set the bus idle
   pinMode(CLK_Pin, OUTPUT);
   pinMode(DIN_Pin, OUTPUT);
   digitalWrite(CLK_Pin, HIGH);
@@ -82,28 +82,28 @@ void setup() {
   pinMode(MOTOR_AIN, OUTPUT);
   ledcAttach(MOTOR_BEN, 1000, 8);  // 1 kHz, 8-bit
   ledcAttach(MOTOR_AEN, 1000, 8);
-  stopCar();                       // Stop at power on
+  stopCar();                       // Stop on power on
 
   // Show standby expression
   showFace(FACE_EYES);
 
-  // Start vision module in line tracking mode
+  // Start the vision module in line-following mode
   aiCam.begin();
   aiCam.setMode("line");
 
-  delay(1000);  // Wait for mode switch to complete
+  delay(1000);  // Wait for the mode switch to complete
 }
 
 void loop() {
-  aiCam.readSerial();  // Read serial each loop
+  aiCam.readSerial();  // Read the serial port each cycle
 
-  int offset = aiCam.getLineOffset();  // Offset: negative left, positive right
-  int valid  = aiCam.getLineValid();   // Valid flag, 5 means line recognized
+  int offset = aiCam.getLineOffset();  // Error: negative means left, positive means right
+  int valid  = aiCam.getLineValid();   // Valid flag, 5 means line detected
 
   if (valid == LINE_OK) {
-    // Line recognized: PD computes differential speed
-    lostStart = 0;         // Clear line-loss timer
-    showFace(FACE_SMILE);  // Show smile
+    // Line detected: PD calculation for differential speed
+    lostStart = 0;         // Clear line-lost timer
+    showFace(FACE_SMILE);  // Show smiling face
 
     int error = offset;  // Current error
 
@@ -111,25 +111,25 @@ void loop() {
     int dError = 0;
     if (hasLast) {
       dError = error - lastError;
-      dError = constrain(dError, -D_MAX, D_MAX);  // Clamp
+      dError = constrain(dError, -D_MAX, D_MAX);  // Limit range
     }
 
-    // Differential = P*error + D*error change
+    // Differential = P x error + D x change in error
     int correction = (int)(error * KP + dError * KD);
 
-    // Clamp correction
+    // Limit the correction
     correction = constrain(correction, -TURN_MAX, TURN_MAX);
 
-    // Positive correction (line to the right): left faster, right slower
-    // Negative correction: the opposite
+    // When correction is positive (to the right), left fast and right slow, nose turns right
+    // Opposite when correction is negative
     driveMotors(BASE_SPEED + correction, BASE_SPEED - correction);
 
-    lastError = error;  // Save current error
+    lastError = error;  // Save the current error
     hasLast = true;
   } else {
-    // Line not recognized: search in the direction of previous error
+    // No line detected: search in the direction of the last error
     if (lostStart == 0) {    // Line just lost
-      lostStart = millis();  // Start timer
+      lostStart = millis();  // Start timing
     }
 
     if (millis() - lostStart < LOST_TIMEOUT) {
@@ -144,16 +144,16 @@ void loop() {
         stopCar();                                  // Direction unknown, stop
       }
     } else {
-      showFace(FACE_SAD);  // Line search timeout
-      stopCar();           // Stop when off line
+      showFace(FACE_SAD);  // Line-search timeout
+      stopCar();           // Stop after losing the line
     }
   }
 
-  delay(5);  // 5 ms per loop
+  delay(5);  // 5 ms per cycle
 }
 
 // ===== Dot matrix display =====
-// Only update display when expression changes
+// Only refresh the display when the expression changes
 void showFace(int face) {
   if (face == curFace) return;  // Expression unchanged
   curFace = face;
@@ -161,7 +161,7 @@ void showFace(int face) {
   if (face == FACE_EYES) {
     matrix_display(eyes);       // Standby
   } else if (face == FACE_SMILE) {
-    matrix_display(smile);      // Smile
+    matrix_display(smile);      // Smiling face
   } else if (face == FACE_SURPRISE) {
     matrix_display(surprise);   // Wide eyes
   } else {
@@ -169,7 +169,7 @@ void showFace(int face) {
   }
 }
 
-// Write 16-byte font bitmap to dot matrix display buffer
+// Write the 16-byte font bitmap into the dot matrix display buffer
 void matrix_display(unsigned char matrix_value[]) {
   // 0x40: write data mode, auto-increment address
   IIC_start();
@@ -192,7 +192,7 @@ void matrix_display(unsigned char matrix_value[]) {
   IIC_end();
 }
 
-// Start condition: DIN falling edge while CLK is HIGH
+// Start condition: falling edge of DIN while CLK is HIGH
 void IIC_start() {
   digitalWrite(CLK_Pin, HIGH);
   delayMicroseconds(3);
@@ -205,7 +205,7 @@ void IIC_start() {
 // Send one byte, LSB first: set data while CLK is LOW, sample on rising edge
 void IIC_send(unsigned char send_data) {
   for (int i = 0; i < 8; i++) {
-    digitalWrite(CLK_Pin, LOW);  // Pull clock low to prepare data
+    digitalWrite(CLK_Pin, LOW);  // Pull clock LOW to prepare data
     delayMicroseconds(3);
 
     // Send bit by bit starting from bit0
@@ -216,14 +216,14 @@ void IIC_send(unsigned char send_data) {
     }
     delayMicroseconds(3);
 
-    digitalWrite(CLK_Pin, HIGH); // Pull clock high, module samples
+    digitalWrite(CLK_Pin, HIGH); // Pull clock HIGH for the module to sample
     delayMicroseconds(3);
 
-    send_data = send_data >> 1;  // Shift right for next bit
+    send_data = send_data >> 1;  // Shift right to get the next bit
   }
 }
 
-// Stop condition: DIN rising edge while CLK is HIGH
+// Stop condition: rising edge of DIN while CLK is HIGH
 void IIC_end() {
   digitalWrite(CLK_Pin, LOW);
   delayMicroseconds(3);
@@ -236,34 +236,34 @@ void IIC_end() {
 }
 
 // ===== Motor driver =====
-// Channel A (38/21) drives left wheel, channel B (40/41) drives right wheel
-// leftSpeed to channel A, rightSpeed to channel B; clamp to +/-255 first, then take absolute value for duty cycle
+// Channel A (38/21) drives the left wheel, channel B (40/41) the right wheel
+// leftSpeed goes to channel A, rightSpeed to channel B; first limit to ±255, then take absolute value for duty cycle
 void driveMotors(int leftSpeed, int rightSpeed) {
-  leftSpeed  = constrain(leftSpeed,  -255, 255);  // Left wheel clamp
-  rightSpeed = constrain(rightSpeed, -255, 255);  // Right wheel clamp
+  leftSpeed  = constrain(leftSpeed,  -255, 255);  // Left wheel limit
+  rightSpeed = constrain(rightSpeed, -255, 255);  // Right wheel limit
 
   // Channel A: left wheel
   if (leftSpeed >= 0) {
-    digitalWrite(MOTOR_AIN, HIGH);    // Pull high: forward
+    digitalWrite(MOTOR_AIN, HIGH);    // Pull HIGH: forward rotation
     ledcWrite(MOTOR_AEN, leftSpeed);  // Duty cycle = speed
   } else {
-    digitalWrite(MOTOR_AIN, LOW);     // Pull low: reverse
-    ledcWrite(MOTOR_AEN, -leftSpeed); // Absolute value
+    digitalWrite(MOTOR_AIN, LOW);     // Pull LOW: reverse rotation
+    ledcWrite(MOTOR_AEN, -leftSpeed); // Take absolute value
   }
 
   // Channel B: right wheel
   if (rightSpeed >= 0) {
-    digitalWrite(MOTOR_BIN, HIGH);     // Pull high: forward
+    digitalWrite(MOTOR_BIN, HIGH);     // Pull HIGH: forward rotation
     ledcWrite(MOTOR_BEN, rightSpeed);  // Duty cycle = speed
   } else {
-    digitalWrite(MOTOR_BIN, LOW);      // Pull low: reverse
-    ledcWrite(MOTOR_BEN, -rightSpeed); // Absolute value
+    digitalWrite(MOTOR_BIN, LOW);      // Pull LOW: reverse rotation
+    ledcWrite(MOTOR_BEN, -rightSpeed); // Take absolute value
   }
 }
 
-// Basic movements
-void goForward(int speed)  { driveMotors(speed, speed); }    // Forward: both wheels forward at same speed
-void goBackward(int speed) { driveMotors(-speed, -speed); }  // Backward: both wheels reverse at same speed
-void spinLeft(int speed)   { driveMotors(-speed, speed); }   // Spin left: left reverse, right forward
-void spinRight(int speed)  { driveMotors(speed, -speed); }   // Spin right: left forward, right reverse
-void stopCar()             { driveMotors(0, 0); }            // Stop: duty cycle zero
+// Basic actions
+void goForward(int speed)  { driveMotors(speed, speed); }    // Forward: both wheels forward at the same speed
+void goBackward(int speed) { driveMotors(-speed, -speed); }  // Backward: both wheels reverse at the same speed
+void spinLeft(int speed)   { driveMotors(-speed, speed); }   // Turn left: left wheel back, right wheel forward
+void spinRight(int speed)  { driveMotors(speed, -speed); }   // Turn right: left wheel forward, right wheel back
+void stopCar()             { driveMotors(0, 0); }            // Stop: duty cycle to zero

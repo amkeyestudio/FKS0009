@@ -4,12 +4,12 @@
 #include "webpage.h"  // Web page content
 
 // ===== Wi-Fi =====
-// Only supports 2.4 GHz
+// Only 2.4 GHz is supported
 const char* WIFI_SSID = "Your WiFi name";
 const char* WIFI_PASS = "Your WiFi password";
 
 // ===== Pins =====
-// Pan-tilt servo; mounted so 0° faces right and 180° faces left
+// Pan-tilt servo; mounted so 0° points right and 180° points left
 #define PAN_SERVO_PIN 42  // Pan-tilt servo
 
 const int trigPin = 13;  // Ultrasonic trigger
@@ -17,9 +17,9 @@ const int echoPin = 12;  // Ultrasonic echo
 
 WebServer server(80);  // Web server on port 80
 Servo panServo;
-int panAngle = 90;     // Current pan angle, centered on power on
+int panAngle = 90;     // Current pan-tilt angle, centers on power on
 
-// This lesson only uses the servo and ultrasonic module; no motors are driven
+// This lesson uses only the servo and ultrasonic module, no motors
 
 void setup() {
   Serial.begin(115200);
@@ -35,13 +35,13 @@ void setup() {
   panServo.attach(PAN_SERVO_PIN, 500, 2500);
   panServo.write(90);
 
-  // Connect to the router in Station mode
+  // Station mode connects to the router
   Serial.print("Connecting to ");
   Serial.println(WIFI_SSID);
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
 
-  // Block until the connection succeeds
+  // Block until connected successfully
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
@@ -58,7 +58,7 @@ void setup() {
 
   server.on("/pan", []() {
     int a = server.arg("angle").toInt();
-    a = constrain(a, 0, 180);   // Clamp to 0~180
+    a = constrain(a, 0, 180);   // Limit to 0-180
     panAngle = a;
     panServo.write(a);
     server.send(200, "text/plain", String(a));  // Return the current angle
@@ -69,7 +69,7 @@ void setup() {
   });
 
   server.begin();
-  Serial.println("Web server started; open the IP above in a phone browser");
+  Serial.println("Web server started, open the above IP in a phone browser");
 }
 
 void loop() {
@@ -96,4 +96,3 @@ int getDistance() {
   }
   return distance;
 }
-

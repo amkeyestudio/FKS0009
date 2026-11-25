@@ -4,13 +4,13 @@
 
 ![A micro servo and its accessories](media/intro_08.jpg){width=520px}
 
-During the obstacle-avoidance lesson, the Mini Tracked Tank V4.0 turned its head left and right before deciding where to go. That head turn is the work of a small servo: the ultrasonic module sits on a pan-tilt bracket above it, so when the servo turns, the sensor sweeps with it. It was centred before being screwed down so that "straight ahead" would match the middle of its range in the program.
+In the obstacle-avoidance lesson in Project 4, the car turns its head left and right to take a look — that turn is the work of this small servo: the ultrasonic module sits on a pan-tilt bracket mounted on it, so when the servo turns, the sensor sweeps with it. When the car was assembled you were told to set it to 90° before fixing it, precisely so that the sensor pointing straight ahead would correspond to 90° in the program.
 
-A servo is not an ordinary motor. Give a motor power and it spins; cut the power and it stops. A servo measures its own angle with a potentiometer, compares it with a target, and fights to stay there — so you'll feel real resistance if you try to turn the horn by hand, and it springs back when you let go. The target doesn't arrive as a voltage level but as a pulse whose width carries the meaning, which is why getting the timing right matters more than getting the wiring right.
+A servo is not the same kind of thing as an ordinary motor. Power a motor and it turns; cut the power and it stops. Inside a servo there is a potentiometer that measures the angle and a control board that compares it with the target; what it receives is one pulse every 20 ms, and the width of that pulse says which angle to turn to: 0.5 ms for 0°, 1.5 ms for 90°, 2.5 ms for 180°.
 
-Here we sweep it from one end of its travel to the other and back, stepping smoothly instead of jumping. The tempting shortcut is to command the far end in one go: the pan-tilt still carries the ultrasonic module, and the sudden move makes the whole bracket wobble. Equally, don't assume the middle position points straight ahead — that depends on how the horn was fitted. If it's off, re-centre the mechanism rather than fudging the angle in code, or the distance readings from the earlier lesson will stay biased.
+Once it reaches the target it locks there; try to turn the horn by hand and you feel obvious resistance, and it springs back when you let go. This lesson sweeps it from 0° to 180° and back, pausing 15 ms at each degree, so the whole run takes about 2.7 seconds.
 
-At power-on the servo gives a click as it snaps to one end, then sweeps steadily to the other, pauses briefly and sweeps back, over and over.
+At power-on the servo gives a click and turns to 0° (facing right), then sweeps steadily to the other end, pauses half a second at the top and sweeps back, over and over; the serial port prints one startup line.
 
 #### **2. Required Parts:**
 

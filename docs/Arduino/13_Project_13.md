@@ -10,7 +10,7 @@ The link is short. Tap a button, the browser sends a request with parameters, an
 
 The mini tracked tank robot itself never moves in this lesson — only the pan-tilt and the ultrasonic module obey the page; the motors wait until the next project. The page and the actions are also split into two files: one describes what the page looks like, the other what each button does, so you can change the interface without touching the actions.
 
-Here's the trap: don't assume the inputs are well-behaved. A URL can be edited by hand, and a sensor with no echo can hold everything up. Both need a guard, or a harmless-looking button will jam the servo or freeze the page.
+Once the board joins the router, the serial port prints the address it obtained; open that address in a phone browser on the same Wi-Fi and the top half of the page shows the current pan-tilt angle while the bottom half shows the distance ahead. Tap left 180° and the sensor head turns to the left with the angle following to 180; tap center 90° and it returns to straight ahead; tap right 0° and it turns to the right; tap the measure button and `--` first turns into three dots, then shows a distance in centimetres.
 
 #### **2. Parts Needed:**
 
@@ -259,7 +259,7 @@ The `_P` in `send_P()` means "send from PROGMEM": it streams the content out ove
 
 `server.arg("angle")` pulls the parameter out of the URL and `toInt()` converts the string to a number.
 
-**Never drop the `constrain()` line**: the slider on the page is limited to a range, but a URL is something a person can type — enter `?angle=500` and the servo is driven against its stop until the gears grind. After clamping, whatever comes in, the servo receives a legal angle.
+**Never drop the `constrain()` line**: the slider on the page starts out as 0–180, but a URL is something a person can type — enter `?angle=500` and the servo is driven against its stop until the gears grind. After clamping, whatever comes in, the servo receives a legal angle.
 
 The response is plain text rather than a web page because this endpoint is called by JavaScript in the page; sending HTML back would just add an extra parsing step.
 

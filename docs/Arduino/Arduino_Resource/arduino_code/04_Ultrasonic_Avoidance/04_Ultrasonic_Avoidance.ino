@@ -126,14 +126,14 @@ void loop() {
     matrix_display(look_left);
     myServo.write(180);            // Pan-tilt turns to 180°
     delay(300);                    // Wait for the servo to reach position
-    rightDistance = getDistance();
+    leftDistance = getDistance();
     delay(100);
 
     // Turn pan-tilt to the other side and measure that side
     matrix_display(look_right);
     myServo.write(0);              // Pan-tilt turns to 0°
     delay(300);
-    leftDistance = getDistance();
+    rightDistance = getDistance();
     delay(100);
 
     myServo.write(90);             // Return to face forward

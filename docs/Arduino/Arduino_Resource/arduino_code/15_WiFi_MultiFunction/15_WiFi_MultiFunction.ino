@@ -6,7 +6,7 @@
 #include "webpage.h"  // Web page content
 
 // ===== Wi-Fi =====
-// Only supports 2.4 GHz
+// Only 2.4 GHz is supported
 const char* ssid = "Your WiFi name";
 const char* password = "Your WiFi password";
 
@@ -16,19 +16,19 @@ Servo myClaw;          // Gripper servo
 Servo myPan;           // Pan-tilt servo
 
 // ===== Motor pins =====
-// Channel A drives the left wheel, channel B the right wheel (verified on the robot)
+// Channel A drives the left wheel, channel B the right wheel (verified on the car)
 // A/B are driver board channel numbers, not left/right
 #define MOTOR_AIN 38  // Channel A direction: left wheel
-#define MOTOR_AEN 21  // Channel A speed control: left wheel
+#define MOTOR_AEN 21  // Channel A speed: left wheel
 #define MOTOR_BIN 40  // Channel B direction: right wheel
-#define MOTOR_BEN 41  // Channel B speed control: right wheel
+#define MOTOR_BEN 41  // Channel B speed: right wheel
 
 // ===== Dot matrix pins =====
-// 8x16 dot matrix, software-emulated timing, no device address
+// 8x16 dot matrix, software-simulated timing, no device address
 // Shares io8/io9 with the line-tracking module's SDA/SCL
-// Refresh only on mode changes to avoid disturbing the line-tracking bus
-#define CLK_Pin 9   // Clock, connected to dot matrix CLK
-#define DIN_Pin 8   // Data, connected to dot matrix DIN
+// Only refresh the display when switching modes to avoid interfering with the line-tracking bus
+#define CLK_Pin 9   // Clock, connect to dot matrix CLK
+#define DIN_Pin 8   // Data, connect to dot matrix DIN
 
 // ===== Ultrasonic pins =====
 const int trigPin = 13;  // Trigger
@@ -39,10 +39,10 @@ const int PAN_PIN  = 42;           // Pan-tilt servo
 const int CLAW_PIN = 11;           // Gripper servo
 const int CLAW_OPEN_ANGLE  = 140;  // Open
 const int CLAW_CLOSE_ANGLE = 90;   // Closed
-const int SERVO_STEP = 15;         // Pan-tilt step angle per press
+const int SERVO_STEP = 15;         // Pan-tilt step angle per move
 int servoAngle = CLAW_CLOSE_ANGLE; // Current gripper angle, closed on power on
-int panAngle = 90;                 // Current pan angle, facing forward on power on
-                                   // 0° faces right, 180° faces left
+int panAngle = 90;                 // Current pan-tilt angle, faces straight ahead on power on
+                                   // 0° points right, 180° points left
 
 // ===== Line-tracking module (PCF8574) =====
 PCF8574 pcf8574(0x20);
@@ -52,25 +52,25 @@ PCF8574 pcf8574(0x20);
 #define OUTD P2  // Right
 #define OUTE P3  // Far right
 
-const int BASE_SPEED = 115;  // Line-tracking forward speed
-const int SPIN_SPEED = 125;  // Outer wheel speed in sharp turns
-const int INNER_SPEED = 95;  // Inner wheel speed in sharp turns (reversed)
-uint8_t lastDir = 0;         // 0 forward, 1 line on the left, 2 line on the right
+const int BASE_SPEED = 115;  // Line-tracking straight speed
+const int SPIN_SPEED = 125;  // Outer wheel speed for sharp turns
+const int INNER_SPEED = 95;  // Inner wheel for sharp turns (reverse)
+uint8_t lastDir = 0;         // 0 straight, 1 line on left, 2 line on right
 unsigned long lostStartTime = 0;
 
-// The dot matrix and line tracker share io8/io9, exclusively by mode:
-//   Line-tracking mode → display off, io8/io9 go to I2C
-//   Other modes → release I2C, io8/io9 go to the dot matrix
+// Dot matrix and line tracking share io8/io9, exclusively by mode:
+//   Line-tracking mode -> display off, io8/io9 go to I2C
+//   Other modes -> release I2C, io8/io9 go to dot matrix
 
 // ===== Following parameters =====
-const long safeDistance = 30;        // 30~50: follow
-const long closeDistanceFollow = 10; // Below 10: back away
-const long maxDistance = 50;         // Above 50: target lost
+const long safeDistance = 30;        // 30-50: following
+const long closeDistanceFollow = 10; // Less than 10: back up
+const long maxDistance = 50;         // Greater than 50: target lost
 
 // ===== Obstacle avoidance parameters =====
-const long closeDistanceAvoid = 15;  // Below 15: treat as an obstacle
-long leftDistance = 0;               // Distance on the left
-long rightDistance = 0;              // Distance on the right
+const long closeDistanceAvoid = 15;  // Less than 15: treated as an obstacle
+long leftDistance = 0;               // Left-side distance
+long rightDistance = 0;              // Right-side distance
 
 // ===== Operating modes =====
 String carMode = "manual";  // Modes: manual / line / avoid / follow
@@ -79,22 +79,22 @@ String carMode = "manual";  // Modes: manual / line / avoid / follow
 #define MANUAL_TIMEOUT 1500
 unsigned long lastCmdTime = 0;
 
-// Obstacle avoidance state machine, keeps the web page responsive
+// Obstacle avoidance state machine, avoids blocking the web page
 enum AvoidStep { AV_GO, AV_LEFT, AV_RIGHT, AV_TURN, AV_TURNING };
 AvoidStep avStep = AV_GO;
 unsigned long avTime = 0;
 
 // ===== Dot matrix font bitmaps =====
-// 16 bytes for 16 columns; each byte's 8 bits map to 8 rows in a column; 1 on, 0 off
+// 16 bytes correspond to 16 columns, each byte's 8 bits to 8 rows in a column, 1 = on, 0 = off
 
-// Smiley: manual
+// Smiling face: manual
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
 };
 
 // Down arrow: spare for line tracking
-// Currently unused because the display is off in line-tracking mode
+// Display off in current line-tracking mode, not used for now
 unsigned char arrow_down[] = {
   0x00, 0x00, 0x00, 0x00, 0x10, 0x30, 0x7E, 0xFE,
   0xFE, 0x7E, 0x30, 0x10, 0x00, 0x00, 0x00, 0x00
@@ -112,9 +112,9 @@ unsigned char heart[] = {
   0x7C, 0x3E, 0x1C, 0x08, 0x00, 0x00, 0x00, 0x00
 };
 
-// ===== Dot matrix driver (software-emulated timing) =====
+// ===== Dot matrix driver (software-simulated timing) =====
 
-// Start condition: pull DIN low while CLK is HIGH
+// Start condition: DIN pulled LOW while CLK is HIGH
 void IIC_start() {
   digitalWrite(DIN_Pin, HIGH);
   delayMicroseconds(5);
@@ -126,7 +126,7 @@ void IIC_start() {
   delayMicroseconds(5);
 }
 
-// Send one byte, LSB first: set data while CLK is LOW, sample on HIGH
+// Send one byte, LSB first: set data while CLK is LOW, sample when HIGH
 void IIC_send(unsigned char send_data) {
   for (int i = 0; i < 8; i++) {
     digitalWrite(CLK_Pin, LOW);
@@ -145,7 +145,7 @@ void IIC_send(unsigned char send_data) {
   delayMicroseconds(5);
 }
 
-// Stop condition: pull DIN high while CLK is HIGH
+// Stop condition: DIN pulled HIGH while CLK is HIGH
 void IIC_end() {
   digitalWrite(CLK_Pin, LOW);
   delayMicroseconds(5);
@@ -158,9 +158,9 @@ void IIC_end() {
 }
 
 // Write 16 bytes to the display buffer and turn the display on
-// Display refresh only; does not handle bus ownership, about 3 ms
+// Just refresh the display, no bus ownership handling, about 3 ms
 void matrix_write(unsigned char matrix_value[]) {
-  // 0x40: write data mode with auto-increment address
+  // 0x40: write data mode, auto-increment address
   IIC_start();
   IIC_send(0x40);
   IIC_end();
@@ -173,7 +173,7 @@ void matrix_write(unsigned char matrix_value[]) {
   }
   IIC_end();
 
-  // 0x8F: display on at maximum brightness
+  // 0x8F: display on, maximum brightness
   IIC_start();
   IIC_send(0x8F);
   IIC_end();
@@ -186,49 +186,49 @@ void matrix_off() {
   IIC_end();
 }
 
-// After refresh, the pins stay with the dot matrix (not returned to I2C)
+// After refresh, pins remain with the dot matrix (not returned to I2C)
 void matrix_show(unsigned char matrix_value[]) {
-  Wire.end();                     // Release io8/io9 from I2C
+  Wire.end();                     // Release io8/io9 from I2C use
   pinMode(CLK_Pin, OUTPUT);
   pinMode(DIN_Pin, OUTPUT);
   digitalWrite(CLK_Pin, HIGH);
   digitalWrite(DIN_Pin, HIGH);
 
-  matrix_write(matrix_value);     // Write to the display
+  matrix_write(matrix_value);     // Write to display
 }
 
-// Update the dot matrix according to the mode
-// In line-tracking mode, turn off the display and give io8/io9 to I2C
+// Handle the dot matrix according to mode
+// Line-tracking mode turns display off and hands io8/io9 to I2C
 void showModeIcon() {
   if (carMode == "line") {
     Wire.end();
     pinMode(CLK_Pin, OUTPUT);
     pinMode(DIN_Pin, OUTPUT);
-    matrix_off();                 // Turn off the display
+    matrix_off();                 // Turn display off
 
-    Wire.begin();                 // io8/io9 go to the line tracker
+    Wire.begin();                 // Hand io8/io9 to line tracking
     Wire.setClock(400000);
     pcf8574.begin();
     return;
   }
 
   // Other modes do not use I2C
-  if (carMode == "manual")     matrix_show(smile);       // Manual: smiley
-  else if (carMode == "avoid") matrix_show(alert_sign);  // Avoidance: exclamation mark
+  if (carMode == "manual")     matrix_show(smile);       // Manual: smiling face
+  else if (carMode == "avoid") matrix_show(alert_sign);  // Obstacle avoidance: exclamation mark
   else                         matrix_show(heart);       // Following: heart
 }
 
 // ===== Motor control =====
 
-// Only writes PWM, does not handle direction
-// Arguments are for the left/right wheels, internally mapped to channels B/A
+// Only write PWM, do not handle direction
+// Parameters are left/right wheels, mapped internally to channels B/A
 void setMotor(int leftSpeed, int rightSpeed) {
-  ledcWrite(MOTOR_AEN, leftSpeed);    // Channel B: right wheel
-  ledcWrite(MOTOR_BEN, rightSpeed);   // Channel A: left wheel
+  ledcWrite(MOTOR_AEN, leftSpeed);    // Channel A: left wheel
+  ledcWrite(MOTOR_BEN, rightSpeed);   // Channel B: right wheel
 }
 
 // Signed speed: forward / reverse
-// Arguments are for the left/right wheels, internally mapped to channels B/A
+// Parameters are left/right wheels, mapped internally to channels B/A
 // Used in line-tracking mode
 void driveLine(int leftSpeed, int rightSpeed) {
   leftSpeed  = constrain(leftSpeed,  -255, 255);
@@ -251,14 +251,14 @@ void driveLine(int leftSpeed, int rightSpeed) {
   }
 }
 
-// Forward: pull the direction pins HIGH
+// Forward: direction pin HIGH
 void forward(int leftSpeed, int rightSpeed) {
   digitalWrite(MOTOR_BIN, HIGH);
   digitalWrite(MOTOR_AIN, HIGH);
   setMotor(leftSpeed, rightSpeed);
 }
 
-// Backward: pull the direction pins LOW
+// Backward: direction pin LOW
 void back(int leftSpeed, int rightSpeed) {
   digitalWrite(MOTOR_BIN, LOW);
   digitalWrite(MOTOR_AIN, LOW);
@@ -300,7 +300,7 @@ int getDistance() {
   distance = duration * 0.034 / 2;
 
   if (distance < 2 || distance > 300) {
-    distance = 0;  // Out of range, mark as invalid
+    distance = 0;  // Out of range, set invalid
   }
   return distance;
 }
@@ -308,7 +308,7 @@ int getDistance() {
 // ===== 1. Line-tracking mode =====
 void runLine() {
   static unsigned long lastRead = 0;
-  if (millis() - lastRead < 5) return;  // Sample every 5 ms
+  if (millis() - lastRead < 5) return;  // Read once every 5 ms
   lastRead = millis();
 
   PCF8574::DigitalInput val = pcf8574.digitalReadAll();
@@ -322,25 +322,25 @@ void runLine() {
   uint8_t state = (A << 4) | (B << 3) | (C << 2) | (D << 1) | E;
 
   if (state != 0) {
-    lostStartTime = 0;  // On the line again, clear the lost-line timer
+    lostStartTime = 0;  // On the line, clear the line-lost timer
   }
 
   switch (state) {
     case 0b00100:
     case 0b01110:
     case 0b11111:
-      driveLine(BASE_SPEED, BASE_SPEED);      // Centered, go forward
+      driveLine(BASE_SPEED, BASE_SPEED);      // Centered, go straight
       lastDir = 0;
       break;
 
     case 0b01100:
-      driveLine(85, BASE_SPEED);              // Too far left: slow the right wheel
+      driveLine(85, BASE_SPEED);              // Left of line: slow right wheel
       lastDir = 1;
       break;
 
     case 0b01000:
     case 0b11100:
-      driveLine(45, SPIN_SPEED);              // Far to the left
+      driveLine(45, SPIN_SPEED);              // Far left of line
       lastDir = 1;
       break;
 
@@ -351,13 +351,13 @@ void runLine() {
       break;
 
     case 0b00110:
-      driveLine(BASE_SPEED, 85);              // Too far right: slow the left wheel
+      driveLine(BASE_SPEED, 85);              // Right of line: slow left wheel
       lastDir = 2;
       break;
 
     case 0b00010:
     case 0b00111:
-      driveLine(SPIN_SPEED, 45);              // Far to the right
+      driveLine(SPIN_SPEED, 45);              // Far right of line
       lastDir = 2;
       break;
 
@@ -376,7 +376,7 @@ void runLine() {
         else if (lastDir == 2) driveLine(SPIN_SPEED, -INNER_SPEED);
         else                   stopMotor();
       } else {
-        stopMotor();                          // Timed out, line not found; stop
+        stopMotor();                          // Not found before timeout, stop
       }
       break;
 
@@ -394,16 +394,16 @@ void runFollow() {
   long d = getDistance();
 
   if (d > safeDistance && d <= maxDistance) {
-    forward(150, 150);                        // 30~50 cm: move forward
+    forward(150, 150);                        // 30-50 cm: go forward
   } else if (d < closeDistanceFollow && d > 0) {
-    back(105, 150);                           // Below 10 cm: back away
+    back(105, 150);                           // Less than 10 cm: back up
   } else {
-    stopMotor();                              // Otherwise stop
+    stopMotor();                              // Stop otherwise
   }
 }
 
 // ===== 3. Obstacle avoidance mode =====
-// A state machine executes step by step without blocking
+// State machine executes step by step, no blocking
 void runAvoidance() {
   switch (avStep) {
     case AV_GO: {
@@ -411,20 +411,20 @@ void runAvoidance() {
       if (d > 0 && d <= closeDistanceAvoid) {
         stopMotor();
         panAngle = 180;
-        myPan.write(panAngle);        // Pan the servo left
+        myPan.write(panAngle);        // Pan-tilt turns left
         avTime = millis();
         avStep = AV_LEFT;
       } else {
-        forward(150, 150);            // No obstacle, move forward
+        forward(150, 150);            // No obstacle, go forward
       }
       break;
     }
 
     case AV_LEFT:
-      if (millis() - avTime >= 300) { // Wait for the servo to settle before measuring
+      if (millis() - avTime >= 300) { // Wait for servo to settle before measuring
         leftDistance = getDistance();
         panAngle = 0;
-        myPan.write(panAngle);        // Pan the servo right
+        myPan.write(panAngle);        // Pan-tilt turns right
         avTime = millis();
         avStep = AV_RIGHT;
       }
@@ -434,7 +434,7 @@ void runAvoidance() {
       if (millis() - avTime >= 300) {
         rightDistance = getDistance();
         panAngle = 90;
-        myPan.write(panAngle);        // Center the pan-tilt
+        myPan.write(panAngle);        // Pan-tilt returns to center
         avTime = millis();
         avStep = AV_TURN;
       }
@@ -442,7 +442,7 @@ void runAvoidance() {
 
     case AV_TURN:
       if (millis() - avTime >= 100) {
-        if (leftDistance > rightDistance) left(255, 255);   // Turn toward the clearer side
+        if (leftDistance > rightDistance) left(255, 255);   // Turn toward the side with more space
         else                              right(255, 255);
         avTime = millis();
         avStep = AV_TURNING;
@@ -450,7 +450,7 @@ void runAvoidance() {
       break;
 
     case AV_TURNING:
-      if (millis() - avTime >= 500) { // Re-check after turning for 0.5 s
+      if (millis() - avTime >= 500) { // Re-measure 0.5 s after turning
         stopMotor();
         avStep = AV_GO;
       }
@@ -467,19 +467,19 @@ void setMode(String m) {
     avStep = AV_GO;
     lostStartTime = 0;
     panAngle = 90;
-    myPan.write(90);  // Center the pan-tilt
+    myPan.write(90);  // Pan-tilt returns to center
     lastCmdTime = millis();
 
     Serial.print("Switched to mode: ");
     Serial.println(carMode);
 
-    // Refresh the display only when the mode changes
+    // Only refresh the display when the mode changes
     // Avoid repeatedly occupying the line-tracking I2C bus
     if (changed) showModeIcon();
   }
 }
 
-// ===== Web request handling =====
+// ===== Web page request handling =====
 void handleCmd() {
   // Mode switch request
   if (server.hasArg("mode")) {
@@ -488,7 +488,7 @@ void handleCmd() {
     return;
   }
 
-  // Motion commands
+  // Action command
   String moveCommand = server.arg("move");
 
   // Pan-tilt and gripper: available in any mode
@@ -509,8 +509,8 @@ void handleCmd() {
     myClaw.write(servoAngle);
   }
   else {
-    // Driving command: switch back to manual before executing
-    // Order matters; setMode stops the motors
+    // Driving command: switch back to manual first, then execute
+    // Order cannot be reversed, setMode includes a stop
     if (carMode != "manual") {
       setMode("manual");
     }
@@ -531,8 +531,8 @@ void setup() {
   Serial.begin(115200);
   delay(500);
 
-  // 1. Dot matrix: set both lines idle, then refresh the display
-  // I2C is not initialized yet, so call matrix_write directly
+  // 1. Dot matrix: set both lines idle, then refresh
+  // I2C is not initialized yet, call matrix_write directly
   pinMode(CLK_Pin, OUTPUT);
   pinMode(DIN_Pin, OUTPUT);
   digitalWrite(CLK_Pin, HIGH);
@@ -542,11 +542,11 @@ void setup() {
   // 2. Motors
   pinMode(MOTOR_BIN, OUTPUT);
   pinMode(MOTOR_AIN, OUTPUT);
-  ledcAttach(MOTOR_BEN, 1000, 8);  // 1 kHz, 8 bit
+  ledcAttach(MOTOR_BEN, 1000, 8);  // 1 kHz, 8-bit
   ledcAttach(MOTOR_AEN, 1000, 8);
   stopMotor();
 
-  // 3. Ultrasonic module
+  // 3. Ultrasonic
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
 
@@ -597,12 +597,12 @@ void setup() {
   });
 
   server.begin();
-  Serial.println("Web server started; manual mode by default");
+  Serial.println("Web server started, default manual mode");
 }
 
 // ===== Main loop =====
 void loop() {
-  server.handleClient();  // Handle web requests
+  server.handleClient();  // Handle web page requests
 
   if (carMode == "line") {
     runLine();

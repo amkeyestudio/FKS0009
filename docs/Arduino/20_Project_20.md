@@ -154,10 +154,10 @@ void setup() {
   showFace(FACE_EYES);  // Show standby expression
 
   // Motor pins
-  pinMode(MOTOR_BIN, OUTPUT);      // Left wheel direction
-  pinMode(MOTOR_AIN, OUTPUT);      // Right wheel direction
-  ledcAttach(MOTOR_BEN, 1000, 8);  // Left wheel PWM: 1 kHz, 8-bit
-  ledcAttach(MOTOR_AEN, 1000, 8);  // Right wheel PWM
+  pinMode(MOTOR_BIN, OUTPUT);      // Right wheel direction
+  pinMode(MOTOR_AIN, OUTPUT);      // Left wheel direction
+  ledcAttach(MOTOR_BEN, 1000, 8);  // Right wheel PWM: 1 kHz, 8-bit
+  ledcAttach(MOTOR_AEN, 1000, 8);  // Left wheel PWM
   stopCar();                       // Stop on power on
 
   // Pan-tilt: point the camera straight ahead on power on
@@ -337,13 +337,13 @@ void IIC_end() {
 
 // ===== Motor driver =====
 // Channel A drives the left wheel, channel B drives the right wheel (same as Lesson 7)
-// leftSpeed goes to channel B, rightSpeed goes to channel A
+// leftSpeed goes to channel A, rightSpeed goes to channel B
 // First limit to ±255, then take the absolute value for the duty cycle
 void driveMotors(int leftSpeed, int rightSpeed) {
-  leftSpeed  = constrain(leftSpeed,  -255, 255);  // Right wheel limit
-  rightSpeed = constrain(rightSpeed, -255, 255);  // Left wheel limit
+  leftSpeed  = constrain(leftSpeed,  -255, 255);  // Left wheel limit
+  rightSpeed = constrain(rightSpeed, -255, 255);  // Right wheel limit
 
-  // Channel A: left wheel
+  // Channel B: right wheel
   if (rightSpeed >= 0) {
     digitalWrite(MOTOR_BIN, HIGH);     // Pull HIGH: forward rotation
     ledcWrite(MOTOR_BEN, rightSpeed);  // Duty cycle = speed
@@ -352,7 +352,7 @@ void driveMotors(int leftSpeed, int rightSpeed) {
     ledcWrite(MOTOR_BEN, -rightSpeed); // Take absolute value, direction set by direction pin
   }
 
-  // Channel B: right wheel
+  // Channel A: left wheel
   if (leftSpeed >= 0) {
     digitalWrite(MOTOR_AIN, HIGH);    // Pull HIGH: forward rotation
     ledcWrite(MOTOR_AEN, leftSpeed);  // Duty cycle = speed
@@ -530,7 +530,7 @@ Twenty milliseconds per round is 50 Hz, higher than the vision module's frame ra
 
 At power-on the pan-tilt first turns to 90°, the dot matrix shows eyes, and the Serial Monitor prints `Vision module serial port started`.
 
-Hold a card a short distance in front of the car:
+Hold a card 10–25 cm in front of the car, aimed at its nose:
 
 ```text
 QR code scanned: FORWARD  Byte count 7

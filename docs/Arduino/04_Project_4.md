@@ -188,14 +188,14 @@ void loop() {
     matrix_display(look_left);
     myServo.write(180);            // Pan-tilt turns to 180°
     delay(300);                    // Wait for the servo to reach position
-    rightDistance = getDistance();
+    leftDistance = getDistance();
     delay(100);
 
     // Turn pan-tilt to the other side and measure that side
     matrix_display(look_right);
     myServo.write(0);              // Pan-tilt turns to 0°
     delay(300);
-    leftDistance = getDistance();
+    rightDistance = getDistance();
     delay(100);
 
     myServo.write(90);             // Return to face forward
@@ -452,13 +452,13 @@ A zero here has two possible sources: something genuinely close ahead, or open s
     matrix_display(look_left);
     myServo.write(180);            // Pan-tilt turns to 180°
     delay(300);                    // Wait for the servo to reach position
-    rightDistance = getDistance();
+    leftDistance = getDistance();
     delay(100);
 
     matrix_display(look_right);
     myServo.write(0);              // Pan-tilt turns to 0°
     delay(300);
-    leftDistance = getDistance();
+    rightDistance = getDistance();
     delay(100);
 
     myServo.write(90);             // Return to face forward
@@ -508,4 +508,4 @@ If the car steers around an obstacle in front instead of pushing against it, and
 
 (3) While driving straight the nose stays crooked and the ultrasonic sensor looks off to an angle: you forgot `write(90)` to recenter after measuring left and right. Add that line after the distance comparison.
 
-(4) The left/right decision is always backwards: the `look_left` pattern goes with `rightDistance`, so one of the two names is reversed. Lift the car off the ground and call `write(180)` manually to see which way the pan-tilt turns — quicker than reading the code.
+(4) The left/right decision is always backwards: first confirm how the servo is mounted — 180° should point to the car's left and 0° to its right, and the two distance variables are named on that premise. If the servo is mounted the other way round, or the pulse range passed to `attach()` has been changed so the midpoint shifts, the names no longer match the real directions and the side choice flips too. Lift the car off the ground and call `write(180)` manually to see which way the pan-tilt turns — quicker than reading the code.

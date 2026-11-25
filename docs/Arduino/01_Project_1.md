@@ -4,11 +4,11 @@
 
 ![From a distance it looks like a picture; up close, it's all dots](media/intro_01.jpg){width=520px}
 
-From a distance it is a picture; up close, nothing but dots. The little panel on the front of the car is how it talks to you — a heart when it sets off, an exclamation mark when something gets in its way, a smile when it scores. Lesson 1 leaves the motors and sensors alone and simply brings that face to life.
+From a distance it is a picture; up close, nothing but dots. The 8×16 panel on the front of the car is how it talks to you — a heart when it sets off, an exclamation mark when something gets in its way, a smile when it scores. Lesson 1 leaves the motors and sensors alone and simply brings that face to life.
 
-Here is the puzzle: the panel has far more LEDs than the controller has spare pins. The trick is a driver chip hidden behind the panel that looks after the lights for you. The controller sends out just two lines, one clock and one data, feeding the picture in bit by bit; the panel scans itself column by column at high speed, and your eye fuses it into a steady image.
+Here is the puzzle: the panel has 128 LEDs in total, far more than the controller has spare pins. The trick is a driver chip hidden behind the panel that looks after the lights for you. The controller sends out just two lines, one clock and one data, feeding the picture in bit by bit; the panel scans itself column by column at high speed, and your eye fuses it into a steady image.
 
-The catch lies in what you send. A picture is described by a compact set of bytes called a **font bitmap** — one byte per column, with the bits inside it mapped to the rows. Get the bit order wrong and a carefully drawn picture comes out garbled or mirrored. This lesson gives you a heart and a smiley to start with, then sets the smiley scrolling sideways.
+What you actually send is only 16 bytes, called the **font bitmap**: one byte per column, and the 8 bits inside a byte cover the 8 rows of that column, with the top row mapping to the lowest bit. A frame adds up to 18 bytes and 144 clock bits, and pushing the whole thing through takes about 1.3 ms — far shorter than the 40 ms the human eye can resolve, so the screen appears to light up "all at once". This lesson provides two bitmaps, a heart and a smiley, and finally sets the smiley scrolling sideways.
 
 
 #### **2. Parts list:**

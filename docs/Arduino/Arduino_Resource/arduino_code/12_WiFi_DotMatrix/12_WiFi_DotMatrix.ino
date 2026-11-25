@@ -3,21 +3,21 @@
 #include "webpage.h"  // Web page content
 
 // ===== Wi-Fi configuration =====
-// Only supports 2.4 GHz
+// Only 2.4 GHz is supported
 const char* WIFI_SSID = "Your WiFi name";
 const char* WIFI_PASS = "Your WiFi password";
 
 // ===== Dot matrix pins =====
-#define CLK_Pin 9  // Clock, connected to the module CLK pin
-#define DIN_Pin 8  // Data, connected to the module DIN pin
+#define CLK_Pin 9  // Clock, connected to module CLK
+#define DIN_Pin 8  // Data, connected to module DIN
 
 // ===== Scroll parameters =====
-#define SCROLL_MS 120  // Scroll interval per column (ms); smaller is faster
+#define SCROLL_MS 120  // Scroll interval per column (ms), smaller is faster
 #define MAX_CHARS  24  // Maximum number of characters
 
-// ===== 5×7 font library =====
-// 5 columns per character, 1 byte per column, bit0 is the top row, bit6 is the bottom row
-// Indices 0~25 for A~Z, 26~35 for 0~9, 36 for space
+// ===== 5×7 font bitmap =====
+// 5 columns per character, 1 byte/column, bit0 is the top row, bit6 is the bottom row
+// Index 0~25 for A~Z, 26~35 for 0~9, 36 for space
 const uint8_t FONT[37][5] = {
   {0x7E, 0x11, 0x11, 0x11, 0x7E},  // A
   {0x7F, 0x49, 0x49, 0x49, 0x36},  // B
@@ -60,12 +60,12 @@ const uint8_t FONT[37][5] = {
 
 WebServer server(80);      // Web server
 String msg = "HELLO";      // Text to display
-int scrollPos = 0;         // Current starting column
+int scrollPos = 0;         // Current start column
 unsigned long lastScrollAt = 0;
-bool needRedraw = true;    // Text changed; the static display needs a redraw
+bool needRedraw = true;    // Text changed, static display needs redraw
 
 void setup() {
-  // Pull both lines high to set the bus idle
+  // Pull both lines high, set the bus idle
   pinMode(CLK_Pin, OUTPUT);
   pinMode(DIN_Pin, OUTPUT);
   digitalWrite(CLK_Pin, HIGH);
@@ -75,7 +75,7 @@ void setup() {
   delay(300);
 
   // Connect to Wi-Fi
-  Serial.print("Connecting to ");
+  Serial.print("Connecting ");
   Serial.println(WIFI_SSID);
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
@@ -96,16 +96,16 @@ void setup() {
   server.on("/msg", []() {
     String t = server.arg("t");
     t.trim();
-    t.toUpperCase();                       // The font only contains uppercase letters
+    t.toUpperCase();                       // Font contains uppercase only
     if (t.length() > MAX_CHARS) {
       t = t.substring(0, MAX_CHARS);       // Truncate if too long
     }
     if (t.length() > 0) {
       msg = t;
-      scrollPos = 0;            // Start scrolling in from the far right column
-      needRedraw = true;        // Mark as needing a redraw
+      scrollPos = 0;            // Start scrolling in from the rightmost column
+      needRedraw = true;        // Mark as needing redraw
     }
-    server.sendHeader("Location", "/");     // Return to the home page
+    server.sendHeader("Location", "/");     // Back to home page
     server.send(302, "text/plain", "");
   });
 
@@ -113,25 +113,25 @@ void setup() {
 }
 
 void loop() {
-  server.handleClient();  // Handle web page requests
+  server.handleClient();  // Handle web requests
 
-  // ---- Fits on one screen: display statically centered ----
+  // ---- Fits on one screen: centered static display ----
   if (textWidth() <= 16) {
-    if (needRedraw) {     // Redraw only when the text changes
+    if (needRedraw) {     // Redraw only when text changes
       renderStatic();
       needRedraw = false;
     }
     return;
   }
 
-  // ---- Wider than one screen: scroll horizontally ----
+  // ---- Exceeds one screen: scroll horizontally ----
   if (millis() - lastScrollAt < SCROLL_MS) return;
   lastScrollAt = millis();
 
   renderFrame(scrollPos);
   scrollPos++;
 
-  // After the full text has scrolled, leave 16 blank columns before looping
+  // After scrolling the whole text, leave 16 blank columns then loop
   int totalCols = textWidth() + 16;
   if (scrollPos >= totalCols) {
     scrollPos = 0;
@@ -155,14 +155,14 @@ void renderStatic() {
   uint8_t cols[16];
   for (int i = 0; i < 16; i++) {
     int idx = i - startCol;                 // Map to the column index in the whole text
-    cols[i] = (idx >= 0) ? getColumn(idx) : 0;  // Fill in blanks before the start of the text
+    cols[i] = (idx >= 0) ? getColumn(idx) : 0;  // Fill blank before the start of the text
   }
 
   matrix_display(cols);
 }
 
 // ===== Render one frame =====
-// Take one screen starting from column pos of the whole text
+// Capture one screen starting from column pos of the whole text
 void renderFrame(int pos) {
   uint8_t cols[16];
 
@@ -177,25 +177,25 @@ void renderFrame(int pos) {
 uint8_t getColumn(int idx) {
   if (idx < 0) return 0;                    // Not yet on screen
 
-  int charIdx = idx / 6;                    // Character index (6 columns per character: 5 font columns + 1 spacing column)
+  int charIdx = idx / 6;                    // Character index (6 columns per character: 5 font bitmap columns + 1 spacing column)
   int colIdx  = idx % 6;                    // Column index within the character
 
-  if (charIdx >= (int)msg.length()) return 0;  // Past the end of the text
+  if (charIdx >= (int)msg.length()) return 0;  // Beyond the end of the text
   if (colIdx >= 5) return 0;                   // Spacing column
 
   int fi = charToIndex(msg[charIdx]);
   return FONT[fi][colIdx];
 }
 
-// Convert a character to a font index
+// Convert character to font bitmap index
 int charToIndex(char c) {
   if (c >= 'A' && c <= 'Z') return c - 'A';       // A~Z → 0~25
   if (c >= '0' && c <= '9') return 26 + (c - '0'); // 0~9 → 26~35
-  return 36;                                       // Treat other characters as spaces
+  return 36;                                       // Treat other characters as space
 }
 
 // ===== Dot matrix driver =====
-// Write 16 bytes of font data to the dot matrix display buffer
+// Write 16 bytes of font bitmap to the dot matrix display buffer
 void matrix_display(unsigned char matrix_value[]) {
   // 0x40: write data mode, auto-increment address
   IIC_start();
@@ -218,7 +218,7 @@ void matrix_display(unsigned char matrix_value[]) {
   IIC_end();
 }
 
-// Start condition: DIN falling edge while CLK is HIGH
+// Start condition: falling edge of DIN while CLK is HIGH
 void IIC_start() {
   digitalWrite(CLK_Pin, HIGH);
   delayMicroseconds(3);
@@ -228,10 +228,10 @@ void IIC_start() {
   delayMicroseconds(3);
 }
 
-// Send one byte, least significant bit first: set data while CLK is LOW, sample on the rising edge
+// Send 1 byte, LSB first: set data while CLK is LOW, sample on rising edge
 void IIC_send(unsigned char send_data) {
   for (int i = 0; i < 8; i++) {
-    digitalWrite(CLK_Pin, LOW);  // Pull the clock low to prepare the data
+    digitalWrite(CLK_Pin, LOW);  // Pull clock low, prepare data
     delayMicroseconds(3);
 
     // Send bit by bit starting from bit0
@@ -242,14 +242,14 @@ void IIC_send(unsigned char send_data) {
     }
     delayMicroseconds(3);
 
-    digitalWrite(CLK_Pin, HIGH); // Pull the clock high, module samples
+    digitalWrite(CLK_Pin, HIGH); // Pull clock high, module samples
     delayMicroseconds(3);
 
     send_data = send_data >> 1;  // Shift right to get the next bit
   }
 }
 
-// Stop condition: DIN rising edge while CLK is HIGH
+// Stop condition: rising edge of DIN while CLK is HIGH
 void IIC_end() {
   digitalWrite(CLK_Pin, LOW);
   delayMicroseconds(3);

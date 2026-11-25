@@ -362,13 +362,13 @@ void IIC_end() {
 
 // ===== Motor driver =====
 // Channel A drives the left wheel, channel B drives the right wheel (same as Lesson 7)
-// leftSpeed goes to channel B, rightSpeed goes to channel A
+// leftSpeed goes to channel A, rightSpeed goes to channel B
 // First limit to ±255, then take the absolute value for the duty cycle
 void driveMotors(int leftSpeed, int rightSpeed) {
-  leftSpeed  = constrain(leftSpeed,  -255, 255);  // Right wheel limit
-  rightSpeed = constrain(rightSpeed, -255, 255);  // Left wheel limit
+  leftSpeed  = constrain(leftSpeed,  -255, 255);  // Left wheel limit
+  rightSpeed = constrain(rightSpeed, -255, 255);  // Right wheel limit
 
-  // Channel A: left wheel
+  // Channel B: right wheel
   if (rightSpeed >= 0) {
     digitalWrite(MOTOR_BIN, HIGH);     // Pull HIGH: forward rotation
     ledcWrite(MOTOR_BEN, rightSpeed);  // Duty cycle = speed
@@ -377,7 +377,7 @@ void driveMotors(int leftSpeed, int rightSpeed) {
     ledcWrite(MOTOR_BEN, -rightSpeed); // Take absolute value
   }
 
-  // Channel B: right wheel
+  // Channel A: left wheel
   if (leftSpeed >= 0) {
     digitalWrite(MOTOR_AIN, HIGH);    // Pull HIGH: forward rotation
     ledcWrite(MOTOR_AEN, leftSpeed);  // Duty cycle = speed
@@ -564,7 +564,7 @@ Send -> MODE:COLOR
 Color-tracking car ready, place a red or yellow block in front
 ```
 
-Put a red block in front of the car and it will:
+Put a red block 20 cm in front of the car and it will:
 
 | Step | Serial Monitor | Action |
 | --- | --- | --- |

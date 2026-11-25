@@ -4,13 +4,13 @@
 
 ![The gripper on the robotic arm](media/intro_09.jpg){width=520px}
 
-There's a gripper on the front of the mini tracked tank robot: two 3D-printed fingers driven by a small servo. It doesn't need a range of positions — just two poses, fully closed and fully open, and the later pick-and-place and ball-kicking tasks both rely on those two ends of its travel.
+There's a gripper on the front of the car: two 3D-printed fingers driven by a 9G servo. It only has two poses — closed at 90°, open at 140° — and the object grabbing and ball kicking later on both rely on those two angles.
 
-It's the same model of servo as the one on the pan-tilt, but only a small slice of its travel is used. At one end the fingers touch; at the other they open just wide enough to swallow an eraser or a crumpled piece of paper. That tiny gap is the whole secret of the mechanism: open too far and the object slips out before the fingers meet, close too hard and the gears strain against a dead point.
+It's the same model as the one on the pan-tilt, but only 90° to 140° of its travel is used — 50° in all. At 90° the two fingers are pressed together; at 140° they open more than twenty millimetres, just enough for an eraser or a paper ball.
 
-Run it a few times empty first, watching what each end of the travel actually looks like, then try something soft. The mistake is to equate a smaller angle with a stronger grip. Holding force comes from the servo stalling against the object, not from the number you write — push the angle past the mechanical limit and all you get is heat and stripped gears. Also, never force the fingers by hand while the power is on.
+Run it open and closed a few times with nothing in the jaws, until you can see what opening each angle gives, then put something in and try what it can hold.
 
-At power-on the fingers close, then open and close again, pausing briefly at each end.
+At power-on the fingers first close to 90°, then open and close, taking about 0.75 s each way and pausing half a second at each end; the serial port prints one startup line.
 
 #### **2. Required Parts:**
 

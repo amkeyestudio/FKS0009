@@ -29,7 +29,7 @@ Parts used in this lesson:
 | Target lost | Greater than 50 cm or invalid reading, stop and show a question mark |
 | Distance measurement period | 100 ms |
 | Forward speed | 150 for each wheel |
-| Back-up speed | Left wheel 105, right wheel 150 (the robot drifts slightly when backing up) |
+| Back-up speed | Left wheel 150, right wheel 105 (the robot drifts slightly when backing up) |
 | Serial baud rate | 115200 |
 | Dot matrix icons | Heart = following, smiling face = stop, down arrow = back up, question mark = lost |
 
@@ -381,7 +381,7 @@ If you call only `setMotor()` while the direction pins still hold their previous
     back(105, 150);
 ```
 
-The differential isn't a typo. With equal speeds the robot backs straight until the obstacle is completely out of sight, then stops abruptly. Giving 150 to the right and 105 to the left makes the nose drift to one side while it retreats, so it comes away at an angle and is more likely to see a clear path on the next reading.
+The differential isn't a typo. With equal speeds the robot backs straight until the obstacle is completely out of sight, then stops abruptly. Giving 105 to the right and 150 to the left makes the nose drift to one side while it retreats, so it comes away at an angle and is more likely to see a clear path on the next reading.
 
 Lesson 4's obstacle avoidance was "stop, look left, look right"; this lesson is "back away while veering." Both approaches are valid.
 

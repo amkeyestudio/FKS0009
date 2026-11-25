@@ -293,8 +293,8 @@ void showModeIcon() {
 // Only write PWM, do not handle direction
 // Parameters are left/right wheels, mapped internally to channels B/A
 void setMotor(int leftSpeed, int rightSpeed) {
-  ledcWrite(MOTOR_AEN, leftSpeed);    // Channel B: right wheel
-  ledcWrite(MOTOR_BEN, rightSpeed);   // Channel A: left wheel
+  ledcWrite(MOTOR_AEN, leftSpeed);    // Channel A: left wheel
+  ledcWrite(MOTOR_BEN, rightSpeed);   // Channel B: right wheel
 }
 
 // Signed speed: forward / reverse
@@ -882,14 +882,12 @@ There is not a single `delay()` anywhere in the lesson — not for lack of wanti
 
 ```cpp
 void setMotor(int leftSpeed, int rightSpeed) {
-  ledcWrite(MOTOR_AEN, leftSpeed);    // Channel B: right wheel
-  ledcWrite(MOTOR_BEN, rightSpeed);   // Channel A: left wheel
+  ledcWrite(MOTOR_AEN, leftSpeed);    // Channel A: left wheel
+  ledcWrite(MOTOR_BEN, rightSpeed);   // Channel B: right wheel
 }
 ```
 
 `setMotor()` only writes two PWM values and never touches the direction pins, so its arguments must be positive. Direction is decided upstream: `forward()` pulls both direction pins HIGH, `back()` LOW, and `left()` / `right()` set one HIGH and the other LOW. This is the approach from Lesson 5.
-
-The two comments inside the function are swapped: `ledcWrite(MOTOR_AEN, ...)` drives channel A, the left wheel, yet the comment says "channel B: right wheel". Trust the names `MOTOR_AEN` / `MOTOR_BEN` instead — as in Lesson 11, the comments are not reliable.
 
 Line-tracking mode uses a different set:
 
@@ -942,7 +940,7 @@ All four modes can be switched at any time; at the moment of switching the car s
 
 **If Wi-Fi will not connect or the page will not open, check in this order:**
 
-(1) **Did you change the credentials?** If `WIFI_SSID` and `WIFI_PASS` at the top of the code are still placeholders when you upload, the connection is guaranteed to fail. Replace them with your router's name and password.
+(1) **Did you change the credentials?** If `ssid` and `password` at the top of the code are still placeholders when you upload, the connection is guaranteed to fail. Replace them with your router's name and password.
 
 (2) **Nothing at all in the Serial Monitor**: press the board's RESET button and try again; the previous sketch may be stuck.
 

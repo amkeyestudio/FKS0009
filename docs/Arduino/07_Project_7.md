@@ -4,11 +4,11 @@
 
 Put the Mini Tracked Tank V4.0 on a black track, press reset, and let go. The mini tracked tank robot completes a lap on its own: quick on the straights, easing the inner wheel back into line through gentle curves, and pivoting in place when a right-angle corner demands it. The five readings you only watched in the last lesson now actually drive the motors.
 
-Which way the line lies is decided entirely by the five sensors underneath. Their combined pattern maps to a set of wheel speeds — equal speeds when the line is centred, a slower inner wheel to correct a small drift, and a reversed inner wheel to twist the robot back when it strays further. The trick is that one fixed amount of correction can never cover both cases: too little and the robot sails straight off a bend, too much and it weaves from side to side on the straight.
+Which way the line lies depends entirely on the five sensors under the car. The five 0s and 1s combine into 32 patterns, of which you usually meet about a dozen in real running, and each maps to one set of wheel speeds: on the centre line both wheels at the same speed; slightly off, slow the inner wheel and let the outer one run; further off, reverse the inner wheel to twist the body back.
 
-Losing the line is normal, not a failure. Seams, reflections and the nose lifting in a corner can make all five sensors see white at once. The robot remembers which side the line was on and keeps searching in that direction for a short while before it gives up. If you cut the track, you'll see it charge ahead along the old direction before it finally stops — and that short grace period is exactly what keeps a normal lap from turning into constant stop-and-go.
+Losing the line has a remedy too. A seam, a reflection, or the nose lifting in a corner can make all five sensors read white at once; the car remembers whether the line was last on its left or its right and searches in that direction for a further 1.5 s — if it finds the line it carries on, and only if it does not does it stop.
 
-Nudge the robot sideways while it's tracking straight and it will steer itself back; break a section of the line and it will run on along the old direction before finally stopping to admit defeat.
+With the car running straight along the line, push it sideways and it steers itself back; cut a section out of the line and it charges on in the old direction, only stopping after 1.5 s.
 
 #### **2. Required Parts:**
 
@@ -145,9 +145,9 @@ void loop() {
       lastDir = 0;
       break;
 
-    // Slightly left of the line: reduce right wheel speed for fine adjustment
+    // Slightly left of the line: reduce left wheel speed for fine adjustment
     case 0b01100: // B and C on the line
-      driveMotors(85, BASE_SPEED); // Slow the right wheel to steer back onto the black line
+      driveMotors(85, BASE_SPEED); // Slow the left wheel to steer back onto the black line
       lastDir = 1;
       break;
 
@@ -165,9 +165,9 @@ void loop() {
       lastDir = 1;
       break;
 
-    // Slightly right of the line: reduce left wheel speed for fine adjustment
+    // Slightly right of the line: reduce right wheel speed for fine adjustment
     case 0b00110: // C and D on the line
-      driveMotors(BASE_SPEED, 85); // Slow the left wheel to steer back onto the black line
+      driveMotors(BASE_SPEED, 85); // Slow the right wheel to steer back onto the black line
       lastDir = 2;
       break;
 
@@ -272,14 +272,14 @@ The other memory variable, `lastDir`, isn't set here; it's assigned at the end o
       break;
 
     case 0b01100: // B and C on the line
-      driveMotors(85, BASE_SPEED); // Slow the right wheel to steer back onto the black line
+      driveMotors(85, BASE_SPEED); // Slow the left wheel to steer back onto the black line
       lastDir = 1;
       break;
 ```
 
 Three "centred" states are merged into one case: only C on the line, B+C on the line, and all five on the line (crossing a wide strip of black tape) are all treated as straight travel.
 
-When it drifts slightly left (B and C on the line), the right wheel drops from 115 to 85 while the left stays put, so the nose naturally eases back to the right. The differential here is only 30 — a gentle correction.
+When it drifts slightly left (B and C on the line), the left wheel drops from 115 to 85 while the right stays put, so the nose naturally swings back left onto the line. The differential here is only 30 — a gentle correction.
 
 **(6) Sharp turns: reverse the inner wheel**
 

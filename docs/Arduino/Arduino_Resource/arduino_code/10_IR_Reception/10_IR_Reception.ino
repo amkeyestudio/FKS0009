@@ -1,10 +1,10 @@
-#include <IRremote.hpp>  // Infrared (IR) decoding library
+#include <IRremote.hpp>  // IR decoding library
 
 // IR receiver, IO48
 #define IR_RECEIVE_PIN 48
 
-// Remote control key codes
-// Codes may vary by batch; check the Serial Monitor output
+// Remote control key code values
+// Codes may differ by batch; refer to serial print
 #define KEY_UP    70
 #define KEY_DOWN  21
 #define KEY_LEFT  68
@@ -13,24 +13,24 @@
 
 void setup() {
   Serial.begin(115200);
-  delay(1000);  // Wait for the serial port to stabilize
+  delay(1000);  // Wait for serial to stabilize
 
-  Serial.println("IR reception experiment started; point the remote control at the front of the car");
+  Serial.println("IR receiver experiment started, point the remote at the car");
   IrReceiver.begin(IR_RECEIVE_PIN, DISABLE_LED_FEEDBACK);
-  Serial.println("Waiting for a key press...");
+  Serial.println("Waiting for a key...");
 }
 
 void loop() {
-  // A decodable frame was received
+  // Received a decodable frame
   if (IrReceiver.decode()) {
     uint8_t cmd = IrReceiver.decodedIRData.command;
     bool holding = IrReceiver.decodedIRData.flags & IRDATA_FLAGS_IS_REPEAT;
-    static bool lastHolding = false;  // Whether the previous frame was a long press, to avoid repeated printing
+    static bool lastHolding = false;  // Whether the previous frame was a long press, to avoid duplicate printing
 
     if (holding) {
       // A long press periodically resends the same code
       if (!lastHolding) {
-        Serial.println("(Long press detected; no more per-frame printing)");
+        Serial.println("(Long press active, no more per-frame printing)");
       }
     } else {
       Serial.print("Protocol: ");
@@ -44,11 +44,11 @@ void loop() {
     }
     lastHolding = holding;
 
-    IrReceiver.resume();  // Must be called, otherwise only one frame can be received
+    IrReceiver.resume();  // Must be called, otherwise only one frame is received
   }
 }
 
-// Convert key codes to names
+// Convert key code to name
 const char* keyName(uint8_t cmd) {
   switch (cmd) {
     case KEY_UP:    return "Up";

@@ -154,7 +154,7 @@ void driveMotors(int leftSpeed, int rightSpeed) {
   leftSpeed  = constrain(leftSpeed,  -255, 255);
   rightSpeed = constrain(rightSpeed, -255, 255);
 
-  // Channel A: left wheel
+  // Channel B: right wheel
   if (rightSpeed >= 0) {
     digitalWrite(MOTOR_BIN, HIGH);
     ledcWrite(MOTOR_BEN, rightSpeed);
@@ -163,7 +163,7 @@ void driveMotors(int leftSpeed, int rightSpeed) {
     ledcWrite(MOTOR_BEN, -rightSpeed);
   }
 
-  // Channel B: right wheel
+  // Channel A: left wheel
   if (leftSpeed >= 0) {
     digitalWrite(MOTOR_AIN, HIGH);
     ledcWrite(MOTOR_AEN, leftSpeed);
@@ -301,20 +301,6 @@ IR is one-way communication: the remote sends and that's the end of it, so the c
 1.5 seconds is a compromise between "a delay a person can feel" and "the car won't run too far". A real car could shorten it to 300 ms to be safer, but you'd feel a stutter when changing direction.
 
 Holding a direction key works for the same reason: each frame restarts the timer, frames arrive every 108 ms so the counter can never reach 1500 ms; once you let go there are no more frames, the timer fills up and the car stops.
-
-**(7) The parameter order of `driveMotors()`, and a misplaced comment**
-
-```cpp
-void driveMotors(int leftSpeed, int rightSpeed) {
-```
-
-As in the line-tracking lesson, **the left wheel comes first** — the opposite of Project 2.
-
-Inside the function, the comment `// Channel A: left wheel` sits above `if (rightSpeed >= 0)`, which is the wrong place: that block handles `rightSpeed`, i.e. channel B and the right wheel. The `// Channel B: right wheel` comment below is swapped in the same way.
-
-Trust the names `MOTOR_AIN` / `MOTOR_BIN` and ignore those comments. This is why Project 2 made a point of the parameter order: these functions look almost identical and the comments aren't reliable.
-
-`stopCar()` is called on every pass through the timeout branch. It looks redundant, but all it does is keep writing zero — skip it and the car would hold its last PWM value and keep running.
 
 #### **8. What You'll See:**
 

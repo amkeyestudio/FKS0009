@@ -4,9 +4,9 @@
 
 Turn the Mini Tracked Tank V4.0 over and you'll find five small black blocks along the side that faces the ground. Each one hides a pair of infrared tubes: one shines down, the other watches the light that bounces back. A white surface reflects; a black line swallows the light. The receiver turns that difference into a clean HIGH or LOW.
 
-Giving each of those five sensors its own pin would eat up the controller board's precious GPIO, so they are all hung off a single PCF8574 and reach the controller through just two wires. The five readings are really five bits of one byte, which means the robot's entire view of the floor fits into a single number. Getting the bit order right matters more than it looks — swap two of them and the position the robot thinks it sees is simply wrong.
+Giving each of those five sensors its own pin would eat up the controller board's spare pins, so they all hang off a single PCF8574 and send their readings back over just two wires (IO8, IO9). Those five channels are really five bits inside one byte, and put together they make a single number from 0 to 31.
 
-Before letting the robot drive anywhere, try reading the five channels on their own. Lay it on white paper and every channel should say one thing; cover a sensor with a finger or a strip of black tape and only the corresponding channel should change. The easy mistake is forgetting that these sensors work by reflected light: in strong sunlight, or if the sensors sit too far off the ground, every reading can look the same and you'll chase a problem that isn't in the code.
+Before letting the car run, just print the five channels to the serial port, one line every 200 ms. Put the car on white paper and all five read 0; cover one sensor with a finger or a strip of black tape and that bit becomes 1; lay the whole row across a black line and all five become 1.
 
 Those five 0s and 1s, laid out from left to right, are the robot's entire knowledge of the floor beneath it — and the next lesson will drive using nothing else.
 
@@ -19,7 +19,6 @@ Parts used in this lesson:
 | ![](../media/kit_02.png){width=170px}<br><span style="font-size:0.85em">Tracked chassis assembly (with line-tracking sensor) ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor driver expansion board ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
 
 > ⚠️ **This sensor was already fixed in place and wired when the chassis was assembled in Chapter 2. This table is for reference only — do not remove it. The wiring notes below only show how the connections are made, for reference; no disassembly is needed. For the full parts list, see 1.4 Kit List.**
-
 
 #### **3. Parameters:**
 
@@ -167,10 +166,6 @@ P5 to P7 are unused; their readings are meaningless, so ignore them.
 
 When an infrared pair is over a black line the reflection is weak and the module reads it as LOW — **seeing a line returns 0**. If you fed 0 straight into your logic, everything downstream would be inverted, so all five are negated here to make "1 = line detected".
 
-Do the inversion only here; every later piece of code reads "1 means line present". Don't invert in one place and not in another.
-
-You can verify this by sweeping white paper and black tape: on white paper every bit should be 1, and over a black line the matching bit becomes 0. Only if one bit never changes is the transmitter or receiver on that channel broken; if all five stay the same, check the I2C address (0x20) and the wiring first.
-
 **(7) `printf` prints the five values**
 
 ```cpp
@@ -213,6 +208,4 @@ Two common observations:
 
 (2) Readings occasionally jump: the sensors sit too high or the ambient light is too strong. Line tracking relies on reflected light; keep the sensors 5–8 mm above the floor. Direct noon sunlight makes them read white constantly, so move into the shade and try again.
 
-(3) One bit never changes while the others work: either the transmitter or the receiver on that channel has failed. Sweep with white paper and black tape — normally every bit is 1 on white and the matching bit becomes 0 over black.
-
-(4) All five are 0 or all five are 1: all 0 means no power or I2C failed to start; all 1 means all five channels are over a black line, or the sensors are so close to the floor that they're touching it.
+(3) All five are 0 or all five are 1: all 0 means no power or I2C failed to start; all 1 means all five channels are over a black line, or the sensors are so close to the floor that they're touching it.

@@ -103,7 +103,7 @@ void driveMotors(int leftSpeed, int rightSpeed) {
   leftSpeed  = constrain(leftSpeed,  -255, 255);
   rightSpeed = constrain(rightSpeed, -255, 255);
 
-  // Channel A: left wheel
+  // Channel B: right wheel
   if (rightSpeed >= 0) {
     digitalWrite(MOTOR_BIN, HIGH);
     ledcWrite(MOTOR_BEN, rightSpeed);
@@ -112,7 +112,7 @@ void driveMotors(int leftSpeed, int rightSpeed) {
     ledcWrite(MOTOR_BEN, -rightSpeed);
   }
 
-  // Channel B: right wheel
+  // Channel A: left wheel
   if (leftSpeed >= 0) {
     digitalWrite(MOTOR_AIN, HIGH);
     ledcWrite(MOTOR_AEN, leftSpeed);

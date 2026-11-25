@@ -27,9 +27,6 @@ Parts used in this lesson:
 | --- | --- |
 | Web page port | 80 |
 | Straight travel speed | 180 |
-| Spin-in-place speed | 180 |
-| Command timeout | 1500 ms |
-| Command format | `/cmd?d=f|b|l|r|s` |
 | Left wheel AIN / AEN | IO38 / IO21 |
 | Right wheel BIN / BEN | IO40 / IO41 |
 
@@ -250,7 +247,6 @@ This is the opposite of the IR car in Project 11. There only **known keys** refr
   } else if (d == "r") {
     Serial.println("Turn right");
     spinRight(SPEED_TURN);
-  }
 ```
 
 Four directions each get a branch, chained with `else if`. The parameter is a `String`, so comparisons use the double-quoted string `"f"`, not the character `'f'` — single quotes would make C++ report a type mismatch.

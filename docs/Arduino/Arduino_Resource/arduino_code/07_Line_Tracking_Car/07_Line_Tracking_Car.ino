@@ -94,9 +94,9 @@ void loop() {
       lastDir = 0;
       break;
 
-    // Slightly left of the line: reduce right wheel speed for fine adjustment
+    // Slightly left of the line: reduce left wheel speed for fine adjustment
     case 0b01100: // B and C on the line
-      driveMotors(85, BASE_SPEED); // Slow the right wheel to steer back onto the black line
+      driveMotors(85, BASE_SPEED); // Slow the left wheel to steer back onto the black line
       lastDir = 1;
       break;
 
@@ -114,9 +114,9 @@ void loop() {
       lastDir = 1;
       break;
 
-    // Slightly right of the line: reduce left wheel speed for fine adjustment
+    // Slightly right of the line: reduce right wheel speed for fine adjustment
     case 0b00110: // C and D on the line
-      driveMotors(BASE_SPEED, 85); // Slow the left wheel to steer back onto the black line
+      driveMotors(BASE_SPEED, 85); // Slow the right wheel to steer back onto the black line
       lastDir = 2;
       break;
 

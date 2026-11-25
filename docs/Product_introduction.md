@@ -12,7 +12,7 @@ Assembly is simple: most parts are fixed with screws and standoffs, and the expa
 
 The figure below shows how each module connects to the main controller:
 
-![](media/system_block.svg)
+![](media/system_block.png)
 
 ## 1.2 Features
 
@@ -34,8 +34,6 @@ The figure below shows how each module connects to the main controller:
 - Motor driving method: Dual H-bridge driver (DRV8835)
 - Ultrasonic detection range: 2 cm – 300 cm
 - Infrared remote control range: 5 m
-
-> [Image to be added] A close-up side view of the main controller stacked with the expansion board, to show the whole system's power and signal connections.
 
 ## 1.4 Kit Parts List
 
@@ -172,7 +170,3 @@ Let's go over the side connectors (the English text in the figure is from the bo
 On the back is a 1.54-inch LCD.
 
 Wiring uses hardware serial 2, 9600 8N1, crossed: controller RX to module TX (IO18), controller TX to module RX (IO17).
-
-There are two ways to mount the lens; both mount on the pan-tilt and rotate with the servo: method A points the lens at the ground, good for line following; method B points it straight ahead, good for color tracking, face following, and QR code tasks. It is an optional part, not used in lessons 1–16, so you can leave it off at first; install it using one of the two methods when you reach lesson 17—see section 2.2.9 for the steps and section 2.3.8 for wiring. The last 4 lessons use it for color tracking and grabbing, camera-based line following, face following, and QR code task cards.
-
-> [Image to be added] A comparison of the two mounting methods for the vision module: one side view with the lens pointing at the ground (method A) and one with the lens pointing straight ahead (method B).
