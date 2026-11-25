@@ -58,7 +58,7 @@
 
 主循环按模式分发，四种模式谁在跑由 `carMode` 决定：
 
-![](media/multi_mode_flow.svg)
+![](media/multi_mode_flow.png)
 
 #### **6. 测试代码：**
 

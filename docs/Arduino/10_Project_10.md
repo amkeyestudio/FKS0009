@@ -45,7 +45,7 @@
 
 接收和解码是两件事：`IrReceiver.decode()` 负责把光信号还原成一帧数据，`decodedIRData` 里才有协议、码值、是否长按这些字段。
 
-![](media/ir_decode_flow.svg)
+![](media/ir_decode_flow.png)
 
 #### **6. 测试代码：**
 

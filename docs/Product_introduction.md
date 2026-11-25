@@ -12,7 +12,7 @@
 
 下图是各模块与主控的连接关系：
 
-![](media/system_block.svg)
+![](media/system_block.png)
 
 
 ## 1.2 特点

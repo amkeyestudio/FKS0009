@@ -67,7 +67,7 @@
 
 每轮只做三件事：读卡、判断是不是新卡、执行：
 
-![](media/qr_task_flow.svg)
+![](media/qr_task_flow.png)
 
 #### **6. 测试代码：**
 

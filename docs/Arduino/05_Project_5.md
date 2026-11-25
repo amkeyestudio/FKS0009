@@ -54,7 +54,7 @@
 
 主循环只有一条判断链，四个区间各对应一组动作：
 
-![](media/follow_flow.svg)
+![](media/follow_flow.png)
 
 #### **6. 测试代码：**
 

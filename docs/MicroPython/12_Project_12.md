@@ -51,7 +51,7 @@
 
 从手机点**发送**到点阵亮起来，中间要过四道关：
 
-![](media/wifi_matrix_flow.svg)
+![](media/wifi_matrix_flow.png)
 
 #### **6. 测试代码：**
 

@@ -44,7 +44,7 @@
 
 五位编码 `state` 是整个程序的分岔口，先看这张图再读 `switch`：
 
-![](media/track_car_flow.svg)
+![](media/track_car_flow.png)
 
 #### **6. 测试代码：**
 

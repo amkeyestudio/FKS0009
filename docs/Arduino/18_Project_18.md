@@ -70,7 +70,7 @@
 
 有线和没线是两条完全不同的路径，先进哪条由**有效位**决定：
 
-![](media/camera_line_flow.svg)
+![](media/camera_line_flow.png)
 
 #### **6. 测试代码：**
 

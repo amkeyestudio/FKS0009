@@ -71,7 +71,7 @@ TX 接 RX、RX 接 TX，接成 TX-TX 也能通，但模块收不到主控的指�
 
 识别到颜色后的八步动作是顺序执行的，去程五步、回程三步：
 
-![](media/color_pick_flow.svg)
+![](media/color_pick_flow.png)
 
 #### **6. 测试代码：**
 

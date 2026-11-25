@@ -60,7 +60,7 @@
 
 网页发指令、板子执行、回头把比分和表情报给网页，三者构成一个闭环：
 
-![](media/soccer_flow.svg)
+![](media/soccer_flow.png)
 
 #### **6. 测试代码：**
 

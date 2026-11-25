@@ -50,7 +50,7 @@
 
 夹爪没有分支，只有一段四拍循环：张开、等、夹紧、等。等的时间决定动作是否看得清。
 
-![](media/gripper_flow.svg)
+![](media/gripper_flow.png)
 
 #### **6. 测试代码：**
 

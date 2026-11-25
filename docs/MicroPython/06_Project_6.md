@@ -45,7 +45,7 @@
 
 读取流程只有三步，但位序和取反两处最容易弄错：
 
-![](media/track_read_flow.svg)
+![](media/track_read_flow.png)
 
 #### **6. 测试代码：**
 

@@ -50,7 +50,7 @@
 
 网页请求进来后，`server.handleClient()` 按网址找到对应的回调，执行完再返回：
 
-![](media/wifi_web_flow.svg)
+![](media/wifi_web_flow.png)
 
 #### **6. 测试代码：**
 

@@ -52,7 +52,7 @@
 
 速度带符号，判一个分支就把方向脚和占空比一起定下来：
 
-![](media/motor_flow.svg)
+![](media/motor_flow.png)
 
 #### **6. 测试代码：**
 

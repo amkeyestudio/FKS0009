@@ -7,7 +7,7 @@
 
 下图是整车安装的完整流程：
 
-![](media/assembly_flow.svg)
+![](media/assembly_flow.png)
 
 ## 2.1 安装前注意
 

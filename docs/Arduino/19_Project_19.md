@@ -67,7 +67,7 @@
 
 上电先标定 20 帧，标定完才开始跟随：
 
-![](media/face_follow_flow.svg)
+![](media/face_follow_flow.png)
 
 #### **6. 测试代码：**
 

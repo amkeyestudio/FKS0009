@@ -49,7 +49,7 @@
 
 一次测距由三段时序拼成，Echo 的宽度就是**声音往返的时间**：
 
-![](media/ultrasonic_flow.svg)
+![](media/ultrasonic_flow.png)
 
 #### **6. 测试代码：**
 

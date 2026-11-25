@@ -51,7 +51,7 @@
 
 从手指按下到轮子转起来，中间隔着浏览器、路由器和板子三层：
 
-![](media/wifi_car_flow.svg)
+![](media/wifi_car_flow.png)
 
 #### **6. 测试代码：**
 
