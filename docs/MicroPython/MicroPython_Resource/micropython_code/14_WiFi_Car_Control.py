@@ -1,7 +1,3 @@
-# 项目 14：Wi-Fi 控车
-# 接线：电机 40/41/38/21
-# 现象：手机按住方向键开车，松手停车；1.5 秒收不到指令也自动停车
-
 import network
 import time
 from mini_tracked_tank_robot import MiniTrackedTankRobot
@@ -17,7 +13,7 @@ STOP_AFTER = 1500          # 指令超时（ms）自动停车
 INDEX_HTML = """<!DOCTYPE html><html><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>迷你履带坦克 遥控车</title>
+<title>迷你履带坦克 V4.0 - 遥控车</title>
 <style>
 body{font-family:-apple-system,"Microsoft YaHei",sans-serif;text-align:center;
      background:#f2f3f5;margin:0;padding:16px}

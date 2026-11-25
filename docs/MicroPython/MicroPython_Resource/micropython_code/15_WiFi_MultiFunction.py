@@ -1,7 +1,3 @@
-# 项目 15：Wi-Fi 全功能车
-# 接线：电机 40/41/38/21、云台 42、夹爪 11、超声波 13/12、点阵 9/8、循迹 I2C 9/8
-# 现象：网页上切四种模式（手动 / 循迹 / 避障 / 跟随），随时能调云台和夹爪
-
 import network
 import time
 from mini_tracked_tank_robot import MiniTrackedTankRobot
@@ -31,7 +27,7 @@ AV_GO, AV_LEFT, AV_RIGHT, AV_TURN, AV_TURNING = 0, 1, 2, 3, 4
 INDEX_HTML = """<!DOCTYPE html><html><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>迷你履带坦克 Wi-Fi 全功能车</title>
+<title>迷你履带坦克 V4.0 - Wi-Fi 全功能车</title>
 <style>
 body{font-family:-apple-system,"Microsoft YaHei",sans-serif;text-align:center;
      background:#f2f3f5;margin:0;padding:16px}

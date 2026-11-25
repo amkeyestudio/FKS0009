@@ -1,7 +1,3 @@
-# 项目 16：足球智能车
-# 接线：电机 40/41/38/21、夹爪舵机 11、点阵 9/8
-# 现象：网页控制开车、带球、射门；进球点阵亮笑脸，比分实时同步
-
 import network
 import time
 from mini_tracked_tank_robot import MiniTrackedTankRobot
@@ -32,7 +28,7 @@ smile = bytes([
 INDEX_HTML = """<!DOCTYPE html><html><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>迷你履带坦克 足球车</title>
+<title>迷你履带坦克 V4.0 - 足球车</title>
 <style>
 body{font-family:-apple-system,"Microsoft YaHei",sans-serif;text-align:center;
      background:#f2f3f5;margin:0;padding:14px}

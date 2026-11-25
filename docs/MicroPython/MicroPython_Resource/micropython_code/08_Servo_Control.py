@@ -1,7 +1,3 @@
-# 项目 8：舵机控制
-# 接线：云台舵机信号线 = IO42
-# 现象：舵机在 0°~180° 之间来回扫动
-
 from mini_tracked_tank_robot import MiniTrackedTankRobot
 import time
 

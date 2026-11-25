@@ -6,7 +6,7 @@
   </defs>
   <rect width="820" height="620" fill="#f8fafc"/>
   <text x="410" y="34" text-anchor="middle" font-size="22" font-weight="bold" fill="#0f172a">ESP32-S3 迷你履带坦克组成框图</text>
-  <text x="410" y="58" text-anchor="middle" font-size="12" fill="#64748b">各模块都插在 KS5039 扩展板的座子上，扩展板再叠插到主控排针（引脚以实物丝印为准）</text>
+  <text x="410" y="58" text-anchor="middle" font-size="12" fill="#64748b">各模块都插在扩展板的座子上，扩展板再叠插到主控排针（引脚以实物丝印为准）</text>
 
   <!-- 连线：先画线，后画框，线端被框覆盖，视觉上从框边缘出发 -->
   <g stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrow)">
@@ -26,7 +26,7 @@
 
   <!-- 扩展板：所有外设的落点 -->
   <rect x="300" y="76" width="220" height="328" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
-  <text x="410" y="102" text-anchor="middle" font-size="15" font-weight="bold" fill="#166534">KS5039 扩展板（DRV8835）</text>
+  <text x="410" y="102" text-anchor="middle" font-size="15" font-weight="bold" fill="#166534">扩展板（DRV8835）</text>
   <text x="310" y="128" font-size="10" fill="#15803d">A 路 IO38/21</text>
   <text x="510" y="128" text-anchor="end" font-size="10" fill="#15803d">B 路 IO40/41</text>
   <text x="310" y="208" font-size="10" fill="#15803d">点阵 IO8/IO9</text>

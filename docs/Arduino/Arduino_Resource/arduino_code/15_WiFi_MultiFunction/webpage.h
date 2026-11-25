@@ -10,7 +10,7 @@ const char index_html[] PROGMEM = R"rawliteral(
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-  <title>FKS0009 Wi-Fi 全功能车</title>
+  <title>迷你履带坦克 V4.0 - Wi-Fi 全功能车</title>
 
   <style>
     /* 页面整体 */

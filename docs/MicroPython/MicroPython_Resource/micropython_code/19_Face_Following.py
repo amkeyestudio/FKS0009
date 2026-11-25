@@ -1,7 +1,3 @@
-# 项目 19：人脸跟随
-# 接线：视觉模块 RX=IO18 / TX=IO17（9600）；电机 40/41/38/21；云台 42（本课固定朝正前）；点阵 9/8
-# 现象：上电先用前 20 帧标定正前方，之后人往哪边偏，车就往哪边差速转向并慢慢靠近
-
 import time
 from mini_tracked_tank_robot import MiniTrackedTankRobot
 from aicam import AiCam

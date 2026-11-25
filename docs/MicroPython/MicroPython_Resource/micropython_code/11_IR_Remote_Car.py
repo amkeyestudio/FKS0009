@@ -1,7 +1,3 @@
-# 项目 11：红外遥控车
-# 接线：红外接收头 = IO48；电机 40/41/38/21
-# 现象：方向盘方向键控车；超过 1.5 秒收不到按键自动停车
-
 from machine import Pin
 from ir_rx.nec import NEC_8
 from mini_tracked_tank_robot import MiniTrackedTankRobot

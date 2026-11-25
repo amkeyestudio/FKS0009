@@ -1,8 +1,3 @@
-# 项目 12：Wi-Fi 点阵屏
-# 接线：点阵 CLK=IO9、DIN=IO8
-# 操作：手机连同一个 Wi-Fi，浏览器打开串口打印的 IP，输入英文/数字发到点阵
-# 现象：一屏装得下就居中静止显示，装不下就横向滚动
-
 import network
 import time
 from mini_tracked_tank_robot import MiniTrackedTankRobot

@@ -1,7 +1,3 @@
-# 项目 5：超声波跟随
-# 接线：TRIG=IO13、ECHO=IO12、电机 40/41/38/21、点阵 9/8
-# 现象：30~50 cm 前进；10~30 cm 停住；小于 10 cm 后退；超范围显示问号
-
 from mini_tracked_tank_robot import MiniTrackedTankRobot
 import time
 

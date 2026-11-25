@@ -1,7 +1,3 @@
-# 项目 17：颜色追踪与抓取
-# 接线：视觉模块 RX=IO18 / TX=IO17（9600）；电机 40/41/38/21；云台 42；夹爪 11；点阵 9/8
-# 现象：看到红色或黄色物块，靠近 → 夹取 → 按颜色转向 → 运送 → 放下 → 退回起点
-
 import time
 from mini_tracked_tank_robot import MiniTrackedTankRobot
 from aicam import AiCam

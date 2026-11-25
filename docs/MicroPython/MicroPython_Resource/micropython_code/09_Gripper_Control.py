@@ -1,7 +1,3 @@
-# 项目 9：夹爪控制与抓取
-# 接线：夹爪舵机信号线 = IO11
-# 现象：夹爪在 90°（夹紧）和 140°（张开）之间来回开合
-
 from mini_tracked_tank_robot import MiniTrackedTankRobot
 import time
 

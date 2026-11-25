@@ -7,7 +7,7 @@ const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE html><html><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FKS0009 联网测试</title>
+<title>迷你履带坦克 V4.0 - 联网测试</title>
 <style>
 body{font-family:-apple-system,"Microsoft YaHei",sans-serif;text-align:center;background:#f2f3f5;margin:0;padding:16px}
 .card{background:#fff;border-radius:14px;padding:16px;max-width:420px;margin:0 auto}

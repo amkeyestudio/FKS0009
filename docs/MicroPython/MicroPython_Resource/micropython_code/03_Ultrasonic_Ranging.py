@@ -1,7 +1,3 @@
-# 项目 3：超声波测距
-# 接线：TRIG=IO13，ECHO=IO12
-# 现象：串口每 1 秒打印一次前方距离（厘米）
-
 from mini_tracked_tank_robot import MiniTrackedTankRobot
 import time
 

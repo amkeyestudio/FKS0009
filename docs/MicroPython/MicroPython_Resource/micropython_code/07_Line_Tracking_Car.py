@@ -1,7 +1,3 @@
-# 项目 7：循迹行驶
-# 接线：PCF8574 的 SCL=IO9、SDA=IO8；电机 40/41/38/21
-# 现象：五路探头居中直行；偏左左调、偏右右调；完全脱线按最后方向找线，1.5 秒还没找到就停车
-
 from mini_tracked_tank_robot import MiniTrackedTankRobot
 import time
 

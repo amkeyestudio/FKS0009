@@ -1,7 +1,3 @@
-# 项目 20：二维码任务卡
-# 接线：视觉模块 RX=IO18 / TX=IO17（9600）；电机 40/41/38/21；云台 42（上电摆到 90°）；点阵 9/8
-# 现象：扫到一张卡就按内容走一段，同一张卡一直举着只执行一次，换卡才重新触发
-
 import time
 from mini_tracked_tank_robot import MiniTrackedTankRobot
 from aicam import AiCam

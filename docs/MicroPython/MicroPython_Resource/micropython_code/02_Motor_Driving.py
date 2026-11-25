@@ -1,7 +1,3 @@
-# 项目 2：电机驱动与调速
-# 接线：AIN=IO40、AEN=IO41、BIN=IO38、BEN=IO21；点阵 CLK=IO9、DIN=IO8
-# 现象：前进 2 秒 → 后退 2 秒 → 原地右转 1.5 秒 → 原地左转 1.5 秒 → 加减速演示
-
 from mini_tracked_tank_robot import MiniTrackedTankRobot
 import time
 

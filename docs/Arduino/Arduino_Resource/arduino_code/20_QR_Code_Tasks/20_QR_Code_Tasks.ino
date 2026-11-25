@@ -1,8 +1,3 @@
-// 第 20 课：二维码任务卡
-// 扫到卡片后按内容走一段，四张卡：FORWARD / BACKWARD / LEFT / RIGHT
-// 云台上电先转到 90° 保证镜头水平，本课之后不再转动
-// 卡片用 ASCII 英文：中文在 UTF-8 / GBK 下字节数不同，与模块回传比对会失败
-
 #include <ESP32Servo.h>
 #include "AiCam.h"  // 视觉模块驱动
 

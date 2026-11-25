@@ -1,7 +1,3 @@
-# 项目 10：红外接收
-# 接线：红外接收头 = IO48
-# 现象：按下遥控器按键，串口打印协议解出的按键码和中文名
-
 from machine import Pin
 from ir_rx.nec import NEC_8
 import time

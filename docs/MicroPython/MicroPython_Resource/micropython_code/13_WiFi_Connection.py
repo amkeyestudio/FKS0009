@@ -1,7 +1,3 @@
-# 项目 13：Wi-Fi 连接
-# 接线：云台舵机=IO42、超声波 TRIG=IO13 / ECHO=IO12
-# 现象：手机浏览器能改云台角度、能读到前方距离，链路就算通了
-
 import network
 import time
 from mini_tracked_tank_robot import MiniTrackedTankRobot
@@ -17,7 +13,7 @@ ECHO_PIN = 12
 INDEX_HTML = """<!DOCTYPE html><html><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>迷你履带坦克 联网测试</title>
+<title>迷你履带坦克 V4.0 - 联网测试</title>
 <style>
 body{font-family:-apple-system,"Microsoft YaHei",sans-serif;text-align:center;
      background:#f2f3f5;margin:0;padding:16px}

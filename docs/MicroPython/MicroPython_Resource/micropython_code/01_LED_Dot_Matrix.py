@@ -1,7 +1,3 @@
-# 项目 1：8×16 点阵
-# 接线：CLK=IO9，DIN=IO8
-# 现象：先亮爱心 3 秒，再亮笑脸 2 秒，然后笑脸滚动一轮
-
 from mini_tracked_tank_robot import MiniTrackedTankRobot
 import time
 

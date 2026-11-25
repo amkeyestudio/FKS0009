@@ -1,7 +1,3 @@
-# 项目 4：超声波避障
-# 接线：TRIG=IO13、ECHO=IO12、云台舵机=IO42、电机 40/41/38/21、点阵 9/8
-# 现象：前方 15 cm 内有障碍就停车，舵机左右各测一次，朝空间大的一侧转
-
 from mini_tracked_tank_robot import MiniTrackedTankRobot
 import time
 

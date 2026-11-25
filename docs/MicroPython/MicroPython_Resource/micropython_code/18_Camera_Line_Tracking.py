@@ -1,7 +1,3 @@
-# 项目 18：摄像头巡线
-# 接线：视觉模块 RX=IO18 / TX=IO17（9600）；电机 38/21(左)、40/41(右)；点阵 9/8
-# 现象：按画面里的线偏差做 PD 差速跟线；丢线按记忆方向找线，0.6 秒找不回就停车
-
 import time
 from mini_tracked_tank_robot import MiniTrackedTankRobot
 from aicam import AiCam
