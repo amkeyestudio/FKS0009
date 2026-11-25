@@ -18,7 +18,7 @@ The parts used in this lesson:
 
 |     |     |
 | :---: | :---: |
-| ![](../media/kit_04.png){width=200px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_02.png){width=200px}<br><span style="font-size:0.85em">Tracked chassis assembly (tracks + motors + wheels) ×1</span> |
+| ![](../media/kit_04.png){width=200px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_02.png){width=200px}<br><span style="font-size:0.85em">Mini tracked tank robot bottom assembly ×1</span> |
 | ![](../media/kit_06.png){width=200px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_03.png){width=200px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
 > ⚠️ **The motors come fitted on the chassis at the factory; in Chapter 2 you only stack the expansion board onto the controller. This table is for reference only — nothing needs to be removed; the wiring notes below merely show how the connections are made, again for reference, so no assembly or disassembly is required. For the complete parts list, see the kit list in Section 1.4.**
 #### **3. Parameters:**
