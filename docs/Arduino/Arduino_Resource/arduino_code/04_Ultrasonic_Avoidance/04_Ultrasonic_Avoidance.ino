@@ -1,69 +1,69 @@
-#include <ESP32Servo.h>  // 舵机库
+#include <ESP32Servo.h>  // Servo library
 
-Servo myServo;  // 云台舵机
+Servo myServo;  // Pan-tilt servo
 
-// ===== 点阵屏引脚 =====
-#define CLK_Pin 9   // 时钟，接点阵 CLK
-#define DIN_Pin 8   // 数据，接点阵 DIN
+// ===== Dot matrix display pins =====
+#define CLK_Pin 9   // Clock, connect to dot matrix CLK
+#define DIN_Pin 8   // Data, connect to dot matrix DIN
 
-// ===== 超声波引脚 =====
-const int trigPin = 13;  // 触发，IO13
-const int echoPin = 12;  // 回响，IO12
+// ===== Ultrasonic module pins =====
+const int trigPin = 13;  // Trigger, IO13
+const int echoPin = 12;  // Echo, IO12
 
-// 舵机信号，GPIO42
+// Servo signal, GPIO42
 const int servoPin = 42;
 
-// ===== 距离阈值 =====
-// 小于 15 cm 视为障碍，停车后左右测距
+// ===== Distance thresholds =====
+// Less than 15 cm counts as an obstacle; stop and measure left/right
 const long closeDistance = 15;
 
-long rightDistance = 0;  // 右侧距离
-long leftDistance = 0;   // 左侧距离
+long rightDistance = 0;  // Right-side distance
+long leftDistance = 0;   // Left-side distance
 
-// ===== 电机引脚 =====
-#define MOTOR_AIN 38  // 左电机方向
-#define MOTOR_AEN 21  // 左电机调速
-#define MOTOR_BIN 40  // 右电机方向
-#define MOTOR_BEN 41  // 右电机调速
+// ===== Motor pins =====
+#define MOTOR_AIN 38  // Left motor direction
+#define MOTOR_AEN 21  // Left motor speed control
+#define MOTOR_BIN 40  // Right motor direction
+#define MOTOR_BEN 41  // Right motor speed control
 
-// ===== 字模（16 列 × 8 行）=====
-// 爱心：直行
+// ===== Font bitmaps (16 columns x 8 rows) =====
+// Heart: forward
 unsigned char heart[] = {
   0x00, 0x00, 0x00, 0x00, 0x08, 0x1c, 0x3e, 0x7c,
   0x7c, 0x3e, 0x1c, 0x08, 0x00, 0x00, 0x00, 0x00
 };
 
-// 感叹号：前方有障碍
+// Exclamation mark: obstacle ahead
 unsigned char alert_sign[] = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5f,
   0x5f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-// 向左看：左转测距
+// Look left: measure distance turning left
 unsigned char look_left[] = {
   0x00, 0x00, 0x3c, 0x4e, 0x4e, 0x42, 0x3c, 0x00,
   0x00, 0x3c, 0x4e, 0x4e, 0x42, 0x3c, 0x00, 0x00
 };
 
-// 向右看：右转测距
+// Look right: measure distance turning right
 unsigned char look_right[] = {
   0x00, 0x00, 0x3c, 0x42, 0x4e, 0x4e, 0x3c, 0x00,
   0x00, 0x3c, 0x42, 0x4e, 0x4e, 0x3c, 0x00, 0x00
 };
 
-// 向下箭头：后退
+// Down arrow: backward
 unsigned char arrow_down[] = {
   0x00, 0x00, 0x00, 0x00, 0x10, 0x30, 0x7e, 0xfe,
   0xfe, 0x7e, 0x30, 0x10, 0x00, 0x00, 0x00, 0x00
 };
 
-// 向左箭头：左转
+// Left arrow: turn left
 unsigned char arrow_left[] = {
   0x00, 0x00, 0x00, 0x18, 0x3c, 0x7e, 0xff, 0x18,
   0x18, 0x18, 0x18, 0x18, 0x18, 0x00, 0x00, 0x00
 };
 
-// 向右箭头：右转
+// Right arrow: turn right
 unsigned char arrow_right[] = {
   0x00, 0x00, 0x00, 0x18, 0x18, 0x18, 0x18, 0x18,
   0x18, 0xff, 0x7e, 0x3c, 0x18, 0x00, 0x00, 0x00
@@ -71,9 +71,9 @@ unsigned char arrow_right[] = {
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("超声波避障启动");
+  Serial.println("Ultrasonic obstacle avoidance started");
 
-  // 点阵引脚初始化并清屏
+  // Initialize dot matrix pins and clear display
   pinMode(CLK_Pin, OUTPUT);
   pinMode(DIN_Pin, OUTPUT);
   digitalWrite(CLK_Pin, HIGH);
@@ -81,64 +81,64 @@ void setup() {
   unsigned char clear_data[16] = {0};
   matrix_display(clear_data);
 
-  pinMode(trigPin, OUTPUT);  // Trig 输出
-  pinMode(echoPin, INPUT);   // Echo 输入
+  pinMode(trigPin, OUTPUT);  // Trig output
+  pinMode(echoPin, INPUT);   // Echo input
 
-  // 方向脚输出
+  // Direction pins as output
   pinMode(MOTOR_BIN, OUTPUT);
   pinMode(MOTOR_AIN, OUTPUT);
 
-  // 调速脚 PWM：1 kHz，8 位
+  // Speed pins PWM: 1 kHz, 8-bit
   ledcAttach(MOTOR_BEN, 1000, 8);
   ledcAttach(MOTOR_AEN, 1000, 8);
 
-  // 上电停车
+  // Stop on power on
   stopCar();
 
-  // 舵机独用定时器，避免与电机 PWM 冲突
+  // Dedicated servo timer to avoid conflict with motor PWM
   ESP32PWM::allocateTimer(0);
-  myServo.setPeriodHertz(50);  // 舵机 50 Hz
-  // 脉宽 500~2400 µs 对应 0~180°（SG90 类）
-  // 换 MG995 等大舵机时可直接 attach(servoPin)
+  myServo.setPeriodHertz(50);  // Servo 50 Hz
+  // Pulse width 500~2400 µs corresponds to 0~180° (SG90 type)
+  // For larger servos like MG995, just use attach(servoPin)
   myServo.attach(servoPin, 500, 2400);
 
-  // 回中位并显示待机图案
+  // Return to center and show the idle pattern
   myServo.write(90);
   matrix_display(heart);
   delay(1000);
 }
 
 void loop() {
-  // 测前方距离
+  // Measure the distance ahead
   long distance = getDistance();
 
-  Serial.print("前方距离：");
+  Serial.print("Distance ahead: ");
   Serial.print(distance);
   Serial.println(" cm");
 
   if (distance <= closeDistance) {
-    // 有障碍：停车并显示感叹号
+    // Obstacle: stop and show the exclamation mark
     stopCar();
     matrix_display(alert_sign);
     delay(150);
 
-    // 云台转向一侧，测这一侧距离
+    // Turn pan-tilt to one side and measure that side
     matrix_display(look_left);
-    myServo.write(180);            // 云台转到 180°
-    delay(300);                    // 等舵机到位
+    myServo.write(180);            // Pan-tilt turns to 180°
+    delay(300);                    // Wait for the servo to reach position
     rightDistance = getDistance();
     delay(100);
 
-    // 云台转向另一侧，测另一侧距离
+    // Turn pan-tilt to the other side and measure that side
     matrix_display(look_right);
-    myServo.write(0);              // 云台转到 0°
+    myServo.write(0);              // Pan-tilt turns to 0°
     delay(300);
     leftDistance = getDistance();
     delay(100);
 
-    myServo.write(90);             // 回正前方
+    myServo.write(90);             // Return to face forward
 
-    // 向空间较大的一侧转向
+    // Turn toward the side with more space
     if (rightDistance > leftDistance) {
       spinRight(255);
     } else {
@@ -147,34 +147,34 @@ void loop() {
     delay(500);
 
   } else {
-    // 无障碍，继续直行
+    // No obstacle, keep moving forward
     goForward(150);
   }
 
   delay(100);
 }
 
-// 测距，返回厘米
+// Measure distance, return centimeters
 int getDistance() {
-  long duration;  // 往返时间（µs）
-  int distance;   // 距离（cm）
+  long duration;  // Round-trip time (µs)
+  int distance;   // Distance (cm)
 
-  // 先拉低，保证起始电平干净
+  // Pull low first for a clean start level
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
 
-  // 10 µs 高脉冲触发发波
+  // 10 µs high pulse triggers emission
   digitalWrite(trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
 
-  // Echo 高电平宽度即往返时间
+  // Echo HIGH pulse width is the round-trip time
   duration = pulseIn(echoPin, HIGH);
 
-  // 声速 0.034 cm/µs，除以 2 去掉回程
+  // Speed of sound 0.034 cm/µs, divide by 2 to remove the return trip
   distance = duration * 0.034 / 2;
 
-  // 超出 2~300 cm 置 0
+  // Set 0 if outside 2~300 cm
   if (distance < 2 || distance > 300) {
     distance = 0;
   }
@@ -182,22 +182,22 @@ int getDistance() {
   return distance;
 }
 
-// ===== 电机控制 =====
-// 速度带符号：正转 / 反转 / 0 停
+// ===== Motor control =====
+// Signed speed: forward / reverse / 0 stop
 void driveMotors(int rightSpeed, int leftSpeed) {
-  rightSpeed  = constrain(rightSpeed,  -255, 255);  // 限幅 ±255
+  rightSpeed  = constrain(rightSpeed,  -255, 255);  // Clamp to ±255
   leftSpeed = constrain(leftSpeed, -255, 255);
 
-  // 右轮（B 路）
+  // Right wheel (channel B)
   if (rightSpeed >= 0) {
     digitalWrite(MOTOR_BIN, HIGH);
     ledcWrite(MOTOR_BEN, rightSpeed);
   } else {
     digitalWrite(MOTOR_BIN, LOW);
-    ledcWrite(MOTOR_BEN, -rightSpeed);  // 方向由方向脚决定，此处只给占空比
+    ledcWrite(MOTOR_BEN, -rightSpeed);  // Direction is set by the direction pin; here only the duty cycle is given
   }
 
-  // 左轮（A 路）
+  // Left wheel (channel A)
   if (leftSpeed >= 0) {
     digitalWrite(MOTOR_AIN, HIGH);
     ledcWrite(MOTOR_AEN, leftSpeed);
@@ -207,56 +207,56 @@ void driveMotors(int rightSpeed, int leftSpeed) {
   }
 }
 
-// 动作与点阵图案绑定
+// Each action is bound to a dot matrix pattern
 void goForward(int speed)  {
-  matrix_display(heart);        // 前进：爱心
+  matrix_display(heart);        // Forward: heart
   driveMotors(speed, speed);
 }
 
 void goBackward(int speed) {
-  matrix_display(arrow_down);   // 后退：向下箭头
+  matrix_display(arrow_down);   // Backward: down arrow
   driveMotors(-speed, -speed);
 }
 
 void spinRight(int speed)  {
-  matrix_display(arrow_left);   // 原地右转，点阵显示左箭头
+  matrix_display(arrow_left);   // Spot turn right, dot matrix shows left arrow
   driveMotors(-speed, speed);
 }
 
 void spinLeft(int speed)   {
-  matrix_display(arrow_right);  // 原地左转，点阵显示右箭头
+  matrix_display(arrow_right);  // Spot turn left, dot matrix shows right arrow
   driveMotors(speed, -speed);
 }
 
 void stopCar() {
-  driveMotors(0, 0);            // 停：占空比归零
+  driveMotors(0, 0);            // Stop: duty cycle set to zero
 }
 
-// ===== 点阵驱动（软件模拟 I2C）=====
-// 将 16 字节字模写入点阵屏显存
+// ===== Dot matrix driver (software I2C) =====
+// Write the 16-byte font bitmap to the dot matrix display buffer
 void matrix_display(unsigned char matrix_value[]) {
-  // 0x40：写数据模式，地址自增
+  // 0x40: write data mode, auto-increment address
   IIC_start();
   IIC_send(0x40);
   IIC_end();
 
-  // 0xC0：显存起始地址 0
+  // 0xC0: display buffer start address 0
   IIC_start();
   IIC_send(0xC0);
 
-  // 连写 16 列
+  // Write 16 columns consecutively
   for (int i = 0; i < 16; i++) {
     IIC_send(matrix_value[i]);
   }
   IIC_end();
 
-  // 0x8A：开显示，亮度最大
+  // 0x8A: turn on display, maximum brightness
   IIC_start();
   IIC_send(0x8A);
   IIC_end();
 }
 
-// 起始条件：CLK 高电平期间 DIN 下降沿
+// Start condition: DIN falling edge while CLK is HIGH
 void IIC_start() {
   digitalWrite(CLK_Pin, HIGH);
   delayMicroseconds(3);
@@ -266,7 +266,7 @@ void IIC_start() {
   delayMicroseconds(3);
 }
 
-// 发送 1 字节，低位在前：CLK 低时置数据，上升沿采样
+// Send 1 byte, LSB first: set data when CLK is LOW, sample on rising edge
 void IIC_send(unsigned char send_data) {
   for (int i = 0; i < 8; i++) {
     digitalWrite(CLK_Pin, LOW);
@@ -286,7 +286,7 @@ void IIC_send(unsigned char send_data) {
   }
 }
 
-// 停止条件：CLK 高电平期间 DIN 上升沿
+// Stop condition: DIN rising edge while CLK is HIGH
 void IIC_end() {
   digitalWrite(CLK_Pin, LOW);
   delayMicroseconds(3);

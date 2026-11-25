@@ -1,67 +1,67 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <ESP32Servo.h>
-#include "webpage.h"  // 网页内容
+#include "webpage.h"  // Web page content
 
 // ===== Wi-Fi =====
-// 仅支持 2.4 GHz
-const char* WIFI_SSID = "你的WiFi名字";
-const char* WIFI_PASS = "你的WiFi密码";
+// Only supports 2.4 GHz
+const char* WIFI_SSID = "Your WiFi name";
+const char* WIFI_PASS = "Your WiFi password";
 
-// ===== 引脚 =====
-// 云台舵机；安装方向为 0° 指右、180° 指左
-#define PAN_SERVO_PIN 42  // 云台舵机
+// ===== Pins =====
+// Pan-tilt servo; mounted so 0° faces right and 180° faces left
+#define PAN_SERVO_PIN 42  // Pan-tilt servo
 
-const int trigPin = 13;  // 超声波触发
-const int echoPin = 12;  // 超声波回响
+const int trigPin = 13;  // Ultrasonic trigger
+const int echoPin = 12;  // Ultrasonic echo
 
-WebServer server(80);  // 网页服务，80 端口
+WebServer server(80);  // Web server on port 80
 Servo panServo;
-int panAngle = 90;     // 当前云台角度，上电回中
+int panAngle = 90;     // Current pan angle, centered on power on
 
-// 本课只用舵机与超声波，不驱动电机
+// This lesson only uses the servo and ultrasonic module; no motors are driven
 
 void setup() {
   Serial.begin(115200);
   delay(500);
 
-  // 超声波
+  // Ultrasonic
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
 
-  // 云台舵机
+  // Pan-tilt servo
   ESP32PWM::allocateTimer(0);
   panServo.setPeriodHertz(50);
   panServo.attach(PAN_SERVO_PIN, 500, 2500);
   panServo.write(90);
 
-  // Station 模式连接路由器
-  Serial.print("正在连接 ");
+  // Connect to the router in Station mode
+  Serial.print("Connecting to ");
   Serial.println(WIFI_SSID);
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
 
-  // 阻塞等待连接成功
+  // Block until the connection succeeds
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
   Serial.println();
-  Serial.println("WiFi 已连接");
-  Serial.print("板子的 IP：");
-  Serial.println(WiFi.localIP());   // 手机浏览器访问此地址
+  Serial.println("WiFi connected");
+  Serial.print("Board IP: ");
+  Serial.println(WiFi.localIP());   // Open this address in a phone browser
 
-  // 网页路由
+  // Web page routes
   server.on("/", []() {
     server.send_P(200, "text/html; charset=utf-8", index_html);
   });
 
   server.on("/pan", []() {
     int a = server.arg("angle").toInt();
-    a = constrain(a, 0, 180);   // 限幅 0~180
+    a = constrain(a, 0, 180);   // Clamp to 0~180
     panAngle = a;
     panServo.write(a);
-    server.send(200, "text/plain", String(a));  // 回传当前角度
+    server.send(200, "text/plain", String(a));  // Return the current angle
   });
 
   server.on("/distance", []() {
@@ -69,14 +69,14 @@ void setup() {
   });
 
   server.begin();
-  Serial.println("网页服务已启动，手机浏览器打开上面的 IP");
+  Serial.println("Web server started; open the IP above in a phone browser");
 }
 
 void loop() {
-  server.handleClient();  // 必须持续调用
+  server.handleClient();  // Must be called continuously
 }
 
-// 测距
+// Distance measurement
 int getDistance() {
   long duration;
   int distance;
@@ -87,7 +87,7 @@ int getDistance() {
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
 
-  // 25 ms 超时，防止无回波时阻塞
+  // 25 ms timeout to avoid blocking when there is no echo
   duration = pulseIn(echoPin, HIGH, 25000);
   distance = duration * 0.034 / 2;
 

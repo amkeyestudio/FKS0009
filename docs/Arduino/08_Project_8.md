@@ -1,82 +1,82 @@
-### 项目 8：舵机控制
+### Project 8: Servo Control
 
-#### **1. 简介：**
+#### **1. Introduction:**
 
-![微型舵机与配件](media/intro_08.jpg){width=520px}
+![A micro servo and its accessories](media/intro_08.jpg){width=520px}
 
-第 4 课避障时，车会左右转头各看一眼——转的就是这只小舵机：超声波模块靠云台支架架在它上面，舵机一转，探头跟着扫。装车时要求先把它调到 90° 再固定，就是为了让探头正对前方时对应程序里的 90°。
+During the obstacle-avoidance lesson, the Mini Tracked Tank V4.0 turned its head left and right before deciding where to go. That head turn is the work of a small servo: the ultrasonic module sits on a pan-tilt bracket above it, so when the servo turns, the sensor sweeps with it. It was centred before being screwed down so that "straight ahead" would match the middle of its range in the program.
 
-舵机和普通电机不是一类东西。电机给电就转、断电才停；舵机内部有电位器量角度、有控制板做比较，收到的是每 20 毫秒一个脉冲，脉冲有多宽就代表转到哪个角度：0.5 毫秒对 0°，1.5 毫秒对 90°，2.5 毫秒对 180°。
+A servo is not an ordinary motor. Give a motor power and it spins; cut the power and it stops. A servo measures its own angle with a potentiometer, compares it with a target, and fights to stay there — so you'll feel real resistance if you try to turn the horn by hand, and it springs back when you let go. The target doesn't arrive as a voltage level but as a pulse whose width carries the meaning, which is why getting the timing right matters more than getting the wiring right.
 
-转到位以后它锁在那儿，用手去掰能感到明显的反抗，松手又弹回去。本课让它从 0° 扫到 180° 再扫回来，每转一度停 15 毫秒，走完全程约 2.7 秒。
+Here we sweep it from one end of its travel to the other and back, stepping smoothly instead of jumping. The tempting shortcut is to command the far end in one go: the pan-tilt still carries the ultrasonic module, and the sudden move makes the whole bracket wobble. Equally, don't assume the middle position points straight ahead — that depends on how the horn was fitted. If it's off, re-centre the mechanism rather than fudging the angle in code, or the distance readings from the earlier lesson will stay biased.
 
-上电时舵机先“咔”一下转到 0°（朝右），然后匀速扫向另一端，到顶停半秒再扫回来，一直往复；串口会打印一行启动信息。
+At power-on the servo gives a click as it snaps to one end, then sweeps steadily to the other, pauses briefly and sweeps back, over and over.
 
-#### **2. 所需清单：**
+#### **2. Required Parts:**
 
-本课用到的器件：
+Parts used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
-| ![](../media/kit_13.png){width=170px}<br><span style="font-size:0.85em">9G 舵机（180°，配十字臂） ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 电机扩展板 ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 开发板 ×1</span> |
-> ⚠️ **舵机在第 2 章已按 90° 调中后装好，本表只作对照，不用拆；下面的接线说明只标清接线方式，供对照，不必拆装。完整物料见 1.4 套件清单。**
-#### **3. 参数：**
+| ![](../media/kit_13.png){width=170px}<br><span style="font-size:0.85em">9G servo (180°, with cross horn) ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor driver expansion board ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
+> ⚠️ **The servo was already centred at 90° and installed in Chapter 2. This table is for reference only — do not remove it. The wiring notes below only show how the connections are made, for reference; no disassembly is needed. For the full parts list, see 1.4 Kit List.**
+#### **3. Parameters:**
 
-| 项目 | 参数 |
+| Item | Parameter |
 | --- | --- |
-| 型号 | 9G 微型舵机，行程 180° |
-| 信号脚 | IO42 |
-| 控制频率 | 50 Hz（周期 20 ms） |
-| 脉宽范围 | 500～2500 µs |
-| 角度对应 | 500 µs ≈ 0°，1500 µs ≈ 90°，2500 µs ≈ 180° |
-| 扫描步进 | 每度一次，步间延时 15 ms |
-| 全行程耗时 | 约 2.7 s（180 度 × 15 ms） |
+| Model | 9G micro servo, 180° travel |
+| Signal pin | IO42 |
+| Control frequency | 50 Hz (20 ms period) |
+| Pulse width range | 500–2500 µs |
+| Angle mapping | 500 µs ≈ 0°, 1500 µs ≈ 90°, 2500 µs ≈ 180° |
+| Sweep step | One step per degree, 15 ms between steps |
+| Full-travel time | About 2.7 s (180 steps × 15 ms) |
 
-#### **4. 接线说明：**
+#### **4. Wiring:**
 
-| 舵机线 | 颜色（常见） | 接到 |
+| Servo wire | Colour (typical) | Connected to |
 | --- | --- | --- |
-| 信号 | 橙 / 黄 | IO42 |
-| 电源 | 红 | 5V |
-| 地 | 棕 / 黑 | GND |
+| Signal | Orange / yellow | IO42 |
+| Power | Red | 5V |
+| Ground | Brown / black | GND |
 
 ![](media/7201.png)
 
 ![](media/PRO8.png)
 
 
-#### **5. 流程图：**
+#### **5. Flowchart:**
 
-舵机的**角度**不是一个数字，而是一段高电平的宽度。每 20 ms 来一个脉冲，高电平持续 0.5～2.5 ms，舵机内部据此判断目标角度：
+A servo's **angle** isn't a number sent over the wire — it's the width of a HIGH pulse. One pulse arrives every 20 ms, staying HIGH for 0.5–2.5 ms, and the servo reads that duration as the target angle:
 
 ![](media/servo_pwm.png)
 
-#### **6. 测试代码：**
+#### **6. Test Code:**
 
 ```cpp
 #include <ESP32Servo.h>
 
-const int PAN_SERVO_PIN = 42; // 云台舵机信号
-const int STEP_DELAY    = 15; // 每度延时（ms），越小越快
+const int PAN_SERVO_PIN = 42; // Pan-tilt servo signal
+const int STEP_DELAY    = 15; // Delay per degree (ms); smaller is faster
 
 Servo panServo;
 
 void setup() {
   Serial.begin(115200);
 
-  // 分配硬件定时器
+  // Allocate hardware timers
   ESP32PWM::allocateTimer(0);
   ESP32PWM::allocateTimer(1);
   ESP32PWM::allocateTimer(2);
   ESP32PWM::allocateTimer(3);
 
-  // 50 Hz，脉宽 500~2500 µs
+  // 50 Hz, pulse width 500~2500 µs
   panServo.setPeriodHertz(50);
   panServo.attach(PAN_SERVO_PIN, 500, 2500);
 
-  // 归零
+  // Return to zero
   panServo.write(0);
-  Serial.println("云台舵机已启动，开始在 0°~180° 之间来回转动...");
+  Serial.println("Pan-tilt servo started, sweeping back and forth between 0° and 180°...");
   delay(1000);
 }
 
@@ -86,31 +86,31 @@ void loop() {
     panServo.write(pos);
     delay(STEP_DELAY);
   }
-  delay(500); // 停顿 0.5 s
+  delay(500); // Pause 0.5 s
 
   // 180° → 0°
   for (int pos = 180; pos >= 0; pos -= 1) {
     panServo.write(pos);
     delay(STEP_DELAY);
   }
-  delay(500); // 停顿 0.5 s
+  delay(500); // Pause 0.5 s
 }
 ```
 
-#### **7. 代码解释：**
+#### **7. Code Explanation:**
 
-**(1) 两个常量和舵机对象**
+**(1) Two constants and a servo object**
 
 ```cpp
-const int PAN_SERVO_PIN = 42; // 云台舵机信号
-const int STEP_DELAY    = 15; // 每度延时（ms），越小越快
+const int PAN_SERVO_PIN = 42; // Pan-tilt servo signal
+const int STEP_DELAY    = 15; // Delay per degree (ms); smaller is faster
 
 Servo panServo;
 ```
 
-引脚 42 是云台的信号线。`STEP_DELAY` 是逐度扫描时每步停多久，15 ms 是试出来的节奏，后面两段循环都用它。`Servo panServo;` 声明舵机对象，所有动作通过它发。
+Pin 42 carries the pan-tilt servo's signal. `STEP_DELAY` is how long each step pauses during the degree-by-degree sweep — 15 ms was found by trial, and both loops below use it. `Servo panServo;` declares the servo object; every command goes through it.
 
-**(2) 四行 `allocateTimer` 不是可有可无的**
+**(2) The four `allocateTimer` lines are not optional**
 
 ```cpp
   ESP32PWM::allocateTimer(0);
@@ -119,34 +119,34 @@ Servo panServo;
   ESP32PWM::allocateTimer(3);
 ```
 
-这四行写在 `setup()` 里，`attach()` 之前。ESP32 的 PWM 靠硬件定时器产生，舵机要 50 Hz、电机要 1 kHz，两者抢同一批定时器。`allocateTimer()` 是把四个定时器先划给舵机库专用——不写这四行，`attach()` 有可能失败，表现是舵机一动不动、串口也不报错。
+These four lines sit in `setup()`, before `attach()`. ESP32 PWM comes from hardware timers, and the servo wants 50 Hz while the motors want 1 kHz — both compete for the same pool. `allocateTimer()` reserves all four timers for the servo library; without these lines `attach()` may fail, showing up as a servo that never moves with no error in the Serial Monitor.
 
-四个定时器都分出去看着浪费，是因为后面要同时带两个舵机（云台 + 夹爪），一个舵机吃一个定时器，留着更省事。
+Handing over all four looks wasteful, but later two servos (pan-tilt + gripper) run together, each consuming a timer, so reserving them up front saves trouble.
 
-**(3) `setPeriodHertz(50)` 和 `attach()` 的两个数字**
+**(3) `setPeriodHertz(50)` and the two numbers in `attach()`**
 
 ```cpp
   panServo.setPeriodHertz(50);
   panServo.attach(PAN_SERVO_PIN, 500, 2500);
 ```
 
-50 Hz 就是 20 ms 一个周期，这是所有模拟舵机的标准。`attach()` 的后两个参数是脉宽下限和上限（微秒）：0° 对应 500 µs，180° 对应 2500 µs，中间线性插值。库替你算好了，`write()` 里只写角度。
+50 Hz means a 20 ms period, the standard for all analogue servos. The last two arguments of `attach()` are the lower and upper pulse widths in microseconds: 0° maps to 500 µs, 180° to 2500 µs, with linear interpolation in between. The library does the maths, so `write()` takes only an angle.
 
-这两个数跟舵机型号有关。9G 舵机写 500/2500 有时会顶到机械限位、发出"哒哒"的堵转声，那就往中间收成 600/2400 再试。
+Those two numbers depend on the servo model. With a 9G servo, 500/2500 sometimes hits the mechanical stop and produces a "tick-tick" stall sound; narrow them to 600/2400 and try again.
 
-**(4) 上电先归零**
+**(4) Return to zero at power-on**
 
 ```cpp
   panServo.write(0);
 ```
 
-`write(0)` 让云台先转到一端，作为后面扫描的起点。上电时不写这一句，舵机会停在断电前的位置，第一次扫描的起点就不确定了。
+`write(0)` moves the pan-tilt to one end first, giving the sweep a defined starting point. Leave it out and the servo stays where it was when power was cut, so the first sweep starts from an unknown position.
 
-注意 `write()` 是"给目标"，不是"转到位"——它立刻返回，舵机自己慢慢转过去。所以每次大角度跳转之后都得自己补一个 `delay()`，否则下一条指令会盖掉还没走完的动作。
+Note that `write()` gives a target, it doesn't wait for arrival — it returns immediately while the servo moves there on its own. So after every large jump you have to add a `delay()`, or the next command will overwrite a move that hasn't finished.
 
-顺带说清一件事：`write(90)` 只是让舵机转到"脉宽中点"，装到车上是不是正前方，取决于舵机臂的齿位。装配有偏差就按第 2 章的办法重新找中位，别用改角度的方式硬凑——那样第 4 课测出来的左右距离会一直是偏的。
+One more thing: `write(90)` only moves the servo to the pulse-width midpoint. Whether that is "straight ahead" on the robot depends on how the horn was fitted. If the assembly is off, re-centre it as described in Chapter 2 instead of fudging the angle in code — otherwise the left and right distances measured in Lesson 4 will stay biased.
 
-**(5) 0° → 180°：逐度扫过去**
+**(5) 0° → 180°: sweeping one degree at a time**
 
 ```cpp
   for (int pos = 0; pos <= 180; pos += 1) {
@@ -155,11 +155,11 @@ Servo panServo;
   }
 ```
 
-直接 `write(180)` 舵机会以最大速度冲向目标，云台上还压着超声波模块，惯性会把支架拽得直晃。一度一步、每步 15 ms，180 度走完约 2.7 秒，转得稳，也方便肉眼看角度和方向的对应关系。
+A direct `write(180)` sends the servo racing to the target at full speed; with the ultrasonic module still on the pan-tilt, the inertia makes the bracket wobble badly. One degree per step with 15 ms pauses takes about 2.7 seconds for the full 180°, runs smoothly, and makes it easy to see how angle and direction correspond by eye.
 
-`STEP_DELAY` 改小转得更快，但小于 10 ms 之后舵机跟不上指令，会出现一顿一顿的抖动。舵机转速由内部电机决定，改延时只是改"下指令的密度"，不能真的让它转得更快。
+Lowering `STEP_DELAY` speeds it up, but below 10 ms the servo can't keep up and starts to stutter. Its real speed is set by the internal motor; changing the delay only changes how densely you issue commands, it can't actually make the servo faster.
 
-**(6) 180° → 0°：回扫**
+**(6) 180° → 0°: sweeping back**
 
 ```cpp
   for (int pos = 180; pos >= 0; pos -= 1) {
@@ -168,44 +168,44 @@ Servo panServo;
   }
 ```
 
-回程和去程完全对称，只是方向反过来。两段加起来正好扫完一个来回。
+The return is exactly symmetrical with the outbound sweep, only reversed. Together the two loops complete one round trip.
 
-**(7) 两个 500 ms 停顿**
+**(7) Two 500 ms pauses**
 
 ```cpp
-  delay(500); // 停顿 0.5 s
+  delay(500); // Pause 0.5 s
 ```
 
-扫到端点停半秒，让舵机走完最后一步、也让超声波模块的晃动停下来。一轮 = 2.7 + 0.5 + 2.7 + 0.5 ≈ 6.4 秒。
+Half a second at each end lets the servo finish its last step and lets the ultrasonic module stop swinging. One cycle = 2.7 + 0.5 + 2.7 + 0.5 ≈ 6.4 seconds.
 
-#### **8. 运行现象：**
+#### **8. What You'll See:**
 
-上电时舵机会先**咔**一下转到 0°，然后开始匀速扫向 180°，串口打印：
+At power-on the servo gives a **click** as it snaps to 0°, then begins its steady sweep toward 180°, and the Serial Monitor prints:
 
 ```text
-云台舵机已启动，开始在 0°~180° 之间来回转动...
+Pan-tilt servo started, sweeping back and forth between 0 and 180 degrees...
 ```
 
-| 阶段 | 现象 |
+| Stage | What happens |
 | --- | --- |
-| 上电瞬间 | 转到 0°（朝右），轻微抖动后稳定 |
-| 0° → 180° | 约 2.7 s 扫过，超声波从右扫到左 |
-| 到 180° | 停 0.5 s |
-| 180° → 0° | 同样 2.7 s 扫回 |
-| 循环 | 不断往复 |
+| At power-on | Snaps to 0° (facing right), settles after a slight jitter |
+| 0° → 180° | Sweeps in about 2.7 s, the ultrasonic sensor moving from right to left |
+| At 180° | Pauses for 0.5 s |
+| 180° → 0° | Sweeps back in the same 2.7 s |
+| Loop | Repeats continuously |
 
-> 【图片待补】舵机扫到两端极限位置时的实拍图各一张。
+> [Image to be added] One photo of the servo at each end of its travel.
 
-**注意**：舵机转到两端时如果一直响，立刻断电。堵转电流能到 700 mA 以上，会拖垮整车的 5V，主控跟着复位。这时候把 `attach()` 的 500/2500 改成 600/2400 再试。
+**Note**: If the servo keeps buzzing at either end, cut the power immediately. Stall current can exceed 700 mA, dragging down the whole robot's 5V rail and resetting the controller. Change the 500/2500 in `attach()` to 600/2400 and try again.
 
-调中位的做法（装车前或换舵机后要做）见 2.1 节，可以用 `Servo_return_to_center_90.ino` 或对应的 `.py` 让它停在 90°。
+See section 2.1 for how to re-centre it (needed before mounting or after replacing the servo); you can use `Servo_return_to_center_90.ino` or the corresponding `.py` to hold it at 90°.
 
-#### **9. 常见问题解决：**
+#### **9. Troubleshooting:**
 
-(1) 上电舵机一点不动：先查信号线是不是接在 IO42。插错脚或者忘了接，舵机收不到 PWM 自然不转；如果串口还跟着重启，多半是 `allocateTimer()` 没写，定时器和电机 PWM 抢资源。
+(1) The servo doesn't move at all at power-on: first check that the signal wire is on IO42. Wrong pin or no connection means no PWM, so no movement. If the Serial Monitor keeps restarting too, `allocateTimer()` is most likely missing and the timers are competing with the motor PWM.
 
-(2) 转起来一顿一顿：`STEP_DELAY` 太小，舵机跟不上指令。改到 15 ms 以上，小于 10 ms 就会抖。
+(2) It moves in jerks: `STEP_DELAY` is too small and the servo can't keep up. Set it to at least 15 ms; below 10 ms it will stutter.
 
-(3) 只扫半程就回头：循环条件写错了。`for (int pos = 0; pos <= 180; pos += 1)` 里的 180 被改成 90 就只扫一半。
+(3) It turns back after only half the sweep: a loop condition is wrong. If the 180 in `for (int pos = 0; pos <= 180; pos += 1)` was changed to 90, you only get half a sweep.
 
-(4) 转到两端一直响：顶到机械限位在堵转，电流能到 700 mA 以上，会拖垮整车的 5V。把 `attach()` 的 500/2500 改成 600/2400 再试。
+(4) It buzzes continuously at either end: it's stalled against a mechanical stop. Current can exceed 700 mA and drag down the whole robot's 5V. Change the 500/2500 in `attach()` to 600/2400 and try again.

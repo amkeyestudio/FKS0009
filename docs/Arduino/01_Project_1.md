@@ -1,66 +1,66 @@
-### 项目 1：8×16 点阵表情展示
+### Project 1: 8×16 Dot Matrix Expression Display
 
-#### **1. 简介：**
+#### **1. Introduction:**
 
-![街边 LED 屏近看全是点](media/intro_01.jpg){width=520px}
+![From a distance it looks like a picture; up close, it's all dots](media/intro_01.jpg){width=520px}
 
-远看是一幅图，近看全是点。车头这块 8×16 的屏，就是车用来说话的地方：走起来是爱心，发现障碍是感叹号，进球是笑脸。第一课不接电机、不碰传感器，先把这张脸点亮。
+From a distance it is a picture; up close, nothing but dots. The little panel on the front of the car is how it talks to you — a heart when it sets off, an exclamation mark when something gets in its way, a smile when it scores. Lesson 1 leaves the motors and sensors alone and simply brings that face to life.
 
-屏上一共 128 颗 LED。一颗一根引脚的话，主控早就没脚可用了，所以屏背后藏了一颗驱动芯片替主控管灯。主控只出两根线，一根时钟、一根数据，把要显示的内容一位一位送进去；屏幕自己以很高的频率一列一列扫描，人眼看到的便是一幅稳定的画面。
+Here is the puzzle: the panel has far more LEDs than the controller has spare pins. The trick is a driver chip hidden behind the panel that looks after the lights for you. The controller sends out just two lines, one clock and one data, feeding the picture in bit by bit; the panel scans itself column by column at high speed, and your eye fuses it into a steady image.
 
-要送的其实只有 16 个字节，叫**字模**：一个字节管一列，字节里的 8 位管这一列的 8 行，最上面一行对应最低位。一帧加起来 18 个字节、144 个时钟位，全部送完约 1.3 毫秒——比人眼能分辨的 40 毫秒短得多，所以整屏是"一下子"亮起来的。本课给出爱心和笑脸两张字模，最后让笑脸横向滚起来。
+The catch lies in what you send. A picture is described by a compact set of bytes called a **font bitmap** — one byte per column, with the bits inside it mapped to the rows. Get the bit order wrong and a carefully drawn picture comes out garbled or mirrored. This lesson gives you a heart and a smiley to start with, then sets the smiley scrolling sideways.
 
 
-#### **2. 所需清单：**
+#### **2. Parts list:**
 
-本课用到的器件：
+The parts used in this lesson:
 
 |     |     |
 | :---: | :---: |
-| ![](../media/kit_06.png){width=200px}<br><span style="font-size:0.85em">8×16 LED 点阵屏 ×1</span> | ![](../media/kit_10.png){width=200px}<br><span style="font-size:0.85em">8×16 点阵固定折弯亚克力板 ×1</span> |
-| ![](../media/kit_03.png){width=200px}<br><span style="font-size:0.85em">ESP32-S3 开发板 ×1</span> | ![](../media/kit_04.png){width=200px}<br><span style="font-size:0.85em">DRV8835 电机扩展板 ×1</span> |
-> ⚠️ **点阵在第 2 章就装好了，本表只作对照，不用拆下来；下面的接线说明只标清接线方式，供对照，不必拆装。完整物料见 1.4 套件清单。**
-#### **3. 参数：**
+| ![](../media/kit_06.png){width=200px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_10.png){width=200px}<br><span style="font-size:0.85em">8×16 bent acrylic mounting plate for the dot matrix ×1</span> |
+| ![](../media/kit_03.png){width=200px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | ![](../media/kit_04.png){width=200px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
+> ⚠️ **The dot matrix was already installed in Chapter 2. This table is for reference only — nothing needs to be removed; the wiring notes below merely show how the connections are made, again for reference, so no assembly or disassembly is required. For the complete parts list, see the kit list in Section 1.4.**
+#### **3. Parameters:**
 
-| 项目 | 参数 |
+| Item | Value |
 | --- | --- |
-| 显示规格 | 8×16 LED 点阵（8 行 × 16 列） |
-| 信号引脚 | CLK = IO9，DIN = IO8 |
-| 字模格式 | 16 字节，每字节对应 1 列的 8 行，bit0 在顶行 |
-| 亮度控制 | 命令 0x8A，亮度 8/16 |
-| 显示内容 | 爱心 3 s → 笑脸 2 s → 笑脸滚动（每帧 150 ms） |
+| Display spec | 8×16 LED dot matrix (8 rows × 16 columns) |
+| Signal pins | CLK = IO9, DIN = IO8 |
+| Font bitmap format | 16 bytes, one byte for the 8 rows of one column, bit0 at the top row |
+| Brightness control | Command 0x8A, brightness 8/16 |
+| Display sequence | Heart 3 s → smile 2 s → scrolling smile (150 ms per frame) |
 
-#### **4. 接线说明：**
+#### **4. Wiring:**
 
-点阵只需两根信号线加电源：
+The dot matrix only needs two signal lines plus power:
 
-| 点阵引脚 | 主控 GPIO |
+| Dot matrix pin | Controller GPIO |
 | --- | :---: |
 | CLK | IO9 |
 | DIN | IO8 |
 
 ![](media/8X16_connection_diagram.png)
 
-#### **5. 流程图：**
+#### **5. Flowchart:**
 
-送一帧画面分四步：先告诉芯片**要写数据**，再指定从第 0 列开始，然后连发 16 个字节，最后开显示。
+Sending one frame takes four steps: first tell the chip **to write data**, then set the starting point at column 0, then send the 16 bytes in a row, and finally turn the display on.
 
 ![](media/matrix_flow.png)
 
-#### **6. 测试代码：**
+#### **6. Test code:**
 
 ```cpp
-// 点阵屏信号线（对应接线表）
-#define CLK_Pin 9   // 时钟，接模块 CLK
-#define DIN_Pin 8   // 数据，接模块 DIN
+// Dot matrix display signal lines (see wiring table)
+#define CLK_Pin 9   // Clock, connect to module CLK
+#define DIN_Pin 8   // Data, connect to module DIN
 
-// 笑脸字模：16 字节对应 16 列，每字节 8 位对应一列 8 行
+// Smile font bitmap: 16 bytes for 16 columns, 8 bits per byte for 8 rows per column
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40, 
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
 };
 
-// 爱心字模，格式同笑脸
+// Heart font bitmap, same format as smile
 unsigned char heart[] = {
     0x00, 0x00, 0x00, 0x00, 0x08, 0x1c, 0x3e, 0x7c,
     0x7c, 0x3e, 0x1c, 0x08, 0x00, 0x00, 0x00, 0x00
@@ -70,60 +70,60 @@ void setup() {
   pinMode(CLK_Pin, OUTPUT);
   pinMode(DIN_Pin, OUTPUT);
   
-  // 两线拉高，总线置空闲
+  // Pull both lines high to leave the bus idle
   digitalWrite(CLK_Pin, HIGH);
   digitalWrite(DIN_Pin, HIGH);
   
-  // 上电清屏，避免残留
+  // Clear display on power on to avoid residue
   unsigned char clear_data[16] = {0};
   matrix_display(clear_data);
 }
 
 void loop() {
-  // 显示爱心 3 s
+  // Show heart for 3 s
   matrix_display(heart);
   delay(3000);
   
-  // 显示笑脸 2 s
+  // Show smile for 2 s
   matrix_display(smile);
   delay(2000);
   
-  // 滚动：字模整体左移 1 列
+  // Scroll: shift the font bitmap left by 1 column
   for (int shift = 0; shift < 16; shift++) {
     unsigned char scroll_data[16];
     for (int i = 0; i < 16; i++) {
-      // 取模回绕，移满 16 列回到原图
+      // Wrap around the bitmap; after 16 columns it returns to the original
       scroll_data[i] = smile[(i + shift) % 16]; 
     }
     matrix_display(scroll_data);
-    delay(150); // 滚动间隔，越小越快
+    delay(150); // Scroll interval, smaller is faster
   }
 }
 
-// 将 16 字节字模写入点阵屏显存
+// Write the 16-byte font bitmap to the dot matrix display buffer
 void matrix_display(unsigned char matrix_value[]) {
-  // 0x40：写数据模式，地址自增
+  // 0x40: write data mode, auto-increment address
   IIC_start();
   IIC_send(0x40);
   IIC_end();
   
-  // 0xC0：显存起始地址 0
+  // 0xC0: display buffer start address 0
   IIC_start();
   IIC_send(0xC0);
   
-  // 连写 16 列
+  // Write 16 columns consecutively
   for (int i = 0; i < 16; i++) {
     IIC_send(matrix_value[i]);
   }
   IIC_end();
   
-  // 0x8A：开显示，亮度 8/16
+  // 0x8A: turn on display, brightness 8/16
   IIC_start();
   IIC_send(0x8A);
   IIC_end();
 }
 
-// 起始条件：CLK 高电平期间 DIN 下降沿
+// Start condition: DIN falling edge while CLK is HIGH
 void IIC_start() {
   digitalWrite(CLK_Pin, HIGH);
   delayMicroseconds(3);
@@ -133,13 +133,13 @@ void IIC_start() {
   delayMicroseconds(3);
 }
 
-// 发送 1 字节，低位在前：CLK 低时置数据，上升沿采样
+// Send 1 byte, LSB first: set data when CLK is LOW, sample on rising edge
 void IIC_send(unsigned char send_data) {
   for (int i = 0; i < 8; i++) {
-    digitalWrite(CLK_Pin, LOW);  // 拉低时钟，准备数据
+    digitalWrite(CLK_Pin, LOW);  // Pull clock low, prepare data
     delayMicroseconds(3);
     
-    // 从 bit0 起逐位发送
+    // Send bit by bit starting from bit0
     if (send_data & 0x01) {
       digitalWrite(DIN_Pin, HIGH);
     } else {
@@ -147,14 +147,14 @@ void IIC_send(unsigned char send_data) {
     }
     delayMicroseconds(3);
     
-    digitalWrite(CLK_Pin, HIGH); // 拉高时钟，模块采样
+    digitalWrite(CLK_Pin, HIGH); // Pull clock high, module samples
     delayMicroseconds(3);
     
-    send_data = send_data >> 1;  // 右移，取出下一位
+    send_data = send_data >> 1;  // Shift right to get the next bit
   }
 }
 
-// 停止条件：CLK 高电平期间 DIN 上升沿
+// Stop condition: DIN rising edge while CLK is HIGH
 void IIC_end() {
   digitalWrite(CLK_Pin, LOW);
   delayMicroseconds(3);
@@ -167,18 +167,18 @@ void IIC_end() {
 }
 ```
 
-#### **7. 代码解释：**
+#### **7. Code walkthrough:**
 
-**(1) 两根信号线**
+**(1) Two signal lines**
 
 ```cpp
-#define CLK_Pin 9   // 时钟，接模块 CLK
-#define DIN_Pin 8   // 数据，接模块 DIN
+#define CLK_Pin 9   // Clock, connect to module CLK
+#define DIN_Pin 8   // Data, connect to module DIN
 ```
 
-点阵没有用硬件 I2C，只有两根普通 IO：CLK 是时钟，DIN 是数据。后面三个函数靠 `digitalWrite` 手动翻转这两根线，凑出点阵屏认的时序——这种做法叫软件模拟 I2C。
+The dot matrix does not use hardware I2C — just two ordinary IO pins: CLK is the clock and DIN is the data. The three functions below flip these two lines manually with `digitalWrite` to produce the timing the panel recognizes, an approach known as software-simulated I2C.
 
-**(2) 两张字模，每张 16 个字节**
+**(2) Two font bitmaps, 16 bytes each**
 
 ```cpp
 unsigned char smile[] = {
@@ -187,65 +187,65 @@ unsigned char smile[] = {
 };
 ```
 
-16 列 × 8 行 = 128 颗灯，所以字模必须是 16 个字节：一个字节管一列，字节里的 8 位管这一列的 8 行，bit0 在最上面。
+16 columns × 8 rows = 128 LEDs, so the font bitmap has to be 16 bytes: one byte controls one column, the 8 bits in that byte control the 8 rows of the column, and bit0 is at the very top.
 
-`0x00` 表示这一列全灭，`0x1C` 是 `0001 1100`，点亮第 3、4、5 行。两张图都是这样一位一位点出来的，不是算出来的。
+`0x00` means the whole column is off; `0x1C` is `0001 1100`, lighting rows 3, 4 and 5. Both pictures are drawn bit by bit like this, not calculated.
 
-**(3) setup：两线拉高，再清屏**
+**(3) setup: pull both lines high, then clear the screen**
 
 ```cpp
 void setup() {
   pinMode(CLK_Pin, OUTPUT);
   pinMode(DIN_Pin, OUTPUT);
   
-  // 两线拉高，总线置空闲
+  // Pull both lines high to leave the bus idle
   digitalWrite(CLK_Pin, HIGH);
   digitalWrite(DIN_Pin, HIGH);
   
-  // 上电清屏，避免残留
+  // Clear display on power on to avoid residue
   unsigned char clear_data[16] = {0};
   matrix_display(clear_data);
 }
 ```
 
-`pinMode` 之后先把两根线都拉高。这个组合是总线的空闲状态——CLK 高、DIN 高，后面的"起始条件"才有明确的反差可用。上电时点阵显存里是随机值，先送 16 个 0 清一遍，避免第一帧之前闪一下花屏。
+Right after `pinMode`, pull both lines high. That combination is the bus idle state — CLK high, DIN high — so the start condition that follows has a clear contrast to work with. On power on the display buffer holds random values, so send 16 zeroes first to clear it and avoid a flash of garbage before the first frame.
 
-**(4) loop 前两段：爱心 3 秒、笑脸 2 秒**
+**(4) The first two phases of loop: heart for 3 s, smile for 2 s**
 
 ```cpp
 void loop() {
-  // 显示爱心 3 s
+  // Show heart for 3 s
   matrix_display(heart);
   delay(3000);
   
-  // 显示笑脸 2 s
+  // Show smile for 2 s
   matrix_display(smile);
   delay(2000);
 ```
 
-`matrix_display()` 把整幅图送完只要 1 ms 左右，真正决定"停多久"的是后面的 `delay()`。这两段里主控什么都做不了，只是等着——第 15 课会把它改成用 `millis()` 计时。
+`matrix_display()` takes only about 1 ms to send a whole picture; what really decides how long it stays is the `delay()` that follows. During these two phases the controller can do nothing but wait — Lesson 15 will rewrite this using `millis()` timing.
 
-前两段加滚动，一轮 `loop()` 约 3 + 2 + 2.4 ≈ 7.4 秒。
+With the first two phases plus the scrolling, one round of `loop()` takes about 3 + 2 + 2.4 ≈ 7.4 seconds.
 
-**(5) 滚动：取模回绕**
+**(5) Scrolling: wrap-around with the modulo operator**
 
 ```cpp
   for (int shift = 0; shift < 16; shift++) {
     unsigned char scroll_data[16];
     for (int i = 0; i < 16; i++) {
-      // 取模回绕，移满 16 列回到原图
+      // Wrap around the bitmap; after 16 columns it returns to the original
       scroll_data[i] = smile[(i + shift) % 16]; 
     }
     matrix_display(scroll_data);
-    delay(150); // 滚动间隔，越小越快
+    delay(150); // Scroll interval, smaller is faster
   }
 ```
 
-把 `smile` 的第 `i + shift` 列填到第 `i` 列，等于整幅图往左挪了 `shift` 列；`% 16` 让下标越过 15 之后绕回 0，所以首尾相接循环滚，不会滚出一段黑边。`shift` 从 0 数到 15，移满 16 列正好回到原图。
+Putting column `i + shift` of `smile` into column `i` shifts the whole picture left by `shift` columns; `% 16` wraps the index back to 0 once it passes 15, so the picture scrolls end to end without leaving a black gap. `shift` counts from 0 to 15, and after moving 16 columns the picture is back where it started.
 
-滚动 16 次 × `delay(150)` = 2.4 秒走完一圈。把 150 改成 80，滚动快近一倍，仍看得清，是最安全的调参；把 `% 16` 改成 `% 17` 就会越界——`smile[]` 只有 16 个元素，读到的是数组外面的内存，画面变乱码。
+16 scroll steps × `delay(150)` = 2.4 seconds for one full cycle. Changing 150 to 80 nearly doubles the speed while the picture stays clear — the safest tweak you can make. Changing `% 16` to `% 17` goes out of bounds: `smile[]` holds only 16 elements, so you read memory outside the array and the picture turns to garbage.
 
-**(6) `IIC_start()` / `IIC_end()`：一对起止标记**
+**(6) `IIC_start()` / `IIC_end()`: a pair of start and stop markers**
 
 ```cpp
 void IIC_start() {
@@ -258,19 +258,19 @@ void IIC_start() {
 }
 ```
 
-起始条件是"CLK 保持高电平期间，DIN 从高变低"；停止条件反过来，"CLK 高电平期间 DIN 从低变高"。芯片看到这两个跳变，就知道一条命令从哪开始、到哪结束。
+The start condition is "DIN goes from HIGH to LOW while CLK stays HIGH"; the stop condition is the reverse, "DIN goes from LOW to HIGH while CLK is HIGH". Seeing these two transitions, the chip knows where a command begins and where it ends.
 
-中间的 `delayMicroseconds(3)` 是给芯片留的建立/保持时间。去掉在短线上也能跑，线一长就开始丢字节、花屏。
+The `delayMicroseconds(3)` calls in between give the chip its setup and hold time. Leave them out and short wires may still work, but as the wires get longer bytes start going missing and the screen shows garbage.
 
-**(7) `IIC_send()`：低位先发**
+**(7) `IIC_send()`: least significant bit first**
 
 ```cpp
 void IIC_send(unsigned char send_data) {
   for (int i = 0; i < 8; i++) {
-    digitalWrite(CLK_Pin, LOW);  // 拉低时钟，准备数据
+    digitalWrite(CLK_Pin, LOW);  // Pull clock low, prepare data
     delayMicroseconds(3);
     
-    // 从 bit0 起逐位发送
+    // Send bit by bit starting from bit0
     if (send_data & 0x01) {
       digitalWrite(DIN_Pin, HIGH);
     } else {
@@ -278,99 +278,99 @@ void IIC_send(unsigned char send_data) {
     }
     delayMicroseconds(3);
     
-    digitalWrite(CLK_Pin, HIGH); // 拉高时钟，模块采样
+    digitalWrite(CLK_Pin, HIGH); // Pull clock high, module samples
     delayMicroseconds(3);
     
-    send_data = send_data >> 1;  // 右移，取出下一位
+    send_data = send_data >> 1;  // Shift right to get the next bit
   }
 }
 ```
 
-循环 8 次，每次先把 CLK 拉低、把当前位摆到 DIN，再把 CLK 拉高——芯片在上升沿采样。
+The loop runs eight times. Each round pulls CLK low, sets the current bit on DIN, then pulls CLK high — the chip samples on the rising edge.
 
-`send_data & 0x01` 取的是最低位，随后 `send_data >> 1` 右移，所以是**低位先发**。这个顺序不能改：改成高位先发，收到的字节每一位都是反的，屏幕上就是一副乱码。
+`send_data & 0x01` picks out the lowest bit and `send_data >> 1` then shifts right, so bits are sent **least significant first**. This order cannot be swapped: sending the most significant bit first inverts every bit of the received byte and leaves garbage on the screen.
 
-**(8) `matrix_display()`：四条命令写一帧**
+**(8) `matrix_display()`: four commands write one frame**
 
 ```cpp
 void matrix_display(unsigned char matrix_value[]) {
-  // 0x40：写数据模式，地址自增
+  // 0x40: write data mode, auto-increment address
   IIC_start();
   IIC_send(0x40);
   IIC_end();
   
-  // 0xC0：显存起始地址 0
+  // 0xC0: display buffer start address 0
   IIC_start();
   IIC_send(0xC0);
   
-  // 连写 16 列
+  // Write 16 columns consecutively
   for (int i = 0; i < 16; i++) {
     IIC_send(matrix_value[i]);
   }
   IIC_end();
   
-  // 0x8A：开显示，亮度 8/16
+  // 0x8A: turn on display, brightness 8/16
   IIC_start();
   IIC_send(0x8A);
   IIC_end();
 }
 ```
 
-三次"起始 + 发送 + 停止"，对应三条命令：`0x40` 切到写数据模式并让地址自增，`0xC0` 把写指针定位到显存第 0 列，`0x8A` 开显示并给亮度（`0x88` 最暗、`0x8F` 最亮）。
+Three start-send-stop sequences correspond to three commands: `0x40` switches to write-data mode with auto-increment address, `0xC0` positions the write pointer at column 0 of the display buffer, and `0x8A` turns the display on and sets the brightness (`0x88` is dimmest, `0x8F` brightest).
 
-中间那 16 个字节是**跟着 `0xC0` 一起发完的，中间没有另起一次传输**——它们靠 `0x40` 设的"地址自增"落到 16 个列上。这是最容易写错的地方：每发一个字节就 `IIC_start()` 一次，屏幕只会亮第一列。
+The 16 bytes in the middle are **sent as part of the same transfer as `0xC0`, with no new transmission in between** — the auto-increment address set by `0x40` drops them into the 16 columns. This is the easiest place to go wrong: call `IIC_start()` before every byte and only the first column will light up.
 
-一帧一共 18 个字节（1 + 1 + 16），18 × 8 = 144 个时钟；每个位在 `IIC_send()` 里分三段，每段 3 µs，一个位约 9 µs，一帧约 1.3 ms——比人眼能分辨的 40 ms 短得多，所以整屏是"一下子"亮起来的。
+One frame is 18 bytes in all (1 + 1 + 16), or 18 × 8 = 144 clock ticks. Each bit takes three steps in `IIC_send()`, 3 µs per step, so one bit is about 9 µs and one frame about 1.3 ms — much shorter than the 40 ms the human eye can resolve, which is why the whole panel appears to light up at once.
 
-把 `0x8A` 改成 `0x8F`，亮度明显提高，同时整屏电流也上升；改成 `0x88` 最暗，夜里看不刺眼。
+Change `0x8A` to `0x8F` and the panel gets noticeably brighter, though the current draw rises as well; `0x88` is the dimmest setting, comfortable to look at at night.
 
-##### 想画自己的图案：在线字模生成工具
+##### Drawing your own pattern: an online font bitmap tool
 
-代码里 `heart[]` 和 `smile[]` 那 16 个字节不是算出来的，是在线工具点出来的。地址：[dotmatrixtool.com](http://dotmatrixtool.com/)。
+The 16 bytes in `heart[]` and `smile[]` were not calculated — they were clicked together in an online tool at [dotmatrixtool.com](http://dotmatrixtool.com/).
 
-打开后中间是一块 16×16 的格子。格子下方是 `Generate`、`Clear` 两个按钮，再下面一排四个下拉框：`Width`、`Height`、`Byte Order`、`Endian`。
+When you open it, the middle is a 16×16 grid. Under the grid are the `Generate` and `Clear` buttons, and beneath them a row of four drop-down boxes: `Width`, `Height`, `Byte Order` and `Endian`.
 
 ![](media/matrix_tool_ui.png)
 
-**一、把格子改成 8 行 16 列。** `Width` 选 16、`Height` 选 8，格子会从方块变成扁长条，下方那行状态文字跟着变成 `16px by 8px, column major, little endian.`。
+**Step 1: change the grid to 8 rows by 16 columns.** Set `Width` to 16 and `Height` to 8; the grid turns from a square into a wide strip and the status line below changes to `16px by 8px, column major, little endian.`.
 
-这个默认的**列优先 + 小端**正好就是代码要的格式：16 个字节依次对应 16 列，每个字节的 bit0 是顶行。所以 `Byte Order` 和 `Endian` 两个框不用动。
+This default **column-major + little-endian** layout is exactly the format the code wants: the 16 bytes correspond in order to the 16 columns, and bit0 of each byte is the top row. So the `Byte Order` and `Endian` boxes can be left untouched.
 
 ![](media/matrix_tool_size.png)
 
-**二、左键点亮，右键擦掉。** 左键点一格亮一格，点错了按右键（或 Ctrl + 左键）擦掉。可以先照着代码里 `smile[]` 的那 16 个字节点一遍，看是不是还原出那个笑脸——这一遍点完，**每字节一列、bit0 在顶行**这个格式就不用背了。
+**Step 2: left-click to light a cell, right-click to erase it.** Each left-click lights one cell; if you click the wrong one, right-click (or Ctrl + left-click) to erase it. Try copying the 16 bytes of `smile[]` from the code first and see whether the smiley reappears — once you have done that, the format of **one byte per column with bit0 at the top** needs no memorizing.
 
-**三、点 Generate 取数据。** 画好之后点 `Generate`，页面底部会冒出一段 `const uint8_t data[] = {...}`，方括号里就是 16 个十六进制字节。
+**Step 3: click Generate to get the data.** Once your drawing is ready, click `Generate` and a block of `const uint8_t data[] = {...}` appears at the bottom of the page; inside the brackets are the 16 hexadecimal bytes.
 
 ![](media/matrix_tool_gen.png)
 
-把这 16 个字节抄进代码的 `smile[]`，重新编译上传，点阵显示的就是你画的图。
+Copy those 16 bytes into `smile[]` in the code, compile and upload again, and the dot matrix will show your drawing.
 
-两处容易卡住的地方：
+Two spots that commonly trip people up:
 
-- 工具给的类型是 `const uint8_t`，本课代码写的是 `unsigned char`。在 ESP32 上两者等价，**只换数组里的内容**，类型和数组名都不用改。
-- 数组末尾那个分号别跟着丢，少了它编译直接报错。
+- The tool provides the type `const uint8_t` while this lesson's code uses `unsigned char`. On the ESP32 the two are equivalent, so **change only the contents of the array** — the type and the array name need no change.
+- Don't drop the semicolon at the end of the array; without it the compile fails immediately.
 
-> 第三张图里生成的输出，就是代码里 `smile[]` 的来历，可以拿来对答案。
+> The output generated in the third figure is exactly where `smile[]` in the code came from — use it to check your answer.
 
-#### **8. 运行现象：**
+#### **8. What you should see:**
 
-上电后点阵先清屏，随后按以下节奏循环：
+After power on the panel clears first, then loops to the following rhythm:
 
-1. 显示爱心图案 3 秒；
-2. 显示笑脸图案 2 秒；
-3. 笑脸图案整体向左滚动，每 150 ms 移动一列，移满 16 列回到原图，然后回到第 1 步重新开始。
+1. Display the heart for 3 seconds;
+2. Display the smiley for 2 seconds;
+3. Scroll the whole smiley to the left, one column every 150 ms; after 16 columns it returns to the original picture and starts again from step 1.
 
-能看到爱心、笑脸清晰点亮、滚动连续不缺列，就说明接线和字模都对。
+If the heart and smiley light up clearly and the scrolling is continuous with no missing columns, the wiring and the font bitmaps are both correct.
 
-> 【图片待补】运行现象实拍：爱心、笑脸、滚动各拍一张，能看清点阵点亮效果。
+> [Image to be added] Photos of the running display: one of the heart, one of the smiley and one of the scrolling effect, with the lit dots clearly visible.
 
-#### **9. 常见问题解决：**
+#### **9. Troubleshooting:**
 
-(1) 整屏不亮：先查 CLK、DIN 有没有接反。代码里 `CLK_Pin` 是 IO9、`DIN_Pin` 是 IO8，两根对调屏就不亮。
+(1) The whole panel stays dark: first check whether CLK and DIN are reversed. In the code `CLK_Pin` is IO9 and `DIN_Pin` is IO8; swap the two and the panel will not light up.
 
-(2) 图案错乱、缺列或者左右颠倒：多半是字模的字节顺序不对。16 个字节依次对应 16 列、每字节 bit0 是顶行；用在线工具生成时 Width 选 16、Height 选 8，保持**列优先 + 小端**。
+(2) A scrambled pattern, missing columns, or a left-right mirror image: the byte order of the font bitmap is almost certainly wrong. The 16 bytes correspond in order to the 16 columns and bit0 of each byte is the top row; when generating with the online tool, set Width to 16 and Height to 8 and keep **column-major + little-endian**.
 
-(3) 只有第一列亮、其余全灭：`matrix_display()` 里那 16 个字节必须连在一次传输里发完（`0xC0` 之后、`IIC_end()` 之前）。中间插了 `IIC_start()`，芯片每次都从第一列重写，屏上就只有一列。
+(3) Only the first column lights and all the rest are dark: the 16 bytes in `matrix_display()` must be sent in a single transfer (after `0xC0` and before `IIC_end()`). Insert an `IIC_start()` in the middle and the chip rewrites from column 0 every time, leaving only one column on screen.
 
-(4) 滚动方向反了、或者看着一顿一顿：移位公式是 `smile[(i + shift) % 16]`，把 `+` 改 `-` 就往反方向走；`delay(150)` 调小滚得更快，小于 80 开始糊。
+(4) The scrolling runs backwards or looks jerky: the shift formula is `smile[(i + shift) % 16]`; change `+` to `-` to scroll the other way. Lower `delay(150)` for faster scrolling, but below 80 the picture starts to blur.

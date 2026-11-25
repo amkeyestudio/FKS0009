@@ -1,243 +1,243 @@
 #include <ESP32Servo.h>
-#include "AiCam.h"  // 视觉模块驱动
+#include "AiCam.h"  // Vision module driver
 
-// ===== 电机引脚 =====
-#define MOTOR_AIN 38  // A 路方向：左轮
-#define MOTOR_AEN 21  // A 路调速：左轮
-#define MOTOR_BIN 40  // B 路方向：右轮
-#define MOTOR_BEN 41  // B 路调速：右轮
+// ===== Motor pins =====
+#define MOTOR_AIN 38  // Channel A direction: left wheel
+#define MOTOR_AEN 21  // Channel A speed: left wheel
+#define MOTOR_BIN 40  // Channel B direction: right wheel
+#define MOTOR_BEN 41  // Channel B speed: right wheel
 
-// ===== 舵机引脚 =====
-#define CLAW_SERVO_PIN 11  // 夹爪舵机，第 9 课
-#define PAN_SERVO_PIN  42  // 云台舵机，第 8 课
+// ===== Servo pins =====
+#define CLAW_SERVO_PIN 11  // Gripper servo, Lesson 9
+#define PAN_SERVO_PIN  42  // Pan-tilt servo, Lesson 8
 
-// ===== 视觉模块串口 =====
-// 主控 RX←模块 TX，主控 TX→模块 RX，需共地
-#define CAM_RX 18  // 主控接收脚
-#define CAM_TX 17  // 主控发送脚
+// ===== Vision module serial =====
+// Controller RX <- module TX, controller TX -> module RX, common ground required
+#define CAM_RX 18  // Controller receive pin
+#define CAM_TX 17  // Controller transmit pin
 
-// ===== 点阵引脚 =====
-#define CLK_Pin 9  // 时钟，接模块 CLK
-#define DIN_Pin 8  // 数据，接模块 DIN
+// ===== Dot matrix pins =====
+#define CLK_Pin 9  // Clock, connected to module CLK
+#define DIN_Pin 8  // Data, connected to module DIN
 
-// ===== 速度 =====
-#define SPEED_RUN      180  // 直线运送速度
-#define SPEED_TURN     180  // 原地转向速度
-#define SPEED_APPROACH 150  // 接近目标速度（低速）
+// ===== Speed =====
+#define SPEED_RUN      180  // Straight-line delivery speed
+#define SPEED_TURN     180  // Spot-turn speed
+#define SPEED_APPROACH 150  // Approach speed (low)
 
-// ===== 角度 =====
-#define CLAW_OPEN   140  // 张开
-#define CLAW_CLOSE   90  // 夹紧
-#define PAN_CENTER   90  // 云台居中
+// ===== Angles =====
+#define CLAW_OPEN   140  // Open
+#define CLAW_CLOSE   90  // Close
+#define PAN_CENTER   90  // Pan-tilt centered
 
-// ===== 动作时长（ms，按场地与电压微调）=====
-#define T_APPROACH 350  // 接近目标时长
-#define T_TURN     600  // 原地转 90° 时长
-#define T_DELIVER  800  // 运送时长
+// ===== Action durations (ms, fine-tune for field and voltage) =====
+#define T_APPROACH 350  // Approach duration
+#define T_TURN     600  // Duration of a 90-degree spot turn
+#define T_DELIVER  800  // Delivery duration
 
-// ===== 表情编号 =====
-#define FACE_EYES   0  // 眼睛：待命
-#define FACE_SMILE  1  // 笑脸：识别到目标或完成投放
-#define FACE_HEART  2  // 爱心：已夹取
+// ===== Expression IDs =====
+#define FACE_EYES   0  // Eyes: standby
+#define FACE_SMILE  1  // Smile: target recognized or delivery complete
+#define FACE_HEART  2  // Heart: grabbed
 
-// 待机：两只方眼，第 4/5、10/11 列亮第 2~4 行
+// Standby: two square eyes, columns 4/5 and 10/11 light up rows 2-4
 unsigned char eyes[] = {
   0x00, 0x00, 0x00, 0x00, 0x1C, 0x1C, 0x00, 0x00,
   0x00, 0x00, 0x1C, 0x1C, 0x00, 0x00, 0x00, 0x00
 };
 
-// 笑脸：16 字节对应 16 列，每字节 8 位对应一列 8 行
+// Smile: 16 bytes for 16 columns, 8 bits per byte for 8 rows per column
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
 };
 
-// 爱心：格式同笑脸
+// Heart: same format as smile
 unsigned char heart[] = {
   0x00, 0x00, 0x00, 0x00, 0x08, 0x1C, 0x3E, 0x7C,
   0x7C, 0x3E, 0x1C, 0x08, 0x00, 0x00, 0x00, 0x00
 };
 
-AiCam aiCam(CAM_RX, CAM_TX);  // 视觉模块实例
-Servo clawServo;              // 夹爪舵机
-Servo panServo;               // 云台舵机
+AiCam aiCam(CAM_RX, CAM_TX);  // Vision module instance
+Servo clawServo;              // Gripper servo
+Servo panServo;               // Pan-tilt servo
 
-int curFace = -1;  // 当前表情，-1 表示未显示
+int curFace = -1;  // Current expression, -1 means none shown
 
 void setup() {
   Serial.begin(115200);
 
-  // 两线拉高，总线置空闲
+  // Pull both lines high to set the bus idle
   pinMode(CLK_Pin, OUTPUT);
   pinMode(DIN_Pin, OUTPUT);
   digitalWrite(CLK_Pin, HIGH);
   digitalWrite(DIN_Pin, HIGH);
 
-  // 两个舵机各占一个定时器，避免与电机 PWM 冲突
+  // Each servo uses a timer to avoid conflict with motor PWM
   ESP32PWM::allocateTimer(0);
   ESP32PWM::allocateTimer(1);
 
-  // 云台：50 Hz，脉宽 500~2500 µs
+  // Pan-tilt: 50 Hz, pulse width 500-2500 us
   panServo.setPeriodHertz(50);
   panServo.attach(PAN_SERVO_PIN, 500, 2500);
 
-  // 夹爪：50 Hz，脉宽 500~2500 µs
+  // Gripper: 50 Hz, pulse width 500-2500 us
   clawServo.setPeriodHertz(50);
   clawServo.attach(CLAW_SERVO_PIN, 500, 2500);
 
-  // 摄像头随云台，回中朝正前
+  // Camera follows pan-tilt, centered to face forward
   panServo.write(PAN_CENTER);
-  // 夹爪张开待命
+  // Gripper open for standby
   clawServo.write(CLAW_OPEN);
 
-  // 电机引脚
+  // Motor pins
   pinMode(MOTOR_BIN, OUTPUT);
   pinMode(MOTOR_AIN, OUTPUT);
-  ledcAttach(MOTOR_BEN, 1000, 8);  // 1 kHz，8 位
+  ledcAttach(MOTOR_BEN, 1000, 8);  // 1 kHz, 8-bit
   ledcAttach(MOTOR_AEN, 1000, 8);
   stopCar();
 
-  // 启动视觉模块，颜色识别模式
+  // Start vision module in color tracking mode
   aiCam.begin();
   aiCam.setMode("color");
 
-  // 显示待机表情
+  // Show standby expression
   showFace(FACE_EYES);
 
-  Serial.println("颜色追踪车已就绪，把红色或黄色物块放到车前");
-  delay(1000);  // 等舵机到位与模块切换完成
+  Serial.println("Color tracking car ready. Place a red or yellow block in front of the car");
+  delay(1000);  // Wait for servos to settle and mode switch to complete
 }
 
 void loop() {
-  aiCam.readSerial();  // 每轮读取串口
+  aiCam.readSerial();  // Read serial each loop
 
-  String color = aiCam.getColor();  // 当前识别颜色
+  String color = aiCam.getColor();  // Currently recognized color
 
-  // 无有效目标或非红黄：停车等待
+  // No valid target or not red/yellow: stop and wait
   if (!aiCam.isColorValid() || (color != "RED" && color != "YELLOW")) {
     stopCar();
-    showFace(FACE_EYES);  // 待机表情
+    showFace(FACE_EYES);  // Standby expression
     return;
   }
 
-  Serial.print("识别到目标：");
+  Serial.print("Target recognized: ");
   Serial.println(color);
 
-  showFace(FACE_SMILE);  // 显示笑脸
-  aiCam.clearColor();    // 清缓存，避免重复触发
+  showFace(FACE_SMILE);  // Show smile
+  aiCam.clearColor();    // Clear buffer to avoid repeated triggers
 
-  pickAndDeliver(color);  // 执行抓取投放流程
+  pickAndDeliver(color);  // Run grab-and-deliver sequence
 
-  aiCam.flushInput();   // 丢弃动作期间积压数据
-  aiCam.clearColor();   // 再清缓存
-  showFace(FACE_EYES);  // 回到待机
-  delay(2000);          // 冷却 2 s 再找下一目标
+  aiCam.flushInput();   // Discard data accumulated during motion
+  aiCam.clearColor();   // Clear buffer again
+  showFace(FACE_EYES);  // Back to standby
+  delay(2000);          // Cooldown 2 s before next target
 }
 
-// ===== 抓取与投放 =====
-// 去程：靠近 → 夹取 → 转向 → 运送 → 放下
-// 回程按相反顺序退回起点
+// ===== Grab and deliver =====
+// Outbound: approach -> grab -> turn -> deliver -> release
+// Return trip retraces the route in reverse order
 void pickAndDeliver(String color) {
-  // 去程
-  // 1. 低速靠近
-  Serial.println("1 靠近");
+  // Outbound
+  // 1. Approach at low speed
+  Serial.println("1 Approaching");
   goForward(SPEED_APPROACH);
   delay(T_APPROACH);
   stopCar();
 
-  // 2. 夹取
-  Serial.println("2 夹取");
+  // 2. Grab
+  Serial.println("2 Grabbing");
   clawServo.write(CLAW_CLOSE);
-  delay(400);           // 等舵机到位
-  showFace(FACE_HEART); // 显示爱心
+  delay(400);           // Wait for servo to settle
+  showFace(FACE_HEART); // Show heart
 
-  // 3. 按颜色转向：红左、黄右
-  Serial.println("3 转向投放区");
+  // 3. Turn by color: red left, yellow right
+  Serial.println("3 Turning to delivery area");
   if (color == "RED") {
-    spinLeft(SPEED_TURN);  // 红色左转
+    spinLeft(SPEED_TURN);  // Red: turn left
   } else {
-    spinRight(SPEED_TURN);  // 黄色右转
+    spinRight(SPEED_TURN);  // Yellow: turn right
   }
   delay(T_TURN);
   stopCar();
 
-  // 4. 运送
-  Serial.println("4 运送");
+  // 4. Deliver
+  Serial.println("4 Delivering");
   goForward(SPEED_RUN);
   delay(T_DELIVER);
   stopCar();
 
-  // 5. 松爪卸货
-  Serial.println("5 放下");
+  // 5. Open gripper to unload
+  Serial.println("5 Releasing");
   clawServo.write(CLAW_OPEN);
   delay(300);
 
-  // 回程
-  // 6. 倒回转向点
-  Serial.println("6 后退到转向点");
+  // Return trip
+  // 6. Back up to the turning point
+  Serial.println("6 Backing to turning point");
   goBackward(SPEED_RUN);
   delay(T_DELIVER);
   stopCar();
 
-  // 7. 回正
-  Serial.println("7 回正");
+  // 7. Straighten out
+  Serial.println("7 Straightening");
   if (color == "RED") {
-    spinRight(SPEED_TURN);  // 反向转回
+    spinRight(SPEED_TURN);  // Turn back in reverse
   } else {
-    spinLeft(SPEED_TURN);  // 反向转回
+    spinLeft(SPEED_TURN);  // Turn back in reverse
   }
   delay(T_TURN);
   stopCar();
 
-  // 8. 倒回起点
-  Serial.println("8 后退回起点");
+  // 8. Back to start point
+  Serial.println("8 Backing to start");
   goBackward(SPEED_APPROACH);
   delay(T_APPROACH);
   stopCar();
 
-  showFace(FACE_SMILE);  // 显示笑脸
-  Serial.println("投放完成，已回到起点");
+  showFace(FACE_SMILE);  // Show smile
+  Serial.println("Delivery complete, back at start");
 }
 
-// ===== 点阵显示 =====
-// 仅表情变化时写屏
+// ===== Dot matrix display =====
+// Only update display when expression changes
 void showFace(int face) {
-  if (face == curFace) return;  // 表情未变
+  if (face == curFace) return;  // Expression unchanged
   curFace = face;
 
   if (face == FACE_EYES) {
-    matrix_display(eyes);   // 待命
+    matrix_display(eyes);   // Standby
   } else if (face == FACE_SMILE) {
-    matrix_display(smile);  // 笑脸
+    matrix_display(smile);  // Smile
   } else {
-    matrix_display(heart);  // 爱心
+    matrix_display(heart);  // Heart
   }
 }
 
-// 将 16 字节字模写入点阵屏显存
+// Write 16-byte font bitmap to dot matrix display buffer
 void matrix_display(unsigned char matrix_value[]) {
-  // 0x40：写数据模式，地址自增
+  // 0x40: write data mode, auto-increment address
   IIC_start();
   IIC_send(0x40);
   IIC_end();
 
-  // 0xC0：显存起始地址 0
+  // 0xC0: display buffer start address 0
   IIC_start();
   IIC_send(0xC0);
 
-  // 连写 16 列
+  // Write 16 columns consecutively
   for (int i = 0; i < 16; i++) {
     IIC_send(matrix_value[i]);
   }
   IIC_end();
 
-  // 0x8A：开显示，亮度最大
+  // 0x8A: display on, maximum brightness
   IIC_start();
   IIC_send(0x8A);
   IIC_end();
 }
 
-// 起始条件：CLK 高电平期间 DIN 下降沿
+// Start condition: DIN falling edge while CLK is HIGH
 void IIC_start() {
   digitalWrite(CLK_Pin, HIGH);
   delayMicroseconds(3);
@@ -247,13 +247,13 @@ void IIC_start() {
   delayMicroseconds(3);
 }
 
-// 发送 1 字节，低位在前：CLK 低时置数据，上升沿采样
+// Send one byte, LSB first: set data while CLK is LOW, sample on rising edge
 void IIC_send(unsigned char send_data) {
   for (int i = 0; i < 8; i++) {
-    digitalWrite(CLK_Pin, LOW);  // 拉低时钟，准备数据
+    digitalWrite(CLK_Pin, LOW);  // Pull clock low to prepare data
     delayMicroseconds(3);
 
-    // 从 bit0 起逐位发送
+    // Send bit by bit starting from bit0
     if (send_data & 0x01) {
       digitalWrite(DIN_Pin, HIGH);
     } else {
@@ -261,14 +261,14 @@ void IIC_send(unsigned char send_data) {
     }
     delayMicroseconds(3);
 
-    digitalWrite(CLK_Pin, HIGH); // 拉高时钟，模块采样
+    digitalWrite(CLK_Pin, HIGH); // Pull clock high, module samples
     delayMicroseconds(3);
 
-    send_data = send_data >> 1;  // 右移，取出下一位
+    send_data = send_data >> 1;  // Shift right for next bit
   }
 }
 
-// 停止条件：CLK 高电平期间 DIN 上升沿
+// Stop condition: DIN rising edge while CLK is HIGH
 void IIC_end() {
   digitalWrite(CLK_Pin, LOW);
   delayMicroseconds(3);
@@ -280,36 +280,36 @@ void IIC_end() {
   delayMicroseconds(3);
 }
 
-// ===== 电机驱动 =====
-// A 路接左轮、B 路接右轮（与第 7 课一致）
-// leftSpeed 走 B 路，rightSpeed 走 A 路
-// 先限幅 ±255，再取绝对值给占空比
+// ===== Motor driver =====
+// Channel A drives left wheel, channel B drives right wheel (same as Lesson 7)
+// leftSpeed goes to channel B, rightSpeed goes to channel A
+// Clamp to +/-255 first, then take absolute value for duty cycle
 void driveMotors(int leftSpeed, int rightSpeed) {
-  leftSpeed  = constrain(leftSpeed,  -255, 255);  // 右轮限幅
-  rightSpeed = constrain(rightSpeed, -255, 255);  // 左轮限幅
+  leftSpeed  = constrain(leftSpeed,  -255, 255);  // Right wheel clamp
+  rightSpeed = constrain(rightSpeed, -255, 255);  // Left wheel clamp
 
-  // A 路：左轮
+  // Channel A: left wheel
   if (rightSpeed >= 0) {
-    digitalWrite(MOTOR_BIN, HIGH);     // 拉高：正转
-    ledcWrite(MOTOR_BEN, rightSpeed);  // 占空比 = 速度
+    digitalWrite(MOTOR_BIN, HIGH);     // Pull high: forward
+    ledcWrite(MOTOR_BEN, rightSpeed);  // Duty cycle = speed
   } else {
-    digitalWrite(MOTOR_BIN, LOW);      // 拉低：反转
-    ledcWrite(MOTOR_BEN, -rightSpeed); // 取绝对值
+    digitalWrite(MOTOR_BIN, LOW);      // Pull low: reverse
+    ledcWrite(MOTOR_BEN, -rightSpeed); // Absolute value
   }
 
-  // B 路：右轮
+  // Channel B: right wheel
   if (leftSpeed >= 0) {
-    digitalWrite(MOTOR_AIN, HIGH);    // 拉高：正转
-    ledcWrite(MOTOR_AEN, leftSpeed);  // 占空比 = 速度
+    digitalWrite(MOTOR_AIN, HIGH);    // Pull high: forward
+    ledcWrite(MOTOR_AEN, leftSpeed);  // Duty cycle = speed
   } else {
-    digitalWrite(MOTOR_AIN, LOW);     // 拉低：反转
-    ledcWrite(MOTOR_AEN, -leftSpeed); // 取绝对值
+    digitalWrite(MOTOR_AIN, LOW);     // Pull low: reverse
+    ledcWrite(MOTOR_AEN, -leftSpeed); // Absolute value
   }
 }
 
-// 基本动作
-void goForward(int speed)  { driveMotors(speed, speed); }    // 前进：左右同速正转
-void goBackward(int speed) { driveMotors(-speed, -speed); }  // 后退：左右同速反转
-void spinLeft(int speed)   { driveMotors(-speed, speed); }   // 左转：左后退右前进
-void spinRight(int speed)  { driveMotors(speed, -speed); }   // 右转：左前进右后退
-void stopCar()             { driveMotors(0, 0); }            // 停止：占空比归零
+// Basic movements
+void goForward(int speed)  { driveMotors(speed, speed); }    // Forward: both wheels forward at same speed
+void goBackward(int speed) { driveMotors(-speed, -speed); }  // Backward: both wheels reverse at same speed
+void spinLeft(int speed)   { driveMotors(-speed, speed); }   // Spin left: left reverse, right forward
+void spinRight(int speed)  { driveMotors(speed, -speed); }   // Spin right: left forward, right reverse
+void stopCar()             { driveMotors(0, 0); }            // Stop: duty cycle zero

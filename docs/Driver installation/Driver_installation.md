@@ -1,84 +1,83 @@
-# 3. 驱动安装
+# 3. Driver Installation
 
-主控板通过板载 CH340 芯片把 USB 转成串口，程序下载和串口打印都走这条路。**装驱动前先用 USB 线把板子接到电脑**，没接板子就装，驱动可能认不到设备。
+The main controller board uses its on-board CH340 chip to convert USB to serial; both program uploads and serial print output go through this path. **Connect the board to the computer with a USB cable before installing the driver.** If you install the driver without the board connected, it may not detect the device.
 
-装没装好，看一个地方就够了：设备管理器（Mac 上是终端）里能不能看到一个 CH340 的串口。第 4 章 Arduino IDE 选端口，选的就是它。
+To check whether the installation worked, there is only one thing to look at: whether a CH340 serial port appears in Device Manager (in Terminal on Mac). This is the port you select in the Arduino IDE in Chapter 4.
 
-## 3.1 Windows 系统
+## 3.1 Windows
 
-### 驱动包下载
+### Driver Download
 
-[下载 Windows CH340 驱动](./Windows.zip)
+[Download the Windows CH340 driver](./Windows.zip)
 
 ![](media/a51.png)
 
-**检查驱动**
+**Check the driver**
 
-1. 用 USB 线接上主控板后，右击桌面上的`此电脑` →**管理 → 设备管理器**。
-2. 展开**端口（COM 和 LPT）**，看到 `USB-SERIAL CH340 (COMx)` 就说明驱动已经装好，后面的安装都可以跳过。
+1. After connecting the main controller with a USB cable, right-click `This PC` on the desktop and choose "Manage → Device Manager".
+2. Expand "Ports (COM & LPT)". If you see `USB-SERIAL CH340 (COMx)`, the driver is already installed and you can skip the rest of the installation.
 
    ![](media/a10.png)
 
-Windows 10 及以上一般会自动装好。没装的时候板子不会出现在**端口**里，而是掉到**其他设备**下面，名字是 `USB2.0-Serial`，前面挂一个黄色感叹号：
+Windows 10 and later usually install it automatically. If the driver is missing, the board will not appear under "Ports" but under "Other devices" instead, named `USB2.0-Serial`, with a yellow exclamation mark in front of it:
 
 ![](media/a11.png)
 
-**一键安装（推荐走这条）**
+**One-click installation (recommended)**
 
-1. 解压后打开 `usb_ch341_3.1.2009.06` 文件夹，双击 `SETUP.EXE`。
-2. 点**安装**，等进度条走完，提示**驱动预安装成功**就装好了，点**确定**退出。
-3. 拔掉 USB 线再插上，回到设备管理器展开**端口（COM 和 LPT）**，出现 `USB-SERIAL CH340 (COMx)` 就成功了。
+1. After extracting, open the `usb_ch341_3.1.2009.06` folder and double-click `SETUP.EXE`.
+2. Click "Install", wait for the progress bar to finish, and when the message "Driver pre-installation successful" appears, it is done—click "OK" to exit.
+3. Unplug the USB cable and plug it back in, then return to Device Manager and expand "Ports (COM & LPT)". If `USB-SERIAL CH340 (COMx)` appears, you have succeeded.
 
-**手动指定驱动（一键装不上时用）**
+**Specify the driver manually (when one-click installation fails)**
 
-1. 右键**其他设备**下带感叹号的 `USB2.0-Serial`，选**更新驱动程序**。
+1. Right-click the `USB2.0-Serial` with the exclamation mark under "Other devices" and select "Update driver".
 
    ![](media/a13.png)
 
-2. 选**浏览我的电脑以查找驱动程序**。
+2. Select "Browse my computer for drivers".
 
    ![](media/a14.png)
 
-3. 点**浏览**，选中解压出来的 `usb_ch341_3.1.2009.06` 文件夹，再点**下一步**。
+3. Click "Browse", select the extracted `usb_ch341_3.1.2009.06` folder, and then click "Next".
 
    ![](media/a15.png)
 
-4. 窗口里提示 `The best drivers for your device are already installed`，说明系统已经认到 CH340，点**关闭**。
+4. If the window says `The best drivers for your device are already installed`, the system already recognizes the CH340—click "Close".
 
    ![](media/a16.png)
 
-5. 回到设备管理器，设备从**其他设备**挪到**端口（COM 和 LPT）**下面，名字变成 `USB-SERIAL CH340 (COMx)`。记下这个号，第 4 章 Arduino IDE 选端口要用。
+5. Return to Device Manager; the device has moved from "Other devices" to "Ports (COM & LPT)" and is renamed `USB-SERIAL CH340 (COMx)`. Note this number down—you will need it to select the port in the Arduino IDE in Chapter 4.
 
-> 装完还是没有 COM 口，先换一根 USB 线：很多随手机附带的线只有充电线芯，插上后设备管理器里一点变化都没有。换线不行再换主机后面的 USB 口，前面板供电常常不够。
+> If there is still no COM port after installation, first try a different USB cable: many cables that come with phones have only power wires and charging cores, so plugging one in produces no change at all in Device Manager. If a different cable does not help, try a USB port on the back of the computer—the front panel often supplies too little power.
 
-## 3.2 macOS 系统
+## 3.2 macOS
 
-### 驱动包下载
+### Driver Download
 
-[下载 macOS CH340 驱动](./MAC.zip)
+[Download the macOS CH340 driver](./MAC.zip)
 
-先下载对应系统的 CH340 驱动并解压。
+First download the CH340 driver for your system and extract it.
 
-> 解压后是 `CH34xVCPDriver.pkg` 和 `CH34xVCPDriver.dmg`，按下面的系统版本选一种装。
+> After extraction you will find `CH34xVCPDriver.pkg` and `CH34xVCPDriver.dmg`; choose one according to your macOS version and follow the steps below.
 
 ![](media/a50.png)
 
 ![](media/a17.png)
 
-**先放开安装权限**
+**Allow installation permissions first**
 
-macOS 对这类底层驱动管得严，装之前要放行一次，装完还要再放行一次。
+macOS is strict about low-level drivers like this one, so you need to grant permission once before installing, and again after installing.
 
-装之前（macOS 12 及更早）：打开**系统偏好设置 → 安全性与隐私 → 通用**，把**允许从以下位置下载的应用**改成**App Store 和认可的开发者**。
+Before installation (macOS 12 and earlier): open "System Preferences → Security & Privacy → General" and change "Allow apps downloaded from" to "App Store and identified developers".
 
 ![](media/a18.png)
 
-macOS 13 及以后没有这个选项了。双击 pkg 时如果弹出**无法打开，因为 Apple 无法检查其是否包含恶意软件**，去**系统设置 → 隐私与安全性**，页面下方会出现刚才被拦下的提示，点**仍要打开**，再输一次开机密码。
+macOS 13 and later do not have this option. If double-clicking the pkg brings up a message that it "cannot be opened because Apple cannot check it for malicious software", go to "System Settings → Privacy & Security"; a notice about the blocked item will appear near the bottom of the page—click "Open Anyway", then enter your login password again.
 
+**Install using the pkg file (default method)**
 
-**pkg 格式安装（默认走这条）**
-
-1. 双击 pkg 文件，一路**继续**到**安装**，装完出现成功提示页。
+1. Double-click the pkg file and click "Continue" all the way to "Install"; a success page appears when it finishes.
 
    ![](media/a19.png)
 
@@ -88,38 +87,38 @@ macOS 13 及以后没有这个选项了。双击 pkg 时如果弹出**无法打�
 
    ![](media/a22.png)
 
-2. OS X 11.0 及以上：打开 LaunchPad → `CH34xVCPDriver` → Install。
+2. OS X 11.0 and later: open LaunchPad → `CH34xVCPDriver` → Install.
 
    ![](media/a23.png)
 
-3. 装完系统会提示**系统扩展已被阻止**。打开**系统设置 → 隐私与安全性**（macOS 12 及更早叫**系统偏好设置 → 安全性与隐私**），拉到页面最下面点**允许**，输入开机密码，然后**重启电脑**（下面这张是重启入口）。系统扩展只在开机时加载，不重启等于没装 —— 这一步漏掉，插上板子照样没有端口。
+3. After installation, the system reports "System extension blocked". Open "System Settings → Privacy & Security" (on macOS 12 and earlier, "System Preferences → Security & Privacy"), scroll to the bottom of the page, click "Allow", enter your login password, and then **restart the computer** (the screenshot below shows where to restart). System extensions load only at startup, so without a restart it is as if the driver were not installed—skip this step and you will still get no port when you plug in the board.
 
    ![](media/a24.png)
 
-**dmg 格式安装（OS X 11.0 及以上不支持 Rosetta 时用）**
+**Install using the dmg file (when OS X 11.0+ does not support Rosetta)**
 
-1. 双击 dmg，把 `CH34xVCPDriver` 拖进**应用程序**文件夹。
+1. Double-click the dmg and drag `CH34xVCPDriver` into the "Applications" folder.
 
    ![](media/a25.png)
 
-2. 打开 LaunchPad → `CH34xVCPDriver` → Install，装完弹出 success 提示。
+2. Open LaunchPad → `CH34xVCPDriver` → Install; a success message appears when it finishes.
 
    ![](media/a26.png)
 
    ![](media/a27.png)
 
-3. 装完同样要去**隐私与安全性**里允许系统扩展，再重启一次。
+3. As with the pkg method, you must allow the system extension in "Privacy & Security" and then restart once more.
 
-**确认驱动装上了**
+**Confirm the driver is installed**
 
-1. 插上主控板，打开**系统报告 → 硬件 → USB**，在右侧 USB 设备树里找 Vendor ID 为 `0x1a86` 的设备 —— 这是 CH340 的厂商标识，有它说明系统已经认到板子。
+1. Plug in the main controller, open "System Information → Hardware → USB", and look in the USB device tree on the right for a device whose Vendor ID is `0x1a86`—this is CH340's vendor identifier, and its presence means the system recognizes the board.
 
    ![](media/a28.png)
 
-2. 打开**终端**，执行 `cd /dev` 再 `ls tty.wch*`，看到 `tty.wchusbserialx`（x 是分配到的编号）就说明驱动生效了。
+2. Open "Terminal", run `cd /dev` and then `ls tty.wch*`; seeing `tty.wchusbserialx` (where x is the assigned number) means the driver is working.
 
    ![](media/a29.png)
 
-   同一个端口在系统里有两个名字：`tty.wchusbserialx` 和 `cu.wchusbserialx`。Arduino IDE / Thonny 里选 `cu.` 开头的那个 —— `tty` 打开时会等一个载波信号，容易卡住；`cu` 直接就能读写。
+   The same port has two names in the system: `tty.wchusbserialx` and `cu.wchusbserialx`. In the Arduino IDE / Thonny, select the one starting with `cu.`—`tty` waits for a carrier signal when opened and tends to hang, while `cu` allows reading and writing directly.
 
-> M 系列芯片的 Mac 用资料包里这份驱动就行，它已经支持 Apple Silicon。网上翻到的老版本只支持 Intel，装上也认不到板子。
+> For Macs with M-series chips, just use the driver in the resource package; it already supports Apple Silicon. Older versions found online support only Intel, and even after installation they will not recognize the board.

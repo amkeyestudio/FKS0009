@@ -1,43 +1,43 @@
-// ===== 点阵屏引脚 =====
-#define CLK_Pin 9   // 时钟，接点阵 CLK
-#define DIN_Pin 8   // 数据，接点阵 DIN
+// ===== Dot matrix display pins =====
+#define CLK_Pin 9   // Clock, connect to dot matrix CLK
+#define DIN_Pin 8   // Data, connect to dot matrix DIN
 
-// ===== 超声波引脚 =====
-const int trigPin = 13;  // 触发脚，接 IO13
-const int echoPin = 12;  // 回响脚，接 IO12
+// ===== Ultrasonic module pins =====
+const int trigPin = 13;  // Trigger pin, connect to IO13
+const int echoPin = 12;  // Echo pin, connect to IO12
 
-// ===== 距离档位（cm）=====
-// 跟随按三个阈值分档
-const long safeDistance = 30;   // 30~50：跟随
-const long closeDistance = 10;  // 小于 10：后退
-const long maxDistance = 50;    // 大于 50：目标丢失
+// ===== Distance levels (cm) =====
+// Following is divided into three threshold levels
+const long safeDistance = 30;   // 30~50: follow
+const long closeDistance = 10;  // Less than 10: back away
+const long maxDistance = 50;    // Greater than 50: target lost
 
-// ===== 电机引脚 =====
-#define MOTOR_AIN 38  // 左电机方向
-#define MOTOR_AEN 21  // 左电机调速
-#define MOTOR_BIN 40  // 右电机方向
-#define MOTOR_BEN 41  // 右电机调速
+// ===== Motor pins =====
+#define MOTOR_AIN 38  // Left motor direction
+#define MOTOR_AEN 21  // Left motor speed control
+#define MOTOR_BIN 40  // Right motor direction
+#define MOTOR_BEN 41  // Right motor speed control
 
-// ===== 字模（16 列 × 8 行）=====
-// 爱心：跟随前进
+// ===== Font bitmaps (16 columns x 8 rows) =====
+// Heart: follow forward
 unsigned char heart[] = {
   0x00, 0x00, 0x00, 0x00, 0x08, 0x1c, 0x3e, 0x7c,
   0x7c, 0x3e, 0x1c, 0x08, 0x00, 0x00, 0x00, 0x00
 };
 
-// 笑脸：距离合适，停止
+// Smile: proper distance, stop
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
 };
 
-// 向下箭头：太近后退
+// Down arrow: too close, back away
 unsigned char arrow_down[] = {
   0x00, 0x00, 0x00, 0x00, 0x10, 0x30, 0x7e, 0xfe,
   0xfe, 0x7e, 0x30, 0x10, 0x00, 0x00, 0x00, 0x00
 };
 
-// 问号：目标丢失
+// Question mark: target lost
 unsigned char question_mark[] = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x02, 0x51,
   0x59, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
@@ -45,9 +45,9 @@ unsigned char question_mark[] = {
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("超声波跟随启动");
+  Serial.println("Ultrasonic following started");
 
-  // 点阵引脚初始化并清屏
+  // Initialize dot matrix pins and clear display
   pinMode(CLK_Pin, OUTPUT);
   pinMode(DIN_Pin, OUTPUT);
   digitalWrite(CLK_Pin, HIGH);
@@ -55,75 +55,75 @@ void setup() {
   unsigned char clear_data[16] = {0};
   matrix_display(clear_data);
 
-  pinMode(trigPin, OUTPUT);  // Trig 输出
-  pinMode(echoPin, INPUT);   // Echo 输入
+  pinMode(trigPin, OUTPUT);  // Trig output
+  pinMode(echoPin, INPUT);   // Echo input
 
-  // 方向脚输出
+  // Direction pins as output
   pinMode(MOTOR_BIN, OUTPUT);
   pinMode(MOTOR_AIN, OUTPUT);
 
-  // 调速脚 PWM：1 kHz，8 位
+  // Speed pins PWM: 1 kHz, 8-bit
   ledcAttach(MOTOR_BEN, 1000, 8);
   ledcAttach(MOTOR_AEN, 1000, 8);
 
-  // 上电停车并显示笑脸
+  // Stop and show smile on power on
   stopMotor();
   matrix_display(smile);
 }
 
 void loop() {
-  // 测前方距离
+  // Measure the distance ahead
   long distance = getDistance();
 
-  Serial.print("当前距离：");
+  Serial.print("Current distance: ");
   Serial.print(distance);
   Serial.println(" cm");
 
   if (distance > safeDistance && distance <= maxDistance) {
-    // 30~50 cm：跟随前进
+    // 30~50 cm: follow forward
     forward(150, 150);
 
   } else if (distance >= closeDistance && distance <= safeDistance) {
-    // 10~30 cm：停止
+    // 10~30 cm: stop
     stopMotor();
     matrix_display(smile);
 
   } else if (distance < closeDistance && distance > 0) {
-    // 小于 10 cm：后退
-    // 左右差速，后退时车身略偏
+    // Less than 10 cm: back away
+    // Different left/right speeds make the car drift slightly when backing
     back(105, 150);
 
   } else {
-    // 大于 50 cm 或读数无效：停车显示问号
+    // Greater than 50 cm or invalid reading: stop and show question mark
     stopMotor();
     matrix_display(question_mark);
   }
 
-  // 100 ms 测一次
+  // Measure once every 100 ms
   delay(100);
 }
 
-// 测距，返回厘米
+// Measure distance, return centimeters
 int getDistance() {
-  long duration;  // 往返时间（µs）
-  int distance;   // 距离（cm）
+  long duration;  // Round-trip time (µs)
+  int distance;   // Distance (cm)
 
-  // 先拉低，保证起始电平干净
+  // Pull low first for a clean start level
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
 
-  // 10 µs 高脉冲触发发波
+  // 10 µs high pulse triggers emission
   digitalWrite(trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
 
-  // Echo 高电平宽度即往返时间
+  // Echo HIGH pulse width is the round-trip time
   duration = pulseIn(echoPin, HIGH);
 
-  // 声速 0.034 cm/µs，除以 2 去掉回程
+  // Speed of sound 0.034 cm/µs, divide by 2 to remove the return trip
   distance = duration * 0.034 / 2;
 
-  // 超出 2~300 cm 置 0
+  // Set 0 if outside 2~300 cm
   if (distance < 2 || distance > 300) {
     distance = 0;
   }
@@ -131,15 +131,15 @@ int getDistance() {
   return distance;
 }
 
-// ===== 电机控制 =====
+// ===== Motor control =====
 
-// 直接写左右轮 PWM（0~255）
+// Write left/right wheel PWM directly (0~255)
 void setMotor(int rightSpeed, int leftSpeed) {
   ledcWrite(MOTOR_BEN, rightSpeed);
   ledcWrite(MOTOR_AEN, leftSpeed);
 }
 
-// 前进：方向脚拉高并显示爱心
+// Forward: direction pins HIGH and show heart
 void forward(int rightSpeed, int leftSpeed) {
   matrix_display(heart);
   digitalWrite(MOTOR_BIN, HIGH);
@@ -147,7 +147,7 @@ void forward(int rightSpeed, int leftSpeed) {
   setMotor(rightSpeed, leftSpeed);
 }
 
-// 后退：方向脚拉低并显示向下箭头
+// Backward: direction pins LOW and show down arrow
 void back(int rightSpeed, int leftSpeed) {
   matrix_display(arrow_down);
   digitalWrite(MOTOR_BIN, LOW);
@@ -155,37 +155,37 @@ void back(int rightSpeed, int leftSpeed) {
   setMotor(rightSpeed, leftSpeed);
 }
 
-// 停止：速度置 0
+// Stop: speed set to 0
 void stopMotor() {
   setMotor(0, 0);
 }
 
-// ===== 点阵驱动（软件模拟 I2C）=====
+// ===== Dot matrix driver (software I2C) =====
 
-// 将 16 字节字模写入点阵屏显存
+// Write the 16-byte font bitmap to the dot matrix display buffer
 void matrix_display(unsigned char matrix_value[]) {
-  // 0x40：写数据模式，地址自增
+  // 0x40: write data mode, auto-increment address
   IIC_start();
   IIC_send(0x40);
   IIC_end();
 
-  // 0xC0：显存起始地址 0
+  // 0xC0: display buffer start address 0
   IIC_start();
   IIC_send(0xC0);
 
-  // 连写 16 列
+  // Write 16 columns consecutively
   for (int i = 0; i < 16; i++) {
     IIC_send(matrix_value[i]);
   }
   IIC_end();
 
-  // 0x8A：开显示，亮度最大
+  // 0x8A: turn on display, maximum brightness
   IIC_start();
   IIC_send(0x8A);
   IIC_end();
 }
 
-// 起始条件：CLK 高电平期间 DIN 下降沿
+// Start condition: DIN falling edge while CLK is HIGH
 void IIC_start() {
   digitalWrite(CLK_Pin, HIGH);
   delayMicroseconds(3);
@@ -195,7 +195,7 @@ void IIC_start() {
   delayMicroseconds(3);
 }
 
-// 发送 1 字节，低位在前：CLK 低时置数据，上升沿采样
+// Send 1 byte, LSB first: set data when CLK is LOW, sample on rising edge
 void IIC_send(unsigned char send_data) {
   for (int i = 0; i < 8; i++) {
     digitalWrite(CLK_Pin, LOW);
@@ -215,7 +215,7 @@ void IIC_send(unsigned char send_data) {
   }
 }
 
-// 停止条件：CLK 高电平期间 DIN 上升沿
+// Stop condition: DIN rising edge while CLK is HIGH
 void IIC_end() {
   digitalWrite(CLK_Pin, LOW);
   delayMicroseconds(3);

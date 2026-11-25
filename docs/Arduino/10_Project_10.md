@@ -1,62 +1,62 @@
-### 项目 10：红外接收
+### Project 10: IR Receiving
 
-#### **1. 简介：**
+#### **1. Introduction:**
 
-![电视遥控器](media/intro_10.jpg){width=520px}
+![TV remote control](media/intro_10.jpg){width=520px}
 
-电视、空调、玩具遥控器，用的都是红外。按一下键，它发出的不是一束持续的光，而是一串每秒闪烁三万八千次的不可见光——人眼看不到，接收头却能把这串闪烁解成 0 和 1。
+The remotes for the TV, the air conditioner and toys all use infrared. Press a key and what leaves the remote isn't a steady beam — it's a stream of invisible light blinking 38,000 times a second. Your eye sees nothing, but the receiver turns that flicker into a clean sequence of 0s and 1s.
 
-一次按键发一整帧，帧里有地址、有键值、还有校验；按住不放时，遥控器不再重复整帧，只隔一段发一个很短的重复标记，说明还是这个键。所以长按在数据上留下的痕迹和按一下完全不同。
+One press sends a whole frame: an address, a key value and a checksum. Hold the key down and the remote stops repeating the full frame — every so often it sends only a short repeat marker saying "still this key". A long press therefore leaves a completely different trace in the data than a single tap.
 
-本课先不控制任何东西，只让车听懂遥控器：对准车头按方向键，串口打印出协议名和键值，上、下、左、右、OK 分别对应 70、21、68、67、64。
+This lesson drives nothing yet; it only teaches the robot to understand the remote. Point it at the front of the car, press a direction key, and the serial port prints the protocol name and key value. Up, down, left, right and OK correspond to 70, 21, 68, 67 and 64.
 
-每只遥控器的码值未必一样，资料里这一组只是手上的样本，串口打出来的那个数字才是这只遥控器的答案。
+Those values are not universal — the set in the files is only the sample we had on hand. The number your own remote prints on serial is the answer for that remote.
 
-#### **2. 所需清单：**
+#### **2. Parts Needed:**
 
-本课用到的器件：
+Parts used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
-| ![](../media/kit_12.png){width=170px}<br><span style="font-size:0.85em">17 键红外遥控器（JMFP-4） ×1</span> | ![](../media/ir_receiver.png){width=170px}<br><span style="font-size:0.85em">红外接收头 ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 电机扩展板 ×1</span> |
-| ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 开发板 ×1</span> |  |  |
-> ⚠️ **接收头在扩展板上，本表只作对照，不用拆；下面的接线说明只标清接线方式，供对照，不必拆装。完整物料见 1.4 套件清单。**
-#### **3. 参数：**
+| ![](../media/kit_12.png){width=170px}<br><span style="font-size:0.85em">17-key IR remote control (JMFP-4) ×1</span> | ![](../media/ir_receiver.png){width=170px}<br><span style="font-size:0.85em">IR receiver ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor driver expansion board ×1</span> |
+| ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |  |  |
+> ⚠️ **The IR receiver is already mounted on the expansion board; this table is for reference only — there is nothing to take apart. The wiring notes below only show how the connections are made, for reference; no assembly or disassembly is required. For the complete parts list, see 1.4 Kit Parts List.**
+#### **3. Parameters:**
 
-| 项目 | 参数 |
+| Item | Value |
 | --- | --- |
-| 接收脚 | IO48 |
-| 载波频率 | 38 kHz |
-| 协议 | NEC |
-| 串口波特率 | 115200 |
-| 已收录键值 | 上 70、下 21、左 68、右 67、OK 64 |
-| 重复帧标志 | `IRDATA_FLAGS_IS_REPEAT` |
-| 依赖库 | `IRremote` |
+| Receiver pin | IO48 |
+| Carrier frequency | 38 kHz |
+| Protocol | NEC |
+| Serial baud rate | 115200 |
+| Recorded key codes | Up 70, Down 21, Left 68, Right 67, OK 64 |
+| Repeat-frame flag | `IRDATA_FLAGS_IS_REPEAT` |
+| Required library | `IRremote` |
 
-#### **4. 接线说明：**
+#### **4. Wiring:**
 
-| 接收头引脚 | 接到 |
+| Receiver pin | Connect to |
 | --- | :---: |
 | OUT / S | IO48 |
 | VCC | 5V |
 | GND | GND |
 
-#### **5. 流程图：**
+#### **5. Flowchart:**
 
-接收和解码是两件事：`IrReceiver.decode()` 负责把光信号还原成一帧数据，`decodedIRData` 里才有协议、码值、是否长按这些字段。
+Receiving and decoding are two different jobs: `IrReceiver.decode()` turns the light signal back into a frame of data, and only `decodedIRData` holds fields such as the protocol, the key code and whether it was a long press.
 
 ![](media/ir_decode_flow.png)
 
-#### **6. 测试代码：**
+#### **6. Test Code:**
 
 ```cpp
-#include <IRremote.hpp>  // 红外解码库
+#include <IRremote.hpp>  // IR decoding library
 
-// 红外接收头，IO48
+// IR receiver, IO48
 #define IR_RECEIVE_PIN 48
 
-// 遥控器按键码值
-// 批次不同码值可能不同，以串口打印为准
+// Remote control key code values
+// Codes may differ by batch; refer to serial print
 #define KEY_UP    70
 #define KEY_DOWN  21
 #define KEY_LEFT  68
@@ -65,57 +65,57 @@
 
 void setup() {
   Serial.begin(115200);
-  delay(1000);  // 等串口稳定
+  delay(1000);  // Wait for serial to stabilize
 
-  Serial.println("红外接收实验开始，把遥控器对准车头");
+  Serial.println("IR receiver experiment started, point the remote at the car");
   IrReceiver.begin(IR_RECEIVE_PIN, DISABLE_LED_FEEDBACK);
-  Serial.println("等待按键……");
+  Serial.println("Waiting for a key...");
 }
 
 void loop() {
-  // 收到一帧可解码信号
+  // Received a decodable frame
   if (IrReceiver.decode()) {
     uint8_t cmd = IrReceiver.decodedIRData.command;
     bool holding = IrReceiver.decodedIRData.flags & IRDATA_FLAGS_IS_REPEAT;
-    static bool lastHolding = false;  // 上一帧是否长按，避免重复打印
+    static bool lastHolding = false;  // Whether the previous frame was a long press, to avoid duplicate printing
 
     if (holding) {
-      // 长按会周期性重发同一码
+      // A long press periodically resends the same code
       if (!lastHolding) {
-        Serial.println("（长按中，后面不再逐帧打印）");
+        Serial.println("(Long press active, no more per-frame printing)");
       }
     } else {
-      Serial.print("协议：");
+      Serial.print("Protocol: ");
       Serial.print(getProtocolString(IrReceiver.decodedIRData.protocol));
-      Serial.print("   按键码：");
+      Serial.print("   Key code: ");
       Serial.print(cmd);
-      Serial.print("（0x");
+      Serial.print("(0x");
       Serial.print(cmd, HEX);
-      Serial.print("）   ");
+      Serial.print(")   ");
       Serial.println(keyName(cmd));
     }
     lastHolding = holding;
 
-    IrReceiver.resume();  // 必须调用，否则只能收到一帧
+    IrReceiver.resume();  // Must be called, otherwise only one frame is received
   }
 }
 
-// 按键码转中文名
+// Convert key code to name
 const char* keyName(uint8_t cmd) {
   switch (cmd) {
-    case KEY_UP:    return "上";
-    case KEY_DOWN:  return "下";
-    case KEY_LEFT:  return "左";
-    case KEY_RIGHT: return "右";
-    case KEY_STOP:  return "OK / 停止";
+    case KEY_UP:    return "Up";
+    case KEY_DOWN:  return "Down";
+    case KEY_LEFT:  return "Left";
+    case KEY_RIGHT: return "Right";
+    case KEY_STOP:  return "OK / Stop";
     default:        return "";
   }
 }
 ```
 
-#### **7. 代码解释：**
+#### **7. Code Explanation:**
 
-**(1) 接收头引脚和五个键值宏**
+**(1) Receiver pin and the five key-code macros**
 
 ```cpp
 #define IR_RECEIVE_PIN 48
@@ -127,136 +127,137 @@ const char* keyName(uint8_t cmd) {
 #define KEY_STOP  64
 ```
 
-`IR_RECEIVE_PIN 48` 是接收头的信号脚。下面五个宏是**这一款遥控器**的编码，不是通用值：换一把同型号的新遥控器，码值大概率还是这几个；换别的遥控器就得重新看串口打印的十六进制值，把这五行改掉。
+`IR_RECEIVE_PIN 48` is the signal pin of the receiver. The five macros below are the codes of **this particular remote**, not universal values: with a brand-new remote of the same model the codes will most likely still be these; with a different model you'll need to read the hexadecimal values in the serial output and change these five lines.
 
-文件开头有注释提醒"批次不同码值可能不同，以串口打印为准"，道理就在这。
+That's why the comment at the top of the file warns that "codes may differ by batch; refer to serial print".
 
-**(2) `setup()` 里先等一秒**
+**(2) Waiting one second in `setup()`**
 
 ```cpp
   Serial.begin(115200);
-  delay(1000);  // 等串口稳定
+  delay(1000);  // Wait for the serial port to stabilize
 
+  Serial.println("IR reception experiment started; point the remote control at the front of the car");
   IrReceiver.begin(IR_RECEIVE_PIN, DISABLE_LED_FEEDBACK);
 ```
 
-`Serial.begin()` 之后立刻打印，前几个字符有时会丢——USB 枚举还没完成。`delay(1000)` 是给串口留的时间。
+Printing immediately after `Serial.begin()` can lose the first few characters — USB enumeration hasn't finished yet. `delay(1000)` gives the serial port time to settle.
 
-`IrReceiver.begin()` 的第二个参数 `DISABLE_LED_FEEDBACK` 是关掉板载 LED 的接收闪烁。不关也能用，但每按一下闪一下，调试时容易跟电源指示灯看混。
+The second argument of `IrReceiver.begin()`, `DISABLE_LED_FEEDBACK`, switches off the on-board LED's receive flicker. It works fine if you leave it enabled, but the LED blinks on every key press and can easily be confused with the power indicator while debugging.
 
-**(3) `decode()` 是"问一句"，不是"等一帧"**
+**(3) `decode()` "asks once"; it doesn't "wait for a frame"**
 
 ```cpp
   if (IrReceiver.decode()) {
 ```
 
-这句话立刻返回：这一轮正好解出一帧完整信号就返回 `true`，没收到就返回 `false`，程序继续往下跑。
+This call returns immediately: if a complete frame happened to be decoded in this pass it returns `true`, otherwise `false`, and execution continues.
 
-所以它是**非阻塞**的，主循环可以一边收红外一边干别的——第 11 课的遥控车就是靠这一点，在收不到按键时还能检查超时。`loop()` 里没有 `delay()`，一轮只有几微秒，人手按键的抖动会被完整记录下来。
+Because it is **non-blocking**, the main loop can keep receiving IR while doing other work. The IR remote control car in Project 11 relies on exactly this — it can still check the timeout when no key arrives. There is no `delay()` in `loop()`; a pass takes only a few microseconds, so the jitter of a human key press is captured in full.
 
-**(4) 从一帧里取出两个有用的东西**
+**(4) Two useful things from one frame**
 
 ```cpp
     uint8_t cmd = IrReceiver.decodedIRData.command;
     bool holding = IrReceiver.decodedIRData.flags & IRDATA_FLAGS_IS_REPEAT;
 ```
 
-`command` 是按键码，8 位，同一个按键每次发都一样。`flags` 里的 `IRDATA_FLAGS_IS_REPEAT` 位标记"这不是新按的，是长按的重复帧"。
+`command` is the key code, 8 bits wide, and the same key always sends the same value. The `IRDATA_FLAGS_IS_REPEAT` bit in `flags` marks "this isn't a fresh press, it's a repeat frame from a long press".
 
-NEC 协议下按住不放时，遥控器不会一直发完整帧，而是每 108 ms 发一个很短的重复帧。所以**长按收到的还是同一个 `cmd`，区别只在 flags**。不判这个位，长按会被当成连按几十次。
+Under the NEC protocol, holding a key doesn't keep sending full frames; the remote sends a very short repeat frame every 108 ms. So **a long press still delivers the same `cmd` — only the flags differ**. Without checking that bit, one long press would be treated as dozens of separate presses.
 
-一帧完整信号是 67.5 ms（9 ms 引导 + 4.5 ms 间隔 + 32 位数据）。
+A complete frame lasts 67.5 ms (9 ms leader + 4.5 ms gap + 32 data bits).
 
-收到乱码时先看 `protocol`：不是 NEC 就说明遥控器用了别的协议；再看 `command` 是否每次都不一样——不一样通常是供电不稳或接收头被强光直射。太阳光、白炽灯里都有 38 kHz 附近的成分，会把信号淹掉。
+When you get garbage, check `protocol` first: if it isn't NEC, the remote uses a different protocol. Then check whether `command` changes every time — if it does, the cause is usually an unstable power supply or the receiver being hit by strong direct light. Sunlight and incandescent lamps both contain energy near 38 kHz that can drown out the signal.
 
-**(5) `static` 让变量记住上一帧**
+**(5) `static` lets a variable remember the previous frame**
 
 ```cpp
-    static bool lastHolding = false;  // 上一帧是否长按，避免重复打印
+    static bool lastHolding = false;  // Whether the previous frame was a long press, to avoid duplicate printing
 ```
 
-`static` 让局部变量在两次 `loop()` 之间保住值——普通局部变量每轮都会重新初始化成 `false`，起不到"记住上一帧"的作用。
+`static` keeps a local variable's value between two `loop()` calls — an ordinary local variable would be reinitialized to `false` every pass and couldn't "remember the previous frame".
 
-它的用途是只打印一次"长按中"。长按一秒会来 9 个重复帧，不拦一下，串口会被这行刷满，真正想看的码值全被顶走。
+Its job is to print "long press active" only once. Holding a key for one second produces nine repeat frames; without this guard, the serial output would be flooded with that line and the key codes you actually want would be pushed away.
 
-**(6) 三个打印项**
+**(6) The three print items**
 
 ```cpp
-      Serial.print("协议：");
+      Serial.print("Protocol: ");
       Serial.print(getProtocolString(IrReceiver.decodedIRData.protocol));
-      Serial.print("   按键码：");
+      Serial.print("   Key code: ");
       Serial.print(cmd);
-      Serial.print("（0x");
+      Serial.print("(0x");
       Serial.print(cmd, HEX);
-      Serial.print("）   ");
+      Serial.print(")   ");
       Serial.println(keyName(cmd));
 ```
 
-`getProtocolString()` 把协议号翻成 `NEC` 这样的名字。同一个码值打印了两种进制：十进制给你对照 `#define`，十六进制方便和遥控器资料上的表比对——改宏时用哪个都行，注意十六进制那个带 `0x` 前缀。
+`getProtocolString()` turns a protocol number into a name such as `NEC`. The same code is printed in two bases: decimal for comparison with the `#define` values, and hexadecimal for comparison with tables in the remote's documentation — either works when editing the macros, but remember that the hex value carries a `0x` prefix.
 
-`Serial.print(cmd, HEX)` 的第二个参数是进制，不加就是十进制。
+The second argument of `Serial.print(cmd, HEX)` selects the base; leave it out and the value is decimal.
 
-**(7) `resume()` 不调用，就只收得到第一帧**
+**(7) Without `resume()`, only the first frame arrives**
 
 ```cpp
-    IrReceiver.resume();  // 必须调用，否则只能收到一帧
+    IrReceiver.resume();  // Must be called, otherwise only one frame is received
 ```
 
-库收到一帧后会停下来等你处理，`resume()` 是告诉它"处理完了，去接下一帧"。少了这一句，现象很典型：按第一个键有输出，之后怎么按都没反应，像接收头坏了一样。这是本课最容易漏的一行。
+After the library receives a frame it stops and waits for you to process it; `resume()` tells it "done, go receive the next frame". Leave this line out and the symptom is very characteristic: the first key press produces output, then nothing responds, as if the receiver had broken. This is the single most commonly missed line in the lesson.
 
-**(8) `keyName()` 查表**
+**(8) `keyName()` as a lookup table**
 
 ```cpp
 const char* keyName(uint8_t cmd) {
   switch (cmd) {
-    case KEY_UP:    return "上";
-    case KEY_DOWN:  return "下";
-    case KEY_LEFT:  return "左";
-    case KEY_RIGHT: return "右";
-    case KEY_STOP:  return "OK / 停止";
+    case KEY_UP:    return "Up";
+    case KEY_DOWN:  return "Down";
+    case KEY_LEFT:  return "Left";
+    case KEY_RIGHT: return "Right";
+    case KEY_STOP:  return "OK / Stop";
     default:        return "";
   }
 }
 ```
 
-返回类型是 `const char*`，`return "上"` 返回的是字符串常量的地址，不是把字符串拷出来。`default` 返回空串，遇到没定义的码值不会打印乱码，也不会崩。
+The return type is `const char*`; `return "Up"` returns the address of a string constant, not a copy of the string. `default` returns an empty string, so an undefined code produces neither garbled output nor a crash.
 
-`switch` 比一串 `if` 好读：一个码值对一个名字，改起来只动对应那行。
+A `switch` reads better than a chain of `if`s: one code maps to one name, and changing it touches only that line.
 
-#### **8. 运行现象：**
+#### **8. What You'll See:**
 
-上电后串口打印：
-
-```text
-红外接收实验开始，把遥控器对准车头
-等待按键……
-```
-
-对准车头按方向键：
+After power on, the serial port prints:
 
 ```text
-协议：NEC   按键码：70（0x46）   上
-协议：NEC   按键码：21（0x15）   下
-协议：NEC   按键码：68（0x44）   左
-协议：NEC   按键码：67（0x43）   右
-协议：NEC   按键码：64（0x40）   OK / 停止
+IR receiver experiment started, point the remote at the car
+Waiting for a key...
 ```
 
-按住**上**不放：
+Point the remote at the front of the car and press a direction key:
 
 ```text
-协议：NEC   按键码：70（0x46）   上
-（长按中，后面不再逐帧打印）
+Protocol: NEC   Key code: 70 (0x46)   Up
+Protocol: NEC   Key code: 21 (0x15)   Down
+Protocol: NEC   Key code: 68 (0x44)   Left
+Protocol: NEC   Key code: 67 (0x43)   Right
+Protocol: NEC   Key code: 64 (0x40)   OK / Stop
 ```
 
-> 【图片待补】串口监视器里连续按五个方向键的完整输出截图。
+Hold **Up** down:
 
-#### **9. 常见问题解决：**
+```text
+Protocol: NEC   Key code: 70 (0x46)   Up
+(Long press active, no more per-frame printing)
+```
 
-按了没反应，按顺序查三件事：
+> [Image to be added] A screenshot of the complete Serial Monitor output after pressing the five direction keys in succession.
 
-(1) 遥控器里有没有电池，电池仓的塑料片有没有抽掉。
+#### **9. Troubleshooting:**
 
-(2) 接收头的受光面是不是被外壳挡住。它需要**看见**遥控器，隔一层茶色亚克力可以，隔一层黑塑料不行。
+If nothing responds, check these three things in order:
 
-(3) 距离。红外在室内有效距离约 8 m，但正对强光（阳光、白炽灯）时会被淹没，缩短到 1 m 以内。
+(1) Are there batteries in the remote, and has the plastic tab in the battery compartment been pulled out?
+
+(2) Is the receiver's light-sensitive face blocked by the housing? It needs to **see** the remote — a layer of tea-colored acrylic is fine, a layer of black plastic is not.
+
+(3) Distance. IR is effective up to about 8 m indoors, but when aimed straight at strong light (sunlight or an incandescent lamp) it gets drowned out and the range falls to under 1 m.

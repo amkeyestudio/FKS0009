@@ -1,50 +1,50 @@
-// ===== 引脚 =====
-// 点阵屏
-#define CLK_Pin 9   // 时钟
-#define DIN_Pin 8   // 数据
+// ===== Pins =====
+// Dot matrix display
+#define CLK_Pin 9   // Clock
+#define DIN_Pin 8   // Data
 
-// 电机驱动
-#define MOTOR_AIN 38  // 左电机方向
-#define MOTOR_AEN 21  // 左电机调速
-#define MOTOR_BIN 40  // 右电机方向
-#define MOTOR_BEN 41  // 右电机调速
+// Motor driver
+#define MOTOR_AIN 38  // Left motor direction
+#define MOTOR_AEN 21  // Left motor speed control
+#define MOTOR_BIN 40  // Right motor direction
+#define MOTOR_BEN 41  // Right motor speed control
 
-// ===== 速度参数 =====
-#define SPEED_RUN  150  // 直行速度，0~255
-#define SPEED_TURN 150  // 原地转向速度，0~255
+// ===== Speed parameters =====
+#define SPEED_RUN  150  // Forward speed, 0~255
+#define SPEED_TURN 150  // Spot-turn speed, 0~255
 
-// ===== 点阵字模（16 列 × 8 行）=====
-// 爱心：直行
+// ===== Dot matrix font bitmaps (16 columns x 8 rows) =====
+// Heart: forward
 unsigned char heart[] = {
   0x00, 0x00, 0x00, 0x00, 0x08, 0x1c, 0x3e, 0x7c,
   0x7c, 0x3e, 0x1c, 0x08, 0x00, 0x00, 0x00, 0x00
 };
 
-// 向下箭头：后退
+// Down arrow: backward
 unsigned char arrow_down[] = {
   0x00, 0x00, 0x00, 0x00, 0x10, 0x30, 0x7e, 0xfe,
   0xfe, 0x7e, 0x30, 0x10, 0x00, 0x00, 0x00, 0x00
 };
 
-// 向左箭头：左转
+// Left arrow: turn left
 unsigned char arrow_left[] = {
   0x00, 0x00, 0x00, 0x18, 0x3c, 0x7e, 0xff, 0x18,
   0x18, 0x18, 0x18, 0x18, 0x18, 0x00, 0x00, 0x00
 };
 
-// 向右箭头：右转
+// Right arrow: turn right
 unsigned char arrow_right[] = {
   0x00, 0x00, 0x00, 0x18, 0x18, 0x18, 0x18, 0x18,
   0x18, 0xff, 0x7e, 0x3c, 0x18, 0x00, 0x00, 0x00
 };
 
-// 笑脸：停车待机、调速滚动
+// Smile: stopped/idle, scrolling during speed change
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40, 
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
 };
 
-// ===== 点阵驱动 =====
+// ===== Dot matrix driver =====
 void IIC_start() {
   digitalWrite(CLK_Pin, HIGH);
   delayMicroseconds(3);
@@ -79,22 +79,22 @@ void IIC_end() {
 
 void matrix_display(unsigned char matrix_value[]) {
   IIC_start();
-  IIC_send(0x40); // 写数据模式，地址自增
+  IIC_send(0x40); // Write data mode, auto-increment address
   IIC_end();
   
   IIC_start();
-  IIC_send(0xC0); // 从地址 0 开始写
+  IIC_send(0xC0); // Start writing at address 0
   for (int i = 0; i < 16; i++) {
     IIC_send(matrix_value[i]);
   }
   IIC_end();
   
   IIC_start();
-  IIC_send(0x8A); // 开显示，最大亮度
+  IIC_send(0x8A); // Turn on display, maximum brightness
   IIC_end();
 }
 
-// 字模左移 shift 列后显示
+// Display the font bitmap shifted left by shift columns
 void matrix_display_scroll(unsigned char base_pattern[], int shift) {
   unsigned char scroll_data[16];
   for (int i = 0; i < 16; i++) {
@@ -103,8 +103,8 @@ void matrix_display_scroll(unsigned char base_pattern[], int shift) {
   matrix_display(scroll_data);
 }
 
-// ===== 电机驱动 =====
-// 速度带符号：正转 / 反转 / 0 停
+// ===== Motor driver =====
+// Signed speed: forward / reverse / 0 stop
 void driveMotors(int rightSpeed, int leftSpeed) {
   rightSpeed  = constrain(rightSpeed,  -255, 255);
   leftSpeed = constrain(leftSpeed, -255, 255);
@@ -126,37 +126,37 @@ void driveMotors(int rightSpeed, int leftSpeed) {
   }
 }
 
-// 每个动作同时刷新点阵图案
+// Each action also refreshes the dot matrix pattern
 void goForward(int speed) {
-  matrix_display(heart);        // 前进：爱心
+  matrix_display(heart);        // Forward: heart
   driveMotors(speed, speed);
 }
 
 void goBackward(int speed) {
-  matrix_display(arrow_down);   // 后退：向下箭头
+  matrix_display(arrow_down);   // Backward: down arrow
   driveMotors(-speed, -speed);
 }
 
 void spinRight(int speed) {
-  matrix_display(arrow_left);   // 原地右转，点阵显示左箭头
+  matrix_display(arrow_left);   // Spot turn right, dot matrix shows left arrow
   driveMotors(-speed, speed);
 }
 
 void spinLeft(int speed) {
-  matrix_display(arrow_right);  // 原地左转，点阵显示右箭头
+  matrix_display(arrow_right);  // Spot turn left, dot matrix shows right arrow
   driveMotors(speed, -speed);
 }
 
 void stopCar() {
-  matrix_display(smile);        // 停车：笑脸
+  matrix_display(smile);        // Stop: smile
   driveMotors(0, 0);
 }
 
-// ===== 初始化 =====
+// ===== Initialization =====
 void setup() {
   Serial.begin(115200);
 
-  // 点阵上电清屏
+  // Clear dot matrix display on power on
   pinMode(CLK_Pin, OUTPUT);
   pinMode(DIN_Pin, OUTPUT);
   digitalWrite(CLK_Pin, HIGH);
@@ -164,58 +164,58 @@ void setup() {
   unsigned char clear_data[16] = {0};
   matrix_display(clear_data);
 
-  // 方向脚输出，调速脚启用 PWM
+  // Direction pins as output, speed pins use PWM
   pinMode(MOTOR_BIN, OUTPUT);
   pinMode(MOTOR_AIN, OUTPUT);
   pinMode(MOTOR_BEN, OUTPUT);
   pinMode(MOTOR_AEN, OUTPUT);
-  ledcAttach(MOTOR_BEN, 1000, 8);  // 1 kHz，8 位
+  ledcAttach(MOTOR_BEN, 1000, 8);  // 1 kHz, 8-bit
   ledcAttach(MOTOR_AEN, 1000, 8);
 
-  // 上电停车并显示笑脸
+  // Stop and show smile on power on
   stopCar();
-  Serial.println("电机驱动实验开始，1 秒后动作");
+  Serial.println("Motor driving experiment starts, action in 1 second");
   delay(1000);
 }
 
-// ===== 主循环 =====
+// ===== Main loop =====
 void loop() {
-  // 直行 2 s
-  Serial.println("前进（显示爱心）");
+  // Forward for 2 s
+  Serial.println("Forward (show heart)");
   goForward(SPEED_RUN);
   delay(2000);
 
   stopCar();
   delay(500);
 
-  // 后退 2 s
-  Serial.println("后退（显示向下箭头）");
+  // Backward for 2 s
+  Serial.println("Backward (show down arrow)");
   goBackward(SPEED_RUN);
   delay(2000);
 
   stopCar();
   delay(500);
 
-  // 原地右转 1.5 s
-  Serial.println("原地右转");
+  // Spot turn right for 1.5 s
+  Serial.println("Spot turn right");
   spinRight(SPEED_TURN);
   delay(1500);
 
   stopCar();
   delay(500);
 
-  // 原地左转 1.5 s
-  Serial.println("原地左转");
+  // Spot turn left for 1.5 s
+  Serial.println("Spot turn left");
   spinLeft(SPEED_TURN);
   delay(1500);
 
   stopCar();
   delay(1000);
 
-  // 调速：占空比 0→255→0，点阵同步滚动
+  // Speed control: duty cycle 0→255→0, dot matrix scrolls along
   int scroll_step = 0;
 
-  Serial.println("加速：占空比 0 -> 255");
+  Serial.println("Accelerate: duty cycle 0 -> 255");
   for (int duty = 0; duty <= 255; duty += 5) {
     driveMotors(duty, duty);
     if (duty % 20 == 0) {
@@ -224,7 +224,7 @@ void loop() {
     delay(20);
   }
 
-  Serial.println("减速：占空比 255 -> 0");
+  Serial.println("Decelerate: duty cycle 255 -> 0");
   for (int duty = 255; duty >= 0; duty -= 5) {
     driveMotors(duty, duty);
     if (duty % 20 == 0) {
@@ -234,6 +234,6 @@ void loop() {
   }
 
   stopCar();
-  Serial.println("停止，2 秒后进入下一轮");
+  Serial.println("Stop, next round in 2 seconds");
   delay(2000);
 }

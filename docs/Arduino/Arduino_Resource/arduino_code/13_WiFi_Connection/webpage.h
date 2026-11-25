@@ -1,13 +1,13 @@
 #ifndef WEBPAGE_H
 #define WEBPAGE_H
 
-// 网页内容单独存放
+// Web page content is stored separately
 
 const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE html><html><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>迷你履带坦克 V4.0 - 联网测试</title>
+<title>Mini Tracked Tank V4.0 - Wi-Fi Connection</title>
 <style>
 body{font-family:-apple-system,"Microsoft YaHei",sans-serif;text-align:center;background:#f2f3f5;margin:0;padding:16px}
 .card{background:#fff;border-radius:14px;padding:16px;max-width:420px;margin:0 auto}
@@ -19,15 +19,15 @@ p{font-size:17px;margin:12px 0}
 b{color:#e53935;font-size:22px}
 </style></head><body>
 <div class="card">
-<h2>迷你履带坦克 V4.0</h2>
-<p>云台角度：<b id="a">90</b> °</p>
+<h2>Mini Tracked Tank V4.0</h2>
+<p>Pan angle: <b id="a">90</b> °</p>
 <div class="row">
-<button onclick="pan(180)">左 180°</button>
-<button onclick="pan(90)">中 90°</button>
-<button onclick="pan(0)">右 0°</button>
+<button onclick="pan(180)">Left 180°</button>
+<button onclick="pan(90)">Center 90°</button>
+<button onclick="pan(0)">Right 0°</button>
 </div>
-<button class="wide" onclick="readD()">测一次距离</button>
-<p>前方距离：<b id="d">--</b> cm</p>
+<button class="wide" onclick="readD()">Measure Distance</button>
+<p>Front distance: <b id="d">--</b> cm</p>
 </div>
 <script>
 function pan(v){

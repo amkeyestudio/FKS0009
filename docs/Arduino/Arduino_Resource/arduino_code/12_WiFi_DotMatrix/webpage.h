@@ -1,13 +1,13 @@
 #ifndef WEBPAGE_H
 #define WEBPAGE_H
 
-// 网页内容单独存放
+// Web page content stored separately
 
 const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE html><html><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>点阵弹幕</title>
+<title>Dot Matrix Message</title>
 <style>
 body{font-family:-apple-system,"Microsoft YaHei",sans-serif;background:#1a1a1a;color:#ddd;
      text-align:center;margin:0;padding:20px}
@@ -21,13 +21,13 @@ button{margin-top:12px;width:100%;height:52px;font-size:19px;border:none;border-
 p{font-size:13px;color:#777;margin:14px 0 0;line-height:1.6}
 </style></head><body>
 <div class="card">
-<h2>点阵弹幕</h2>
+<h2>Dot Matrix Message</h2>
 <form action="/msg" method="get">
-  <input name="t" maxlength="24" placeholder="输入英文或数字" autocomplete="off">
-  <button type="submit">发送到点阵</button>
+  <input name="t" maxlength="24" placeholder="Enter letters or numbers" autocomplete="off">
+  <button type="submit">Send to Dot Matrix</button>
 </form>
-<p>只支持大写字母、数字和空格，最多 24 个字符<br>
-短的（一屏放得下）会静止显示在中间，长的（比如 LOVE）自动横向滚动</p>
+<p>Only uppercase letters, numbers, and spaces are supported, up to 24 characters<br>
+Short text (fits on one screen) is displayed statically in the center; long text (such as LOVE) scrolls horizontally</p>
 </div>
 </body></html>
 )rawliteral";

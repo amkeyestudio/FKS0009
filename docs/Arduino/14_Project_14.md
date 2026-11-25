@@ -1,87 +1,88 @@
-### 项目 14：Wi-Fi 控车
+### Project 14: Wi-Fi Car Control
 
-#### **1. 简介：**
+#### **1. Introduction:**
 
-![用手机操控机器人](media/intro_14.jpg){width=520px}
+![Controlling a robot with a phone](media/intro_14.jpg){width=520px}
 
-手机当遥控器，这次控制的是车。页面上一组方向键，按住车走，松开车停。比红外遥控器好用在于 Wi-Fi 没有方向性——隔着墙、背对着车也能控制，只要还在同一个局域网里。
+Use the phone as a remote — this time to drive the car. A direction pad on the page: hold a key and the car goes, release and it stops. Unlike an IR remote, Wi-Fi has no directionality — it works through a wall or from behind the car, as long as everything is on the same LAN.
 
-代价是延迟不固定：一个指令要经路由器转一圈，快的时候二十几毫秒，忙起来上百毫秒，还可能丢包。所以规则和红外遥控车一样：1.5 秒没有新指令就自动停车。
+The price is a variable delay. A command makes a round trip through the router — a few tens of milliseconds when things are quiet, over a hundred when the network is busy, and sometimes the packet is simply lost. So use the same rule as the IR remote control car: stop automatically if no new command arrives within 1.5 s.
 
-按键方式也不一样。红外按一下发一帧，网页按钮是按下、松开各发一次，所以前进和停止是两条独立指令，松手时浏览器一定补一条停。
+The buttons behave differently too. An IR remote sends one frame per press; a web button fires once on press and once on release, so forward and stop are two separate commands — and the browser always sends the stop on release.
 
-按住上，两轮同速前进；按左，两轮一正一反原地左转；松手立停。把手机 Wi-Fi 关掉，车会在 1.5 秒后自己停下来。
+Hold up and both tracks run at the same speed forward; press left and the two sides run in opposite directions to spin left in place; release and the car stops at once. Turn off the phone's Wi-Fi and the car will stop by itself 1.5 s later.
 
-#### **2. 所需清单：**
+#### **2. Parts Needed:**
 
-本课用到的器件：
+Parts used in this lesson:
 
 |     |     |
 | :---: | :---: |
-| ![](../media/kit_04.png){width=200px}<br><span style="font-size:0.85em">DRV8835 电机扩展板 ×1</span> | ![](../media/kit_02.png){width=200px}<br><span style="font-size:0.85em">履带底盘总成 ×1</span> |
-| ![](../media/kit_03.png){width=200px}<br><span style="font-size:0.85em">ESP32-S3 开发板 ×1</span> | <span style="font-size:0.85em">2.4 GHz 无线路由器或手机热点 ×1</span> |
-> ⚠️ **全是第 2 章装好的器件，本表只作对照，不用拆；下面的接线说明只标清接线方式，供对照，不必拆装。完整物料见 1.4 套件清单。**
-#### **3. 参数：**
+| ![](../media/kit_04.png){width=200px}<br><span style="font-size:0.85em">DRV8835 motor driver expansion board ×1</span> | ![](../media/kit_02.png){width=200px}<br><span style="font-size:0.85em">Tracked chassis assembly ×1</span> |
+| ![](../media/kit_03.png){width=200px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | <span style="font-size:0.85em">2.4 GHz wireless router or phone hotspot ×1</span> |
+> ⚠️ **All parts were installed back in Chapter 2; this table is for reference only — there is nothing to take apart. The wiring notes below only show how the connections are made, for reference; no assembly or disassembly is required. For the complete parts list, see 1.4 Kit Parts List.**
+#### **3. Parameters:**
 
-| 项目 | 参数 |
+| Item | Value |
 | --- | --- |
-| 网页端口 | 80 |
-| 直行速度 | 180 |
-| 原地转速度 | 180 |
-| 指令超时 | 1500 ms |
-| 指令格式 | `/cmd?d=f|b|l|r|s` |
-| 左轮 AIN / AEN | IO38 / IO21 |
-| 右轮 BIN / BEN | IO40 / IO41 |
+| Web page port | 80 |
+| Straight travel speed | 180 |
+| Spin-in-place speed | 180 |
+| Command timeout | 1500 ms |
+| Command format | `/cmd?d=f|b|l|r|s` |
+| Left wheel AIN / AEN | IO38 / IO21 |
+| Right wheel BIN / BEN | IO40 / IO41 |
 
-#### **4. 接线说明：**
+#### **4. Wiring:**
 
-| 信号 | 主控 GPIO |
+| Signal | Controller GPIO |
 | --- | :---: |
-| 左轮 AIN（方向） | IO38 |
-| 左轮 AEN（调速） | IO21 |
-| 右轮 BIN（方向） | IO40 |
-| 右轮 BEN（调速） | IO41 |
+| Left wheel AIN (direction) | IO38 |
+| Left wheel AEN (speed) | IO21 |
+| Right wheel BIN (direction) | IO40 |
+| Right wheel BEN (speed) | IO41 |
 
-这一课不接传感器，只接电机。Wi-Fi 是片内功能。
+This lesson wires no sensors, only the motors. Wi-Fi is built into the chip.
 
 ![](media/PRO14.png)
 
-#### **5. 流程图：**
+#### **5. Flowchart:**
 
-从手指按下到轮子转起来，中间隔着浏览器、路由器和板子三层：
+Between a finger touching the screen and the wheels turning, the signal passes through three layers — browser, router and board:
 
 ![](media/wifi_car_flow.png)
 
-#### **6. 测试代码：**
+#### **6. Test Code:**
 
-> **上传前先改一处**：把下面 `WIFI_SSID`、`WIFI_PASS` 换成自己的 Wi-Fi 名称和密码，不改连不上。
+> **Before uploading, change one thing**: replace `WIFI_SSID` and `WIFI_PASS` below with your own Wi-Fi name and password — otherwise it won't connect.
 >
-> 另外两点要同时满足：Wi-Fi 必须是 **2.4 GHz**（板子不支持 5 GHz），手机和车要在**同一个局域网**——否则浏览器打不开板子的 IP。
+> Two more conditions must hold at the same time: the Wi-Fi must be **2.4 GHz** (the board doesn't support 5 GHz), and the phone and the robot must be on the **same LAN** — otherwise the browser can't open the board's IP.
 
-> **本课工程有两个文件**：`14_WiFi_Car_Control.ino` 和 `webpage.h`。网页的 HTML 全部放在 `webpage.h`，`.ino` 里只留 Arduino 逻辑；两个文件放在同一个文件夹，少一个编译不过。
+> **This project has two files**: `14_WiFi_Car_Control.ino` and `webpage.h`. All the page HTML lives in `webpage.h`; the `.ino` keeps only the Arduino logic. Put both files in the same folder — if one is missing, compilation fails.
 
 ```cpp
 #include <WiFi.h>
 #include <WebServer.h>
-#include "webpage.h"  // 网页内容
+#include "webpage.h"  // Web page content
 
 // ===== Wi-Fi =====
-// 仅支持 2.4 GHz
-const char* WIFI_SSID = "你的WiFi名字";
-const char* WIFI_PASS = "你的WiFi密码";
+// Only supports 2.4 GHz
+const char* WIFI_SSID = "Your WiFi name";
+const char* WIFI_PASS = "Your WiFi password";
 
-// ===== 引脚 =====
-#define MOTOR_AIN 38  // A 路方向
-#define MOTOR_AEN 21  // A 路调速
-#define MOTOR_BIN 40  // B 路方向
-#define MOTOR_BEN 41  // B 路调速
 
-// ===== 速度 =====
-#define SPEED_RUN  180  // 直行
-#define SPEED_TURN 180  // 原地转
+// ===== Pins =====
+#define MOTOR_AIN 38  // Channel A direction
+#define MOTOR_AEN 21  // Channel A speed control
+#define MOTOR_BIN 40  // Channel B direction
+#define MOTOR_BEN 41  // Channel B speed control
 
-// 指令超时（ms）自动停车
-// 网络丢包或手机锁屏时防止失控
+// ===== Speed =====
+#define SPEED_RUN  180  // Forward
+#define SPEED_TURN 180  // Spin in place
+
+// Auto-stop when a command times out (ms)
+// Prevents loss of control on packet loss or when the phone screen locks
 #define STOP_AFTER 1500
 
 WebServer server(80);
@@ -97,26 +98,26 @@ void setup() {
   ledcAttach(MOTOR_AEN, 1000, 8);
   stopCar();
 
-  Serial.print("正在连接 ");
+  Serial.print("Connecting to ");
   Serial.println(WIFI_SSID);
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
 
-  // 阻塞等待连接成功
+  // Block until the connection succeeds
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
   Serial.println();
-  Serial.println("WiFi 已连接");
-  Serial.print("板子的 IP：");
-  Serial.println(WiFi.localIP());   // 手机浏览器访问此地址
+  Serial.println("WiFi connected");
+  Serial.print("Board IP: ");
+  Serial.println(WiFi.localIP());   // Open this address in a phone browser
 
   server.on("/", []() {
     server.send_P(200, "text/html; charset=utf-8", index_html);
   });
 
-  // 网页按钮统一入口，d 为方向
+  // Single entry point for web page buttons; d is the direction
   server.on("/cmd", []() {
     String d = server.arg("d");
     runCmd(d);
@@ -124,43 +125,43 @@ void setup() {
   });
 
   server.begin();
-  Serial.println("遥控车已就绪");
+  Serial.println("Remote control car is ready");
 }
 
 void loop() {
-  server.handleClient();  // 必须持续调用
+  server.handleClient();  // Must be called continuously
 
-  // 超时停车
+  // Stop on timeout
   if (millis() - lastCmdTime > STOP_AFTER) {
     stopCar();
   }
 }
 
-// 指令分发
+// Command dispatch
 void runCmd(String d) {
-  lastCmdTime = millis();   // 刷新超时计时
+  lastCmdTime = millis();   // Refresh the timeout timer
 
   if (d == "f") {
-    Serial.println("前进");
+    Serial.println("Forward");
     goForward(SPEED_RUN);
   } else if (d == "b") {
-    Serial.println("后退");
+    Serial.println("Backward");
     goBackward(SPEED_RUN);
   } else if (d == "l") {
-    Serial.println("左转");
+    Serial.println("Turn left");
     spinLeft(SPEED_TURN);
   } else if (d == "r") {
-    Serial.println("右转");
+    Serial.println("Turn right");
     spinRight(SPEED_TURN);
   } else {
-    Serial.println("停车");
+    Serial.println("Stop");
     stopCar();
   }
 }
 
-// ===== 电机驱动 =====
-// A 路接左轮、B 路接右轮，与第 7 课一致
-// 若左右相反，互换下面两段
+// ===== Motor driver =====
+// Channel A drives the left wheel, channel B the right wheel, as in Lesson 7
+// If left and right are reversed, swap the two sections below
 void driveMotors(int leftSpeed, int rightSpeed) {
   leftSpeed  = constrain(leftSpeed,  -255, 255);
   rightSpeed = constrain(rightSpeed, -255, 255);
@@ -189,9 +190,9 @@ void spinRight(int speed)  { driveMotors(speed, -speed); }
 void stopCar()             { driveMotors(0, 0); }
 ```
 
-#### **7. 代码解释：**
+#### **7. Code Explanation:**
 
-**(1) 一个接口管五个动作**
+**(1) One endpoint for five actions**
 
 ```cpp
   server.on("/cmd", []() {
@@ -201,11 +202,11 @@ void stopCar()             { driveMotors(0, 0); }
   });
 ```
 
-不再给每个方向开一个路径，而是统一走 `/cmd`，用参数 `d` 区分：`f` 前进、`b` 后退、`l` 左转、`r` 右转、`s` 停车（以及任何没定义的字母，都当停车）。
+Instead of opening a separate path for every direction, everything goes through `/cmd`, with the parameter `d` telling them apart: `f` forward, `b` backward, `l` turn left, `r` turn right, `s` stop (and any undefined letter is also treated as stop).
 
-第 13 课是"一个功能一个路径"（`/pan`、`/distance`），这课动作多、每个动作只有一行，合成一个入口更省事。
+Project 13 used "one path per feature" (`/pan`, `/distance`); here there are many actions and each is only a line or two, so a single entry point is simpler.
 
-**(2) 网页那边只有一句**
+**(2) Just one line on the web side**
 
 ```javascript
 function go(d){
@@ -213,122 +214,122 @@ function go(d){
 }
 ```
 
-`fetch` 发一个 GET 请求，参数直接拼在网址里。`.catch(e=>{})` 吞掉所有错误——手机断网、板子重启都会让请求失败，不吞的话控制台一片红，但车该怎么跑还怎么跑。
+`fetch` sends a GET request with the parameters appended directly to the URL. `.catch(e=>{})` swallows all errors — if the phone loses its connection or the board reboots the request fails; without the catch the console turns red, but the robot keeps doing whatever it was doing.
 
-请求是异步的（`fetch` 不等待返回），所以手指按住按钮时不会因为等上一次响应而卡顿。
+The request is asynchronous (`fetch` doesn't wait for the response), so holding a button doesn't stutter while waiting for the previous one to come back.
 
-用 GET 不用 POST，是因为 GET 的参数就在网址里，服务端一行 `server.arg()` 就能取，省掉解析请求体的代码。代价是参数会出现在浏览历史和日志里——控制指令不敏感，用 GET 最省事。
+GET rather than POST because GET parameters sit right in the URL and a single line of `server.arg()` retrieves them, saving the code needed to parse a request body. The cost is that the parameters appear in browsing history and logs — control commands aren't sensitive, so GET is the easy choice.
 
-**(3) `lastCmdTime` 必须在分支之前刷**
+**(3) `lastCmdTime` must be refreshed before the branches**
 
 ```cpp
 void runCmd(String d) {
-  lastCmdTime = millis();   // 刷新超时计时
+  lastCmdTime = millis();   // Refresh the timeout timer
 
   if (d == "f") {
 ```
 
-注意这句在第一个 `if` 之前，不在每个分支里。放前面意味着**任何** `d` 都算"车还连得上"，包括停车和那些没定义的字母。
+Notice this line sits before the first `if`, not inside each branch. Putting it up front means **any** `d` counts as "the robot is still reachable", including stop and those undefined letters.
 
-放分支里就会出问题：发 `s` 停车时不刷计时，1.5 秒后超时判断又调一次 `stopCar()`——虽然结果一样，但语义乱了。
+Put it inside a branch and you get a problem: sending `s` to stop wouldn't refresh the timer, so 1.5 seconds later the timeout would call `stopCar()` again — the result is the same, but the meaning gets muddled.
 
-这一点和第 11 课的红外车相反。红外那边只有**已知键**才刷计时，因为在遥控器上按到数字键是误触，不该续命；网页这边按钮是固定的，能发出请求就说明手机还连着。
+This is the opposite of the IR car in Project 11. There only **known keys** refreshed the timer, because hitting a number key on the remote is an accidental touch and shouldn't keep the car alive; on the web page the buttons are fixed, so being able to send a request at all means the phone is still connected.
 
-**(4) 五个动作的 `if` 链**
+**(4) The `if` chain for five actions**
 
 ```cpp
   if (d == "f") {
-    Serial.println("前进");
+    Serial.println("Forward");
     goForward(SPEED_RUN);
   } else if (d == "b") {
-    Serial.println("后退");
+    Serial.println("Backward");
     goBackward(SPEED_RUN);
   } else if (d == "l") {
-    Serial.println("左转");
+    Serial.println("Turn left");
     spinLeft(SPEED_TURN);
   } else if (d == "r") {
-    Serial.println("右转");
+    Serial.println("Turn right");
     spinRight(SPEED_TURN);
   }
 ```
 
-四个方向各一支，用 `else if` 串起来。参数是 `String`，所以比较用双引号包起来的字符串 `"f"`，不是字符 `'f'`——写成单引号 C++ 会报类型不匹配。
+Four directions each get a branch, chained with `else if`. The parameter is a `String`, so comparisons use the double-quoted string `"f"`, not the character `'f'` — single quotes would make C++ report a type mismatch.
 
-**(5) `s` 落在 `else` 里**
+**(5) `s` falls into `else`**
 
 ```cpp
   } else {
-    Serial.println("停车");
+    Serial.println("Stop");
     stopCar();
   }
 ```
 
-`runCmd()` 里没有 `if (d == "s")` 这一支。网页上所有按钮的 `onpointerup`（松手）都发 `s`，它一路走到最后的 `else` 才停车。
+There is no `if (d == "s")` branch in `runCmd()`. Every button on the page sends `s` on `onpointerup` (release), and it falls all the way through to the final `else` to stop.
 
-好处是任何打错的字母也当停车处理——**默认往安全的方向兜底**。
+The upside is that any mistyped letter is treated as stop as well — **the default fails safe**.
 
-**(6) `loop()` 里两件事，和红外课同一个结构**
+**(6) Two things in `loop()`, the same structure as the IR lesson**
 
 ```cpp
 void loop() {
-  server.handleClient();  // 必须持续调用
+  server.handleClient();  // Must be called continuously
 
-  // 超时停车
+  // Stop on timeout
   if (millis() - lastCmdTime > STOP_AFTER) {
     stopCar();
   }
 }
 ```
 
-第一件处理网络请求，第二件查超时，两个 `if` 平级。`STOP_AFTER` 也是 1500 ms，和红外课一样。
+The first handles network requests, the second checks the timeout; the two `if`s are siblings. `STOP_AFTER` is also 1500 ms, just like in the IR lesson.
 
-超时在这里的作用比红外更明显：手机走出 Wi-Fi 覆盖、锁屏、浏览器切到后台，`fetch` 都不再发出，但车不会知道——它只会看到"再也没有 `/cmd` 请求进来"。1.5 秒一到就停车，避免车顶着墙一直跑。
+The timeout matters more here than with IR: when the phone walks out of Wi-Fi coverage, locks its screen or switches the browser to the background, `fetch` stops being sent — but the robot has no idea. All it sees is "no more `/cmd` requests coming in". When 1.5 seconds are up it stops, so it doesn't keep driving into a wall.
 
-松手到真正停住之间最多 1.5 秒，这段时间车还在跑，是追尾的高发窗口，测试时手别离开电源。
+At most 1.5 seconds pass between releasing the button and actually stopping; during that window the robot is still moving, a prime moment for a rear-end collision, so keep a hand near the power while testing.
 
-手机上长按按钮，浏览器默认会弹"选择文字/复制"的菜单，还会把长按当成滚动页面的手势。`touch-action:none` 把这些默认行为关掉，`onpointerdown` 才能稳稳地按住持续生效。
+On a phone, long-pressing a button brings up the browser's default "select text / copy" menu and is also treated as a page-scroll gesture. `touch-action:none` disables those defaults so `onpointerdown` can reliably keep the command active.
 
-前面两个 `user-select:none` 是同一个目的：禁止选中文字，否则长按会选中按钮上的字。
+The two `user-select:none` rules serve the same purpose: prevent text selection, otherwise a long press would select the label on the button.
 
-#### **8. 运行现象：**
+#### **8. What You'll See:**
 
-串口打印：
+The serial port prints:
 
 ```text
-正在连接 你的WiFi名字
+Connecting Your WiFi name
 .....
-WiFi 已连接
-板子的 IP：192.168.1.23
-遥控车已就绪
+WiFi connected
+Board IP: 192.168.1.23
+Remote control car ready
 ```
 
-手机页面上一组方向键，按住不放车持续走，松手立停。
+The phone page shows a direction pad; hold a button and the robot keeps moving, release and it stops immediately.
 
-| 操作 | 串口 | 车 |
+| Action | Serial | Robot |
 | --- | --- | --- |
-| 按 ↑ | 前进 | 两轮正转 |
-| 按 ↓ | 后退 | 两轮反转 |
-| 按 ← | 左转 | 原地左转 |
-| 按 → | 右转 | 原地右转 |
-| 松手 / 按停 | 停车 | 立即停 |
-| 强行关掉手机 Wi-Fi | 无输出 | 1.5 s 后自己停 |
+| Press ↑ | Forward | Both wheels rotate forward |
+| Press ↓ | Backward | Both wheels rotate in reverse |
+| Press ← | Turn left | Spin in place to the left |
+| Press → | Turn right | Spin in place to the right |
+| Release / press stop | Stop | Stops immediately |
+| Force the phone's Wi-Fi off | No output | Stops by itself after 1.5 s |
 
-> 【图片待补】手机上方向键页面与小车行驶的同框实拍图。
+> [Image to be added] A photo of the direction-pad page on the phone alongside the robot actually driving.
 
-#### **9. 常见问题解决：**
+#### **9. Troubleshooting:**
 
-**Wi-Fi 连不上、网页打不开，按这个顺序查：**
+**If Wi-Fi won't connect or the page won't open, check in this order:**
 
-(1) **账号密码换了没有**：代码开头的 `WIFI_SSID`、`WIFI_PASS` 还是占位符就烧进去，一定连不上，改成自己路由器的名称和密码。
+(1) **Did you change the credentials?** If `WIFI_SSID` and `WIFI_PASS` at the top of the code are still placeholders when you flash, it will never connect; replace them with your router's name and password.
 
-(2) **串口一行字都没有**：按一下板子上的 RESET 键再试，可能是上一版程序卡住了。
+(2) **Nothing at all on serial?** Press the RESET button on the board and try again — the previous sketch may be stuck.
 
 ![](media/RESET.png){width=340px}
 
-(3) **串口一直冒点、拿不到 IP**：Wi-Fi 连接失败。路由器必须是 **2.4 GHz**，5 GHz 板子不支持；没有 2.4 G 就开手机热点（热点默认 2.4 G）。
+(3) **Dots keep printing on serial, no IP?** Wi-Fi connection failed. The router must be **2.4 GHz**; the board doesn't support 5 GHz. If you have no 2.4 G network, turn on a phone hotspot (hotspots default to 2.4 G).
 
-(4) **拿到 IP 但页面打不开**：地址要带 `http://`，IP 以串口打印的为准；手机必须连同一个 Wi-Fi，两边 IP 前三段要一样。
+(4) **Got an IP but the page won't open?** The address must include `http://`, and the IP must be the one printed on serial; the phone must be on the same Wi-Fi, and the first three octets of both IPs must match.
 
-(5) **网段对、还是打不开**：进路由器后台把**AP 隔离**关掉，开了它同一 Wi-Fi 下的设备互相访问不了。
+(5) **Same subnet but still won't open?** Log in to the router settings and turn off **AP isolation**; when it's enabled, devices on the same Wi-Fi can't reach one another.
 
-(6) 车动起来一顿一顿的，多半是路由器信号弱或者 2.4G 信道拥挤。把手机和车挪近一点，或者进路由器后台换一个信道（1、6、11 三个互不重叠）。如果转弯时一侧轮子明显慢，先查电池电压——Wi-Fi 发射瞬间电流能到 300 mA，电池电量低时电压被拉垮，PWM 输出跟着塌。
+(6) The robot moves in jerks, usually because the router signal is weak or the 2.4 G channel is crowded. Move the phone and robot closer together, or log in to the router and switch channels (1, 6 and 11 don't overlap). If one wheel is noticeably slower when turning, check the battery voltage first — the Wi-Fi transmitter can draw 300 mA in bursts, and a low battery sags under that load, dragging the PWM output down with it.

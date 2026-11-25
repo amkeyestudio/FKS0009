@@ -1,215 +1,215 @@
-### 项目 16：DIY足球竞技小车
+### Project 16: DIY Soccer Robot
 
-#### **1. 简介：**
+#### **1. Introduction:**
 
 ![](media/IMG_9128.JPG)
 
-一台车、一颗 3D 打印球、一个球门，就是一场比赛。如果和朋友一人有一台车可以当成竞技比赛来玩，因为这节课要做的不是会跑的车，而是会比赛的车：屏幕上有比分，进一个球点阵跳笑脸，三秒后回到待机，随时能清零重开。
+One car, one 3D-printed ball and one goal make a match. If you and a friend each have a car, you can play it as a real competition — because what you build here is not a car that merely drives, but a car that plays: a score on the screen, a smiley on the dot matrix when you score, back to standby three seconds later, and a reset whenever you want to start over.
 
-夹爪在这里的用法和第 9 课不一样。第 9 课张开、合紧是给人看姿态；这里张开 140° 是把两片爪围成一个朝前的兜，球被兜在里面可以带着跑；合到 90° 时两片往里收，把球从兜里挤出去。
+The gripper is used differently here than in Lesson 9. There, opening and closing was a pose to show off; here, opening to 140° arranges the two jaws into a forward-facing pocket that holds the ball while the car carries it, and closing to 90° draws the jaws inward to squeeze the ball out of the pocket.
 
-比分和表情都在车上算、车上存，网页只负责显示和发指令——路由器断了，车照样能开、能进球，只是手机上看不到分数。
+The score and the expression are both computed and stored on the car; the web page only displays and sends commands — if the router drops, the car still drives and scores, you just cannot see the score on your phone.
 
-按带球张爪、把球带到门线前，按射门合爪把球挤出，再按进球：点阵立刻变笑脸，三秒后回两只方眼，网页上的比分加一。
+Press Carry to open the gripper, bring the ball up to the goal line, press Shoot to close the gripper and push the ball out, then press Goal: the dot matrix turns into a smiley at once, goes back to two square eyes three seconds later, and the score on the page goes up by one.
 
-#### **2. 所需清单：**
+#### **2. Parts List:**
 
-本课用到的器件：
+Parts used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
-| ![](../media/kit_08.png){width=170px}<br><span style="font-size:0.85em">大型机械夹（半成品） ×1</span> | ![](../media/kit_27.png){width=170px}<br><span style="font-size:0.85em">3D 打印足球（直径 31.25mm） ×1</span> | ![](../media/kit_13.png){width=170px}<br><span style="font-size:0.85em">9G 舵机（180°，配十字臂） ×1</span> |
-| ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED 点阵屏 ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 电机扩展板 ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 开发板 ×1</span> |
-| ![](../media/kit_07.png){width=170px}<br><span style="font-size:0.85em">大型机械夹-发射套（左、右各一） ×1</span> | <span style="font-size:0.85em">2.4 GHz 无线路由器或手机热点 ×1</span> |  |
-> ⚠️ **全部在第 2 章装好，本表只作对照，不用拆；下面的接线说明只标清接线方式，供对照，不必拆装。完整物料见 1.4 套件清单。**
+| ![](../media/kit_08.png){width=170px}<br><span style="font-size:0.85em">Large mechanical gripper (partially assembled) ×1</span> | ![](../media/kit_27.png){width=170px}<br><span style="font-size:0.85em">3D-printed soccer ball (31.25 mm diameter) ×1</span> | ![](../media/kit_13.png){width=170px}<br><span style="font-size:0.85em">9G servo (180°, with cross horn) ×1</span> |
+| ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
+| ![](../media/kit_07.png){width=170px}<br><span style="font-size:0.85em">Large gripper launcher sleeve (one left, one right) ×1</span> | <span style="font-size:0.85em">2.4 GHz Wi-Fi router or phone hotspot ×1</span> |  |
+> ⚠️ **All parts were assembled in Chapter 2; this table is only for reference and nothing needs to be taken apart. The wiring notes below only show how the connections are made, also for reference — no disassembly is needed. For the full parts list, see 1.4 Kit Contents.**
 
-#### **3. 参数：**
+#### **3. Parameters:**
 
-| 项目 | 参数 |
+| Item | Parameter |
 | --- | --- |
-| 行驶速度 | 180 |
-| 原地转速度 | 180 |
-| 夹爪张开 | 140°（兜球） |
-| 夹爪闭合 | 90°（射门） |
-| 指令超时 | 1500 ms |
-| 庆祝时长 | 3 s |
-| 比分接口 | `/score` 返回**比分,状态** |
-| 网页轮询 | 1 s / 次 |
+| Driving speed | 180 |
+| Spin-in-place speed | 180 |
+| Gripper open | 140° (hold the ball) |
+| Gripper closed | 90° (shoot) |
+| Command timeout | 1500 ms |
+| Celebration duration | 3 s |
+| Score endpoint | `/score` returns **score,status** |
+| Web page polling | Once every 1 s |
 
-#### **4. 接线说明：**
+#### **4. Wiring:**
 
-| 模块 | 引脚 | 主控 GPIO |
+| Module | Pin | Controller GPIO |
 | --- | --- | :---: |
-| 左轮 AIN / AEN | 方向 / 调速 | IO38 / IO21 |
-| 右轮 BIN / BEN | 方向 / 调速 | IO40 / IO41 |
-| 夹爪舵机 | 信号 | IO11 |
-| 点阵 | CLK / DIN | IO9 / IO8 |
+| Left wheel AIN / AEN | Direction / speed | IO38 / IO21 |
+| Right wheel BIN / BEN | Direction / speed | IO40 / IO41 |
+| Gripper servo | Signal | IO11 |
+| Dot matrix | CLK / DIN | IO9 / IO8 |
 
-这一课不用超声波、不用循迹、不用云台，只保留**走 + 夹 + 显示**。
+This lesson uses no ultrasonic module, no line tracking, and no pan-tilt — only **drive + grip + display**.
 
 ![](media/PRO16.png)
 
-**机械夹安装步骤**
+**Mechanical gripper installation steps**
 ![](media/IMG_9130.JPG)
 
 ![](media/IMG_9130-2.JPG)
 
 ![](media/IMG_9130-3.JPG)
 
-#### **5. 流程图：**
+#### **5. Flowchart:**
 
-网页发指令、板子执行、回头把比分和表情报给网页，三者构成一个闭环：
+The page sends a command, the board executes it, then reports the score and expression back to the page — the three together form a closed loop:
 
 ![](media/soccer_flow.png)
 
-#### **6. 测试代码：**
+#### **6. Test Code:**
 
-> **上传前先改一处**：把下面 `WIFI_SSID`、`WIFI_PASS` 换成自己的 Wi-Fi 名称和密码，不改连不上。
+> **Change one thing before uploading**: replace `WIFI_SSID` and `WIFI_PASS` below with your own Wi-Fi name and password, or the connection will fail.
 >
-> 另外两点要同时满足：Wi-Fi 必须是 **2.4 GHz**（板子不支持 5 GHz），手机和车要在**同一个局域网**——否则浏览器打不开板子的 IP。
+> Two more conditions must both hold: the Wi-Fi must be **2.4 GHz** (the board does not support 5 GHz), and the phone and the car must be on the **same LAN** — otherwise the browser cannot open the board's IP address.
 
-> **本课工程有两个文件**：`16_Soccer_Robot.ino` 和 `webpage.h`。网页的 HTML 全部放在 `webpage.h`，`.ino` 里只留 Arduino 逻辑；两个文件放在同一个文件夹，少一个编译不过。
+> **This lesson's project has two files**: `16_Soccer_Robot.ino` and `webpage.h`. All the web page HTML lives in `webpage.h`; the `.ino` holds only the Arduino logic. Put both files in the same folder — compilation fails if either is missing.
 
 ```cpp
 #include <WiFi.h>
 #include <WebServer.h>
 #include <ESP32Servo.h>
-#include "webpage.h"  // 网页内容
+#include "webpage.h"  // Web page content
 
 // ===== Wi-Fi =====
-// 仅支持 2.4 GHz
-const char* WIFI_SSID = "你的WiFi名字";
-const char* WIFI_PASS = "你的WiFi密码";
+// Only 2.4 GHz is supported
+const char* WIFI_SSID = "Your WiFi name";
+const char* WIFI_PASS = "Your WiFi password";
 
-// ===== 电机引脚 =====
-#define MOTOR_AIN 38  // A 路方向：左轮
-#define MOTOR_AEN 21  // A 路调速：左轮
-#define MOTOR_BIN 40  // B 路方向：右轮
-#define MOTOR_BEN 41  // B 路调速：右轮
+// ===== Motor pins =====
+#define MOTOR_AIN 38  // Channel A direction: left wheel
+#define MOTOR_AEN 21  // Channel A speed: left wheel
+#define MOTOR_BIN 40  // Channel B direction: right wheel
+#define MOTOR_BEN 41  // Channel B speed: right wheel
 
-// ===== 夹爪舵机 =====
-#define CLAW_SERVO_PIN 11  // 夹爪舵机，同第 9 课
+// ===== Gripper servo =====
+#define CLAW_SERVO_PIN 11  // Gripper servo, same as Lesson 9
 
-// ===== 点阵引脚 =====
-#define CLK_Pin 9  // 时钟，接模块 CLK
-#define DIN_Pin 8  // 数据，接模块 DIN
+// ===== Dot matrix pins =====
+#define CLK_Pin 9  // Clock, connect to module CLK
+#define DIN_Pin 8  // Data, connect to module DIN
 
-// ===== 速度 =====
-#define SPEED_RUN   180  // 行驶速度
-#define SPEED_TURN  180  // 原地转向速度
+// ===== Speed =====
+#define SPEED_RUN   180  // Driving speed
+#define SPEED_TURN  180  // Spot-turn speed
 
-// ===== 夹爪角度 =====
-#define CLAW_OPEN   140  // 张开
-#define CLAW_CLOSE   90  // 夹紧
+// ===== Gripper angles =====
+#define CLAW_OPEN   140  // Open
+#define CLAW_CLOSE   90  // Closed
 
-// ===== 超时保护 =====
-#define STOP_AFTER 1500  // 指令超时（ms）自动停车
+// ===== Timeout protection =====
+#define STOP_AFTER 1500  // Auto-stop on command timeout (ms)
 
-// ===== 表情编号 =====
-#define FACE_EYES  0  // 待机：眼睛
-#define FACE_SMILE 1  // 进球：笑脸
+// ===== Expression numbers =====
+#define FACE_EYES  0  // Standby: eyes
+#define FACE_SMILE 1  // Goal scored: smiling face
 
-// 16 字节对应 16 列，每字节 8 位对应一列 8 行
+// 16 bytes correspond to 16 columns, each byte's 8 bits correspond to 8 rows in one column
 
-// 待机：两只方眼
+// Standby: two square eyes
 unsigned char eyes[] = {
   0x00, 0x00, 0x00, 0x00, 0x1C, 0x1C, 0x00, 0x00,
   0x00, 0x00, 0x1C, 0x1C, 0x00, 0x00, 0x00, 0x00
 };
 
-// 笑脸：进球
+// Smiling face: goal scored
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
 };
 
-WebServer server(80);  // 网页服务器
-Servo clawServo;       // 夹爪舵机
+WebServer server(80);  // Web server
+Servo clawServo;       // Gripper servo
 
-int score = 0;                      // 当前比分
-unsigned long lastCmdTime = 0;      // 最后指令时刻
-unsigned long smileUntil = 0;       // 笑脸结束时刻
-int curFace = -1;                   // 当前表情，-1 表示未显示
+int score = 0;                      // Current score
+unsigned long lastCmdTime = 0;      // Time of the last command
+unsigned long smileUntil = 0;       // Time when the smile ends
+int curFace = -1;                   // Current expression, -1 means not shown
 
 void setup() {
-  // 两线拉高，总线置空闲
+  // Pull both lines HIGH to set the bus idle
   pinMode(CLK_Pin, OUTPUT);
   pinMode(DIN_Pin, OUTPUT);
   digitalWrite(CLK_Pin, HIGH);
   digitalWrite(DIN_Pin, HIGH);
-  showFace(FACE_EYES);  // 上电显示待机表情
+  showFace(FACE_EYES);  // Show standby expression on power on
 
-  // 电机引脚
+  // Motor pins
   pinMode(MOTOR_BIN, OUTPUT);
   pinMode(MOTOR_AIN, OUTPUT);
-  ledcAttach(MOTOR_BEN, 1000, 8);  // 1 kHz，8 位
+  ledcAttach(MOTOR_BEN, 1000, 8);  // 1 kHz, 8-bit
   ledcAttach(MOTOR_AEN, 1000, 8);
   stopCar();
 
-  // 夹爪：50 Hz，脉宽 500~2500 µs
+  // Gripper: 50 Hz, pulse width 500-2500 µs
   ESP32PWM::allocateTimer(0);
   clawServo.setPeriodHertz(50);
   clawServo.attach(CLAW_SERVO_PIN, 500, 2500);
-  clawServo.write(CLAW_OPEN);  // 上电张开
+  clawServo.write(CLAW_OPEN);  // Open on power on
   delay(300);
 
-  // 连接 Wi-Fi
+  // Connect to Wi-Fi
   Serial.begin(115200);
   delay(300);
-  Serial.print("正在连接 ");
+  Serial.print("Connecting to ");
   Serial.println(WIFI_SSID);
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
 
-  // 阻塞等待连接
+  // Block until connected
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
   Serial.println();
-  Serial.println("WiFi 已连接");
-  Serial.print("板子的 IP：");
-  Serial.println(WiFi.localIP());  // 手机浏览器访问此地址
+  Serial.println("WiFi connected");
+  Serial.print("Board IP: ");
+  Serial.println(WiFi.localIP());  // Open this address in a phone browser
 
-  // 首页
+  // Home page
   server.on("/", []() {
     server.send_P(200, "text/html; charset=utf-8", index_html);
   });
 
-  // 指令入口，d 为动作名
+  // Command endpoint, d is the action name
   server.on("/cmd", []() {
     String d = server.arg("d");
-    server.send(200, "text/plain", runCmd(d));  // 返回"比分,状态"，网页直接用
+    server.send(200, "text/plain", runCmd(d));  // Return "score,status" for direct use by the web page
   });
 
-  // 比分查询，网页每秒轮询
+  // Score query, polled once per second by the web page
   server.on("/score", []() {
     server.send(200, "text/plain", String(score) + "," + faceName());
   });
 
   server.begin();
-  Serial.println("足球车已就绪");
+  Serial.println("Soccer car ready");
 }
 
 void loop() {
-  server.handleClient();  // 必须持续调用
+  server.handleClient();  // Must be called continuously
 
-  // 超时停车
+  // Stop on timeout
   if (millis() - lastCmdTime > STOP_AFTER) {
     stopCar();
   }
 
-  // 笑脸 3 s 后恢复待机
+  // Smiling face returns to standby after 3 s
   if (smileUntil != 0 && millis() > smileUntil) {
     smileUntil = 0;
     showFace(FACE_EYES);
   }
 }
 
-// ===== 指令分发 =====
-// 返回 "比分,状态"，供网页同步刷新
+// ===== Command dispatch =====
+// Return "score,status" for web page sync
 String runCmd(String d) {
-  lastCmdTime = millis();  // 刷新超时计时
+  lastCmdTime = millis();  // Refresh the timeout timer
 
   if (d == "f") {
     goForward(SPEED_RUN);
@@ -220,75 +220,75 @@ String runCmd(String d) {
   } else if (d == "r") {
     spinRight(SPEED_TURN);
   } else if (d == "carry") {
-    clawServo.write(CLAW_OPEN);   // 带球：张开
+    clawServo.write(CLAW_OPEN);   // Dribbling: open
   } else if (d == "shoot") {
-    clawServo.write(CLAW_CLOSE);  // 射门：闭合
+    clawServo.write(CLAW_CLOSE);  // Shooting: close
   } else if (d == "goal") {
-    score++;                        // 手动记分
-    celebrate();                    // 播放庆祝表情
+    score++;                        // Manual scoring
+    celebrate();                    // Play celebration expression
   } else if (d == "reset") {
-    score = 0;                      // 清零
+    score = 0;                      // Reset to zero
   } else {
-    stopCar();                      // 其余指令一律停车
+    stopCar();                      // Stop for all other commands
   }
 
   return String(score) + "," + faceName();
 }
 
-// ===== 夹爪用法 =====
-// 两个状态对应两个动作：
-//   张开 140°：球兜在爪内，行进时带球
-//   闭合 90°：爪臂收拢挤出，即射门
+// ===== Gripper usage =====
+// Two states correspond to two actions:
+//   Open 140°: ball held in the gripper, dribble while moving
+//   Closed 90°: gripper arms close and push the ball out, i.e. shoot
 
-// ===== 进球庆祝 =====
+// ===== Goal celebration =====
 void celebrate() {
-  showFace(FACE_SMILE);        // 切笑脸
-  smileUntil = millis() + 3000;  // 3 s 后恢复
+  showFace(FACE_SMILE);        // Switch to smiling face
+  smileUntil = millis() + 3000;  // Restore after 3 s
 }
 
-// 当前表情名，供网页显示
+// Current expression name, for the web page to display
 String faceName() {
-  if (curFace == FACE_SMILE) return "进球！";
-  return "待命";
+  if (curFace == FACE_SMILE) return "Goal!";
+  return "Standby";
 }
 
-// ===== 点阵显示 =====
-// 仅表情变化时写屏
+// ===== Dot matrix display =====
+// Only refresh the display when the expression changes
 void showFace(int face) {
-  if (face == curFace) return;  // 表情未变
+  if (face == curFace) return;  // Expression unchanged
   curFace = face;
 
   if (face == FACE_EYES) {
-    matrix_display(eyes);   // 待机
+    matrix_display(eyes);   // Standby
   } else {
-    matrix_display(smile);  // 笑脸
+    matrix_display(smile);  // Smiling face
   }
 }
 
-// 将 16 字节字模写入点阵屏显存
+// Write the 16-byte font bitmap into the dot matrix display buffer
 void matrix_display(unsigned char matrix_value[]) {
-  // 0x40：写数据模式，地址自增
+  // 0x40: write data mode, auto-increment address
   IIC_start();
   IIC_send(0x40);
   IIC_end();
 
-  // 0xC0：显存起始地址 0
+  // 0xC0: display buffer start address 0
   IIC_start();
   IIC_send(0xC0);
 
-  // 连写 16 列
+  // Write 16 columns consecutively
   for (int i = 0; i < 16; i++) {
     IIC_send(matrix_value[i]);
   }
   IIC_end();
 
-  // 0x8A：开显示，亮度最大
+  // 0x8A: display on, maximum brightness
   IIC_start();
   IIC_send(0x8A);
   IIC_end();
 }
 
-// 起始条件：CLK 高电平期间 DIN 下降沿
+// Start condition: falling edge of DIN while CLK is HIGH
 void IIC_start() {
   digitalWrite(CLK_Pin, HIGH);
   delayMicroseconds(3);
@@ -298,13 +298,13 @@ void IIC_start() {
   delayMicroseconds(3);
 }
 
-// 发送 1 字节，低位在前：CLK 低时置数据，上升沿采样
+// Send one byte, LSB first: set data while CLK is LOW, sample on rising edge
 void IIC_send(unsigned char send_data) {
   for (int i = 0; i < 8; i++) {
-    digitalWrite(CLK_Pin, LOW);  // 拉低时钟，准备数据
+    digitalWrite(CLK_Pin, LOW);  // Pull clock LOW to prepare data
     delayMicroseconds(3);
 
-    // 从 bit0 起逐位发送
+    // Send bit by bit starting from bit0
     if (send_data & 0x01) {
       digitalWrite(DIN_Pin, HIGH);
     } else {
@@ -312,14 +312,14 @@ void IIC_send(unsigned char send_data) {
     }
     delayMicroseconds(3);
 
-    digitalWrite(CLK_Pin, HIGH); // 拉高时钟，模块采样
+    digitalWrite(CLK_Pin, HIGH); // Pull clock HIGH for the module to sample
     delayMicroseconds(3);
 
-    send_data = send_data >> 1;  // 右移，取出下一位
+    send_data = send_data >> 1;  // Shift right to get the next bit
   }
 }
 
-// 停止条件：CLK 高电平期间 DIN 上升沿
+// Stop condition: rising edge of DIN while CLK is HIGH
 void IIC_end() {
   digitalWrite(CLK_Pin, LOW);
   delayMicroseconds(3);
@@ -331,110 +331,118 @@ void IIC_end() {
   delayMicroseconds(3);
 }
 
-// ===== 电机驱动 =====
-// A 路接左轮、B 路接右轮（与第 7 课一致）
-// leftSpeed 写 B 路，rightSpeed 写 A 路
+// ===== Motor driver =====
+// Channel A drives the left wheel, channel B drives the right wheel (same as Lesson 7)
+// leftSpeed goes to channel B, rightSpeed goes to channel A
 void driveMotors(int leftSpeed, int rightSpeed) {
-  leftSpeed  = constrain(leftSpeed,  -255, 255);  // 右轮限幅
-  rightSpeed = constrain(rightSpeed, -255, 255);  // 左轮限幅
+  leftSpeed  = constrain(leftSpeed,  -255, 255);  // Right wheel limit
+  rightSpeed = constrain(rightSpeed, -255, 255);  // Left wheel limit
 
-  // A 路：左轮
+  // Channel A: left wheel
   if (rightSpeed >= 0) {
-    digitalWrite(MOTOR_BIN, HIGH);     // 拉高：正转
-    ledcWrite(MOTOR_BEN, rightSpeed);  // 占空比 = 速度
+    digitalWrite(MOTOR_BIN, HIGH);     // Pull HIGH: forward rotation
+    ledcWrite(MOTOR_BEN, rightSpeed);  // Duty cycle = speed
   } else {
-    digitalWrite(MOTOR_BIN, LOW);      // 拉低：反转
-    ledcWrite(MOTOR_BEN, -rightSpeed); // 取绝对值
+    digitalWrite(MOTOR_BIN, LOW);      // Pull LOW: reverse rotation
+    ledcWrite(MOTOR_BEN, -rightSpeed); // Take absolute value
   }
 
-  // B 路：右轮
+  // Channel B: right wheel
   if (leftSpeed >= 0) {
-    digitalWrite(MOTOR_AIN, HIGH);    // 拉高：正转
-    ledcWrite(MOTOR_AEN, leftSpeed);  // 占空比 = 速度
+    digitalWrite(MOTOR_AIN, HIGH);    // Pull HIGH: forward rotation
+    ledcWrite(MOTOR_AEN, leftSpeed);  // Duty cycle = speed
   } else {
-    digitalWrite(MOTOR_AIN, LOW);     // 拉低：反转
-    ledcWrite(MOTOR_AEN, -leftSpeed); // 取绝对值
+    digitalWrite(MOTOR_AIN, LOW);     // Pull LOW: reverse rotation
+    ledcWrite(MOTOR_AEN, -leftSpeed); // Take absolute value
   }
 }
 
-// 基本动作
-void goForward(int speed)  { driveMotors(speed, speed); }    // 前进：左右同速正转
-void goBackward(int speed) { driveMotors(-speed, -speed); }  // 后退：左右同速反转
-void spinLeft(int speed)   { driveMotors(-speed, speed); }   // 左转：左后退右前进
-void spinRight(int speed)  { driveMotors(speed, -speed); }   // 右转：左前进右后退
-void stopCar()             { driveMotors(0, 0); }            // 停止：占空比归零
+// Basic actions
+void goForward(int speed)  { driveMotors(speed, speed); }    // Forward: both wheels forward at the same speed
+void goBackward(int speed) { driveMotors(-speed, -speed); }  // Backward: both wheels reverse at the same speed
+void spinLeft(int speed)   { driveMotors(-speed, speed); }   // Turn left: left wheel back, right wheel forward
+void spinRight(int speed)  { driveMotors(speed, -speed); }   // Turn right: left wheel forward, right wheel back
+void stopCar()             { driveMotors(0, 0); }            // Stop: duty cycle to zero
 ```
 
-#### **7. 代码解释：**
+#### **7. Code Explanation:**
 
-**(1) 引脚、速度、夹爪角度**
+**(1) Pins, speed, and gripper angles**
 
 ```cpp
-#define MOTOR_AIN 38  // A 路方向：左轮
-#define MOTOR_AEN 21  // A 路调速：左轮
-#define MOTOR_BIN 40  // B 路方向：右轮
-#define MOTOR_BEN 41  // B 路调速：右轮
+// ===== Motor pins =====
+#define MOTOR_AIN 38  // Channel A direction: left wheel
+#define MOTOR_AEN 21  // Channel A speed control: left wheel
+#define MOTOR_BIN 40  // Channel B direction: right wheel
+#define MOTOR_BEN 41  // Channel B speed control: right wheel
 
-#define CLAW_SERVO_PIN 11  // 夹爪舵机，同第 9 课
+// ===== Gripper servo =====
+#define CLAW_SERVO_PIN 11  // Gripper servo, same as Lesson 9
 
-#define SPEED_RUN   180  // 行驶速度
-#define SPEED_TURN  180  // 原地转向速度
+// ===== Dot matrix pins =====
+#define CLK_Pin 9  // Clock, connected to the module's CLK
+#define DIN_Pin 8  // Data, connected to the module's DIN
 
-#define CLAW_OPEN   140  // 张开
-#define CLAW_CLOSE   90  // 夹紧
+// ===== Speed =====
+#define SPEED_RUN   180  // Driving speed
+#define SPEED_TURN  180  // Spin-in-place speed
+
+// ===== Gripper angles =====
+#define CLAW_OPEN   140  // Open
+#define CLAW_CLOSE   90  // Closed
 ```
 
-电机四根脚和第 2、11 课一样，夹爪在第 9 课验证过，这课直接搬过来。180 的速度也和第 11 课的遥控车一致——足球赛要的是反应快，不需要循迹那种细腻修正。
+The four motor pins are the same as in Lessons 2 and 11, and the gripper was verified in Lesson 9, so this lesson simply carries them over. The speed of 180 also matches the remote-control car in Lesson 11 — a soccer match wants quick reactions, not the delicate corrections of line tracking.
 
-`CLAW_OPEN 140` / `CLAW_CLOSE 90` 就是第 9 课那两个角度，一个张到最大、一个夹到最紧。
+`CLAW_OPEN 140` / `CLAW_CLOSE 90` are the two angles from Lesson 9: one fully open, the other fully closed.
 
-**(2) 表情常量、两张字模、五个全局变量**
+**(2) Expression constants, two font bitmaps, and five global variables**
 
 ```cpp
-#define FACE_EYES  0  // 待机：眼睛
-#define FACE_SMILE 1  // 进球：笑脸
+#define FACE_EYES  0  // Standby: eyes
+#define FACE_SMILE 1  // Goal scored: smiling face
 ```
 
 ```cpp
-int score = 0;                      // 当前比分
-unsigned long lastCmdTime = 0;      // 最后指令时刻
-unsigned long smileUntil = 0;       // 笑脸结束时刻
-int curFace = -1;                   // 当前表情，-1 表示未显示
+int score = 0;                      // Current score
+unsigned long lastCmdTime = 0;      // Time of the last command
+unsigned long smileUntil = 0;       // Time when the smile ends
+int curFace = -1;                   // Current expression, -1 means not shown
 ```
 
-四个状态变量各管一件事：`score` 是比分，`lastCmdTime` 是超时判断的时刻，`smileUntil` 是笑脸什么时候该收，`curFace` 是"屏上现在是什么表情"，`-1` 表示还没显示过。
+The four state variables each handle one thing: `score` is the score, `lastCmdTime` is the moment used for the timeout check, `smileUntil` is when the smiley should end, and `curFace` is "what expression is on the screen now", with `-1` meaning none has been shown yet.
 
-两个字模 `eyes[]` 和 `smile[]` 都是 16 字节，格式和第 1 课一样：一字节一列，bit0 在最上面。
+Both font bitmaps, `eyes[]` and `smile[]`, are 16 bytes in the same format as Lesson 1: one byte per column, with bit 0 at the top.
 
-**(3) `setup()`：上电先显示待机表情**
+**(3) `setup()`: show the standby expression at power-on**
 
 ```cpp
   pinMode(CLK_Pin, OUTPUT);
   pinMode(DIN_Pin, OUTPUT);
   digitalWrite(CLK_Pin, HIGH);
   digitalWrite(DIN_Pin, HIGH);
-  showFace(FACE_EYES);  // 上电显示待机表情
+  showFace(FACE_EYES);  // Show standby expression on power on
 ```
 
-两线拉高置空闲，然后立刻画眼睛。这里用的是 `showFace()` 而不是 `matrix_display()`——`showFace()` 会顺手把 `curFace` 记成 `FACE_EYES`，后面再调它就不会重复刷屏。
+The two lines are pulled HIGH to idle the bus, then the eyes are drawn immediately. This uses `showFace()` rather than `matrix_display()` — `showFace()` also records `curFace` as `FACE_EYES`, so later calls do not refresh the display again.
 
-**(4) `setup()`：夹爪张开，然后连 Wi-Fi**
+**(4) `setup()`: open the gripper, then connect to Wi-Fi**
 
 ```cpp
-  clawServo.write(CLAW_OPEN);  // 上电张开
+  clawServo.write(CLAW_OPEN);  // Open on power on
   delay(300);
 ```
 
-上电就让爪子张开，等着接球。`delay(300)` 是给舵机转到位的时间，这 300 ms 在 `setup()` 里，网页还没启动，阻塞没有副作用。
+The gripper opens at power-on, ready to receive the ball. `delay(300)` gives the servo time to reach position; because it is in `setup()` and the web server has not started, this blocking wait has no side effects.
 
-后面连 Wi-Fi 的 `while` 循环和第 13、14 课一样，连上之后打印 IP 给手机访问。
+The `while` loop that follows for Wi-Fi is the same as in Lessons 13 and 14; once connected it prints the IP for the phone to visit.
 
-**(5) 两条路由：`/cmd` 和 `/score`**
+**(5) Two routes: `/cmd` and `/score`**
 
 ```cpp
   server.on("/cmd", []() {
     String d = server.arg("d");
-    server.send(200, "text/plain", runCmd(d));  // 返回"比分,状态"，网页直接用
+    server.send(200, "text/plain", runCmd(d));  // Return "score,status" for direct use by the web page
   });
 
   server.on("/score", []() {
@@ -442,28 +450,28 @@ int curFace = -1;                   // 当前表情，-1 表示未显示
   });
 ```
 
-`/cmd` 收动作，`/score` 只查状态、不带动作。两条路由分开的好处是多台手机同时看比分：A 手机进球，B 手机最多 1 秒后轮询到新分数。
+`/cmd` accepts actions while `/score` only reports status and carries no action. Keeping the two routes separate lets several phones watch the same score: if phone A scores, phone B picks up the new number on its next poll, at most a second later.
 
-比分必须记在板子上。记在网页里，刷新一次就清零；记在服务端，手机、电脑同时开两个页面看到的才是同一个数。凡是"多端要看到同一个值"的状态，都应该放在板子这边。
+The score must be kept on the board. Kept in the web page, it resets on every refresh; kept on the server, a phone and a computer opening two pages see the same number. Any state that "multiple devices must agree on" belongs on the board.
 
-**(6) `runCmd()`：执行 + 回报**
+**(6) `runCmd()`: execute and report back**
 
 ```cpp
 String runCmd(String d) {
-  lastCmdTime = millis();  // 刷新超时计时
+  lastCmdTime = millis();  // Refresh the timeout timer
 ```
 
-`runCmd()` 的返回值不是 `void`，而是 `String`，最后一句是：
+`runCmd()` does not return `void` but `String`, and its last statement is:
 
 ```cpp
   return String(score) + "," + faceName();
 ```
 
-网页发一次"射门"，同一个响应里就把最新比分和表情状态带回来了，不用再发一次请求问"现在几比几"。省一次往返，手机上比分牌刷新更跟手。
+When the page sends "shoot", the same response carries the latest score and expression state back — no second request asking "what is the score now". That saves a round trip and makes the scoreboard feel more responsive on the phone.
 
-`lastCmdTime` 照例放在最前面，任何指令都算"车还连得上"。
+`lastCmdTime` is still updated first, so any command means "the car is still reachable".
 
-**(7) `runCmd()` 的八个分支**
+**(7) The eight branches of `runCmd()`**
 
 ```cpp
   if (d == "f") {
@@ -475,58 +483,58 @@ String runCmd(String d) {
   } else if (d == "r") {
     spinRight(SPEED_TURN);
   } else if (d == "carry") {
-    clawServo.write(CLAW_OPEN);   // 带球：张开
+    clawServo.write(CLAW_OPEN);   // Dribbling: open
   } else if (d == "shoot") {
-    clawServo.write(CLAW_CLOSE);  // 射门：闭合
+    clawServo.write(CLAW_CLOSE);  // Shooting: close
   } else if (d == "goal") {
-    score++;                        // 手动记分
-    celebrate();                    // 播放庆祝表情
+    score++;                        // Manual scoring
+    celebrate();                    // Play celebration expression
   } else if (d == "reset") {
-    score = 0;                      // 清零
+    score = 0;                      // Reset to zero
   } else {
-    stopCar();                      // 其余指令一律停车
+    stopCar();                      // Stop for all other commands
   }
 ```
 
-前四个是行驶，中间两个是夹爪，后两个是记分，最后 `else` 兜底停车。
+The first four are driving, the middle two are the gripper, the last two handle scoring, and the final `else` falls back to stopping.
 
-`carry` 和 `shoot` 只写舵机角度，一点 PWM 都不给电机。车是靠"张开兜住球 → 开过去 → 合拢挤出"这套机械动作完成射门的，不需要冲刺。想加"射门瞬间往前顶一下"，就在 `shoot` 里补一句 `goForward()` + 定时停车，但要注意别把自己顶出界。
+`carry` and `shoot` only write servo angles and give the motors no PWM at all. Scoring is done by the mechanical sequence "open to pocket the ball → drive over → close to squeeze it out", no sprinting required. If you want "a little nudge forward at the moment of shooting", add a `goForward()` plus a timed stop inside `shoot`, but be careful not to push the ball out of bounds.
 
-**(8) `showFace()` 的去重**
+**(8) De-duplication in `showFace()`**
 
 ```cpp
 void showFace(int face) {
-  if (face == curFace) return;  // 表情未变
+  if (face == curFace) return;  // Expression unchanged
   curFace = face;
 ```
 
-刷一次点阵要 20 多次 GPIO 翻转加四段 I2C 时序，几十微秒。`loop()` 一秒几千轮，不去重就是几千次白刷，还会拖慢网页响应。
+One dot matrix refresh takes more than 20 GPIO toggles plus four segments of I2C timing, tens of microseconds. `loop()` runs thousands of times a second; without de-duplication that is thousands of wasted refreshes, and the web response slows down too.
 
-`curFace` 记的是"屏上现在是什么"，`-1` 表示什么都没显示。第一次调用必定会刷（`-1` 不等于任何表情），之后同一种表情反复调用都直接返回。
+`curFace` records "what is on the screen now", with `-1` meaning nothing. The first call always refreshes (`-1` matches no expression); after that, repeated calls with the same expression simply return.
 
-**(9) `faceName()`：把表情翻译给网页**
+**(9) `faceName()`: translating the expression for the page**
 
 ```cpp
 String faceName() {
-  if (curFace == FACE_SMILE) return "进球！";
-  return "待命";
+  if (curFace == FACE_SMILE) return "Goal!";
+  return "Standby";
 }
 ```
 
-网页上那行状态文字就是从这里来的。`curFace` 是"屏上现在是什么表情"，`faceName()` 把它翻成中文：笑脸就是"进球！"，其余一律"待命"。
+The status line on the page comes from here. `curFace` is "what expression is on the screen now"; `faceName()` turns it into words: a smiley means "Goal!", everything else means "Standing by".
 
-只判笑脸一种，是因为全课只有两种表情。它不看 `smileUntil`——3 秒到期后 `loop()` 会调 `showFace(FACE_EYES)`，`curFace` 跟着变，这里自然回到"待命"，不需要在两处都判时间。
+Only the smiley is checked because the whole lesson has just two expressions. It does not look at `smileUntil` — when three seconds are up `loop()` calls `showFace(FACE_EYES)`, `curFace` changes with it, and this function naturally returns to "Standing by" without needing a second time check.
 
-**(10) `celebrate()` 和 `smileUntil`**
+**(10) `celebrate()` and `smileUntil`**
 
 ```cpp
 void celebrate() {
-  showFace(FACE_SMILE);        // 切笑脸
-  smileUntil = millis() + 3000;  // 3 s 后恢复
+  showFace(FACE_SMILE);        // Switch to smiling face
+  smileUntil = millis() + 3000;  // Restore after 3 s
 }
 ```
 
-`loop()` 里查：
+Checked in `loop()`:
 
 ```cpp
   if (smileUntil != 0 && millis() > smileUntil) {
@@ -535,61 +543,61 @@ void celebrate() {
   }
 ```
 
-如果庆祝里写 `delay(3000)`，这 3 秒内 `handleClient()` 一次都不跑，手机页面卡死，队友再按射门也没反应。记一个"到期时刻"然后在主循环里查，是这套教程里所有"等一会儿"的统一写法——第 7 课的丢线计时、第 15 课的避障状态机都是这个套路。
+If the celebration used `delay(3000)`, `handleClient()` would not run once during those three seconds, the phone page would freeze, and a teammate pressing shoot again would get no response. Recording a "due time" and checking it in the main loop is the standard way this tutorial handles every "wait a while" — the lost-line timer in Lesson 7 and the obstacle-avoidance state machine in Lesson 15 both use the same pattern.
 
-`smileUntil = 0` 是复位标记，表示"当前没有待恢复的庆祝"，避免下一轮又判一次到期。
+`smileUntil = 0` is the reset flag, meaning "no celebration pending", so the next round does not test for expiry again.
 
-**(11) `loop()`：两件定时的事**
+**(11) `loop()`: two timed tasks**
 
 ```cpp
 void loop() {
-  server.handleClient();  // 必须持续调用
+  server.handleClient();  // Must be called continuously
 
-  // 超时停车
+  // Stop on timeout
   if (millis() - lastCmdTime > STOP_AFTER) {
     stopCar();
   }
 ```
 
-`STOP_AFTER 1500` 和第 11、14 课同一条规则：1.5 秒没收到指令就停车。三件事平级排在 `loop()` 里——处理请求、查超时、查笑脸到期，谁都不阻塞谁。
+`STOP_AFTER 1500` follows the same rule as Lessons 11 and 14: stop if no command arrives within 1.5 seconds. Three tasks sit at the same level in `loop()` — handle requests, check the timeout, check the smile expiry — and none blocks another.
 
-这也是为什么整课没有一句 `delay()`：任何一处阻塞，另外两件事都会被拖住。
+That is also why there is no `delay()` anywhere in the lesson: a blocking call in any one place drags the other two tasks down with it.
 
-#### **8. 运行现象：**
+#### **8. What You Will See:**
 
-串口打印 `足球车已就绪`，点阵显示两只方眼（待机）。
+The Serial Monitor prints "Soccer car ready" and the dot matrix shows two square eyes (standby).
 
-| 操作 | 点阵 | 网页 |
+| Action | Dot matrix | Web page |
 | --- | --- | --- |
-| 按方向键 | 不变（待机眼睛） | 车动 |
-| 按**带球** | 不变 | 夹爪张开，可兜球 |
-| 按**射门** | 不变 | 夹爪合拢，球被挤出 |
-| 按**进球** | 立即变笑脸，3 s 后回眼睛 | 比分 +1，显示**进球！** |
-| 按**清零** | 不变 | 比分归 0 |
+| Press a direction key | Unchanged (standby eyes) | Car moves |
+| Press **Carry** | Unchanged | Gripper opens, ready to pocket the ball |
+| Press **Shoot** | Unchanged | Gripper closes, ball is squeezed out |
+| Press **Goal** | Instantly shows a smiley, back to eyes after 3 s | Score +1, displays **Goal!** |
+| Press **Reset** | Unchanged | Score returns to 0 |
 
-> 【图片待补】进球瞬间点阵笑脸与手机比分 +1 的同框截图。
+> [Image to be added] A screenshot showing the dot matrix smiley and the phone score +1 at the moment of a goal.
 
-比赛时的实际打法：
+How the match is actually played:
 
-1. **带球**张开爪子，把球兜进爪内。
-2. 用方向键把球带到球门前，对准。
-3. 按**射门**，爪子合拢把球挤出。
-4. 球过门线后按**进球**，比分加一、点阵庆祝。
+1. **Carry** opens the gripper to pocket the ball.
+2. Use the direction keys to bring the ball in front of the goal and line it up.
+3. Press **Shoot** to close the gripper and squeeze the ball out.
+4. Once the ball crosses the line, press **Goal** to add a point and celebrate on the dot matrix.
 
-#### **9. 常见问题解决：**
+#### **9. Troubleshooting:**
 
-**Wi-Fi 连不上、网页打不开，按这个顺序查：**
+**If Wi-Fi will not connect or the page will not open, check in this order:**
 
-(1) **账号密码换了没有**：代码开头的 `WIFI_SSID`、`WIFI_PASS` 还是占位符就烧进去，一定连不上，改成自己路由器的名称和密码。
+(1) **Did you change the credentials?** If `WIFI_SSID` and `WIFI_PASS` at the top of the code are still placeholders when you upload, the connection is guaranteed to fail. Replace them with your router's name and password.
 
-(2) **串口一行字都没有**：按一下板子上的 RESET 键再试，可能是上一版程序卡住了。
+(2) **Nothing at all in the Serial Monitor**: press the board's RESET button and try again; the previous sketch may be stuck.
 
 ![](media/RESET.png){width=340px}
 
-(3) **串口一直冒点、拿不到 IP**：Wi-Fi 连接失败。路由器必须是 **2.4 GHz**，5 GHz 板子不支持；没有 2.4 G 就开手机热点（热点默认 2.4 G）。
+(3) **Dots keep printing but no IP appears**: Wi-Fi connection failed. The router must be **2.4 GHz** — the board does not support 5 GHz. If you have no 2.4 GHz band, use a phone hotspot (hotspots default to 2.4 GHz).
 
-(4) **拿到 IP 但页面打不开**：地址要带 `http://`，IP 以串口打印的为准；手机必须连同一个 Wi-Fi，两边 IP 前三段要一样。
+(4) **You have an IP but the page will not open**: include `http://` in the address and use the IP printed in the Serial Monitor; the phone must be on the same Wi-Fi, and the first three octets of both IPs must match.
 
-(5) **网段对、还是打不开**：进路由器后台把**AP 隔离**关掉，开了它同一 Wi-Fi 下的设备互相访问不了。
+(5) **Subnet matches but still no page**: log in to the router and turn off **AP isolation**; with it enabled, devices on the same Wi-Fi cannot reach each other.
 
-(6) 如果射门时球往侧面跑，是车头没有正对球门——夹爪是往里收的，两侧受力不均就会把球推向一侧。倒车调整一下角度再射。
+(6) If the ball veers sideways when you shoot, the nose is not square to the goal — the gripper closes inward, so uneven force on the two sides pushes the ball to one side. Back up, adjust the angle, and shoot again.

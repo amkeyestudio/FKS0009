@@ -1,25 +1,25 @@
 #include <WiFi.h>
 #include <WebServer.h>
-#include "webpage.h"  // 网页内容
+#include "webpage.h"  // Web page content
 
 // ===== Wi-Fi =====
-// 仅支持 2.4 GHz
-const char* WIFI_SSID = "你的WiFi名字";
-const char* WIFI_PASS = "你的WiFi密码";
+// Only supports 2.4 GHz
+const char* WIFI_SSID = "Your WiFi name";
+const char* WIFI_PASS = "Your WiFi password";
 
 
-// ===== 引脚 =====
-#define MOTOR_AIN 38  // A 路方向
-#define MOTOR_AEN 21  // A 路调速
-#define MOTOR_BIN 40  // B 路方向
-#define MOTOR_BEN 41  // B 路调速
+// ===== Pins =====
+#define MOTOR_AIN 38  // Channel A direction
+#define MOTOR_AEN 21  // Channel A speed control
+#define MOTOR_BIN 40  // Channel B direction
+#define MOTOR_BEN 41  // Channel B speed control
 
-// ===== 速度 =====
-#define SPEED_RUN  180  // 直行
-#define SPEED_TURN 180  // 原地转
+// ===== Speed =====
+#define SPEED_RUN  180  // Forward
+#define SPEED_TURN 180  // Spin in place
 
-// 指令超时（ms）自动停车
-// 网络丢包或手机锁屏时防止失控
+// Auto-stop when a command times out (ms)
+// Prevents loss of control on packet loss or when the phone screen locks
 #define STOP_AFTER 1500
 
 WebServer server(80);
@@ -35,26 +35,26 @@ void setup() {
   ledcAttach(MOTOR_AEN, 1000, 8);
   stopCar();
 
-  Serial.print("正在连接 ");
+  Serial.print("Connecting to ");
   Serial.println(WIFI_SSID);
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
 
-  // 阻塞等待连接成功
+  // Block until the connection succeeds
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
   Serial.println();
-  Serial.println("WiFi 已连接");
-  Serial.print("板子的 IP：");
-  Serial.println(WiFi.localIP());   // 手机浏览器访问此地址
+  Serial.println("WiFi connected");
+  Serial.print("Board IP: ");
+  Serial.println(WiFi.localIP());   // Open this address in a phone browser
 
   server.on("/", []() {
     server.send_P(200, "text/html; charset=utf-8", index_html);
   });
 
-  // 网页按钮统一入口，d 为方向
+  // Single entry point for web page buttons; d is the direction
   server.on("/cmd", []() {
     String d = server.arg("d");
     runCmd(d);
@@ -62,43 +62,43 @@ void setup() {
   });
 
   server.begin();
-  Serial.println("遥控车已就绪");
+  Serial.println("Remote control car is ready");
 }
 
 void loop() {
-  server.handleClient();  // 必须持续调用
+  server.handleClient();  // Must be called continuously
 
-  // 超时停车
+  // Stop on timeout
   if (millis() - lastCmdTime > STOP_AFTER) {
     stopCar();
   }
 }
 
-// 指令分发
+// Command dispatch
 void runCmd(String d) {
-  lastCmdTime = millis();   // 刷新超时计时
+  lastCmdTime = millis();   // Refresh the timeout timer
 
   if (d == "f") {
-    Serial.println("前进");
+    Serial.println("Forward");
     goForward(SPEED_RUN);
   } else if (d == "b") {
-    Serial.println("后退");
+    Serial.println("Backward");
     goBackward(SPEED_RUN);
   } else if (d == "l") {
-    Serial.println("左转");
+    Serial.println("Turn left");
     spinLeft(SPEED_TURN);
   } else if (d == "r") {
-    Serial.println("右转");
+    Serial.println("Turn right");
     spinRight(SPEED_TURN);
   } else {
-    Serial.println("停车");
+    Serial.println("Stop");
     stopCar();
   }
 }
 
-// ===== 电机驱动 =====
-// A 路接左轮、B 路接右轮，与第 7 课一致
-// 若左右相反，互换下面两段
+// ===== Motor driver =====
+// Channel A drives the left wheel, channel B the right wheel, as in Lesson 7
+// If left and right are reversed, swap the two sections below
 void driveMotors(int leftSpeed, int rightSpeed) {
   leftSpeed  = constrain(leftSpeed,  -255, 255);
   rightSpeed = constrain(rightSpeed, -255, 255);

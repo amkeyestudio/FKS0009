@@ -1,8 +1,8 @@
 #ifndef WEBPAGE_H
 #define WEBPAGE_H
 
-// 网页内容单独存放
-// 该 HTML 由板子原样下发，在浏览器执行
+// Web page content is stored separately
+// This HTML is sent unchanged by the board and runs in the browser
 
 const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE html>
@@ -10,10 +10,10 @@ const char index_html[] PROGMEM = R"rawliteral(
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-  <title>迷你履带坦克 V4.0 - Wi-Fi 全功能车</title>
+  <title>Mini Tracked Tank V4.0 - Wi-Fi Multi-Function Car</title>
 
   <style>
-    /* 页面整体 */
+    /* Overall page */
     body {
       font-family: -apple-system, "Microsoft YaHei", sans-serif;
       text-align: center;
@@ -22,7 +22,7 @@ const char index_html[] PROGMEM = R"rawliteral(
       padding: 16px;
     }
 
-    /* 卡片 */
+    /* Card */
     .card {
       background: #fff;
       border-radius: 14px;
@@ -36,7 +36,7 @@ const char index_html[] PROGMEM = R"rawliteral(
       font-size: 20px;
     }
 
-    /* 距离显示 */
+    /* Distance display */
     .dist {
       font-size: 16px;
       color: #666;
@@ -47,7 +47,7 @@ const char index_html[] PROGMEM = R"rawliteral(
       font-size: 20px;
     }
 
-    /* 按钮公共样式 */
+    /* Common button style */
     button {
       font-size: 22px;
       border: none;
@@ -57,10 +57,10 @@ const char index_html[] PROGMEM = R"rawliteral(
       -webkit-user-select: none;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
-      touch-action: none;       /* 防止按住时页面滑动 */
+      touch-action: none;       /* Prevent page scrolling while a button is held */
     }
 
-    /* 模式按钮：两列 */
+    /* Mode buttons: two columns */
     .modes {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -73,12 +73,12 @@ const char index_html[] PROGMEM = R"rawliteral(
       background: #3f51b5;
     }
 
-    /* 选中模式 */
+    /* Selected mode */
     .on {
       background: #e53935 !important;
     }
 
-    /* 方向键盘：3×3 */
+    /* Direction keypad: 3x3 */
     .grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -89,14 +89,14 @@ const char index_html[] PROGMEM = R"rawliteral(
       font-size: 20px;
     }
 
-    /* 按键配色 */
-    .f { background: #4caf50; }   /* 前进：绿 */
-    .b { background: #f44336; }   /* 后退：红 */
-    .l { background: #ff9800; }   /* 左转：橙 */
-    .r { background: #2196f3; }   /* 右转：蓝 */
-    .s { background: #607d8b; }   /* 停车：灰 */
-    .p { background: #9c27b0; }   /* 云台：紫 */
-    .c { background: #009688; }   /* 夹爪：青 */
+    /* Button colors */
+    .f { background: #4caf50; }   /* Forward: green */
+    .b { background: #f44336; }   /* Backward: red */
+    .l { background: #ff9800; }   /* Turn left: orange */
+    .r { background: #2196f3; }   /* Turn right: blue */
+    .s { background: #607d8b; }   /* Stop: gray */
+    .p { background: #9c27b0; }   /* Pan-tilt: purple */
+    .c { background: #009688; }   /* Gripper: cyan */
 
     p.tip {
       font-size: 14px;
@@ -109,23 +109,23 @@ const char index_html[] PROGMEM = R"rawliteral(
 <body>
   <div class="card">
 
-    <h2>当前模式：<span id="m">手动遥控</span></h2>
-    <p class="dist">前方距离：<b id="d">--</b> cm</p>
+    <h2>Current mode: <span id="m">Manual Control</span></h2>
+    <p class="dist">Front distance: <b id="d">--</b> cm</p>
 
-    <!-- 模式切换 -->
+    <!-- Mode switching -->
     <div class="modes">
-      <button id="b-manual" class="on" onclick="mode('manual')">手动遥控</button>
-      <button id="b-line"   onclick="mode('line')">循迹行驶</button>
-      <button id="b-avoid"  onclick="mode('avoid')">超声波避障</button>
-      <button id="b-follow" onclick="mode('follow')">超声波跟随</button>
+      <button id="b-manual" class="on" onclick="mode('manual')">Manual Control</button>
+      <button id="b-line"   onclick="mode('line')">Line Tracking</button>
+      <button id="b-avoid"  onclick="mode('avoid')">Ultrasonic Obstacle Avoidance</button>
+      <button id="b-follow" onclick="mode('follow')">Ultrasonic Following</button>
     </div>
 
-    <!-- 3×3 键盘：上排云台，中间方向，下排夹爪 -->
+    <!-- 3x3 keypad: pan-tilt on top, direction in the middle, gripper at the bottom -->
     <div class="grid">
-      <button class="p" onclick="go('servo_plus')">云台◀</button>
+      <button class="p" onclick="go('servo_plus')">Pan ◀</button>
       <button class="f" onpointerdown="go('forward')" onpointerup="go('stop')"
               onpointerleave="go('stop')" onpointercancel="go('stop')">↑</button>
-      <button class="p" onclick="go('servo_minus')">云台▶</button>
+      <button class="p" onclick="go('servo_minus')">Pan ▶</button>
 
       <button class="l" onpointerdown="go('left')" onpointerup="go('stop')"
               onpointerleave="go('stop')" onpointercancel="go('stop')">←</button>
@@ -133,25 +133,25 @@ const char index_html[] PROGMEM = R"rawliteral(
       <button class="r" onpointerdown="go('right')" onpointerup="go('stop')"
               onpointerleave="go('stop')" onpointercancel="go('stop')">→</button>
 
-      <button class="c" onclick="go('claw_close')">爪合</button>
+      <button class="c" onclick="go('claw_close')">Close Gripper</button>
       <button class="b" onpointerdown="go('backward')" onpointerup="go('stop')"
               onpointerleave="go('stop')" onpointercancel="go('stop')">↓</button>
-      <button class="c" onclick="go('claw_open')">爪开</button>
+      <button class="c" onclick="go('claw_open')">Open Gripper</button>
     </div>
 
-    <p class="tip">按住方向键开车，松手即停 ｜ 云台和夹爪点一下走一步</p>
+    <p class="tip">Hold a direction button to drive; release to stop | Tap the pan-tilt and gripper buttons for one step</p>
   </div>
 
   <script>
-    // 模式名映射
+    // Mode name mapping
     var names = {
-      manual: '手动遥控',
-      line:   '循迹行驶',
-      avoid:  '超声波避障',
-      follow: '超声波跟随'
+      manual: 'Manual Control',
+      line:   'Line Tracking',
+      avoid:  'Ultrasonic Obstacle Avoidance',
+      follow: 'Ultrasonic Following'
     };
 
-    // 切换模式：更新标题与高亮
+    // Switch mode: update the title and highlight
     function mode(m) {
       document.getElementById('m').innerText = names[m];
 
@@ -162,12 +162,12 @@ const char index_html[] PROGMEM = R"rawliteral(
       fetch('/cmd?mode=' + m).catch(function () {});
     }
 
-    // 发送动作指令
+    // Send a motion command
     function go(cmd) {
       fetch('/cmd?move=' + cmd).catch(function () {});
     }
 
-    // 每秒刷新距离
+    // Refresh the distance every second
     setInterval(function () {
       fetch('/distance')
         .then(function (r) { return r.text(); })

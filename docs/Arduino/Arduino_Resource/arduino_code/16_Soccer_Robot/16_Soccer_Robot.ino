@@ -1,142 +1,142 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <ESP32Servo.h>
-#include "webpage.h"  // 网页内容
+#include "webpage.h"  // Web page content
 
 // ===== Wi-Fi =====
-// 仅支持 2.4 GHz
-const char* WIFI_SSID = "你的WiFi名字";
-const char* WIFI_PASS = "你的WiFi密码";
+// Only supports 2.4 GHz
+const char* WIFI_SSID = "Your WiFi name";
+const char* WIFI_PASS = "Your WiFi password";
 
-// ===== 电机引脚 =====
-#define MOTOR_AIN 38  // A 路方向：左轮
-#define MOTOR_AEN 21  // A 路调速：左轮
-#define MOTOR_BIN 40  // B 路方向：右轮
-#define MOTOR_BEN 41  // B 路调速：右轮
+// ===== Motor pins =====
+#define MOTOR_AIN 38  // Channel A direction: left wheel
+#define MOTOR_AEN 21  // Channel A speed control: left wheel
+#define MOTOR_BIN 40  // Channel B direction: right wheel
+#define MOTOR_BEN 41  // Channel B speed control: right wheel
 
-// ===== 夹爪舵机 =====
-#define CLAW_SERVO_PIN 11  // 夹爪舵机，同第 9 课
+// ===== Gripper servo =====
+#define CLAW_SERVO_PIN 11  // Gripper servo, same as Lesson 9
 
-// ===== 点阵引脚 =====
-#define CLK_Pin 9  // 时钟，接模块 CLK
-#define DIN_Pin 8  // 数据，接模块 DIN
+// ===== Dot matrix pins =====
+#define CLK_Pin 9  // Clock, connected to the module's CLK
+#define DIN_Pin 8  // Data, connected to the module's DIN
 
-// ===== 速度 =====
-#define SPEED_RUN   180  // 行驶速度
-#define SPEED_TURN  180  // 原地转向速度
+// ===== Speed =====
+#define SPEED_RUN   180  // Driving speed
+#define SPEED_TURN  180  // Spin-in-place speed
 
-// ===== 夹爪角度 =====
-#define CLAW_OPEN   140  // 张开
-#define CLAW_CLOSE   90  // 夹紧
+// ===== Gripper angles =====
+#define CLAW_OPEN   140  // Open
+#define CLAW_CLOSE   90  // Closed
 
-// ===== 超时保护 =====
-#define STOP_AFTER 1500  // 指令超时（ms）自动停车
+// ===== Timeout protection =====
+#define STOP_AFTER 1500  // Auto-stop when a command times out (ms)
 
-// ===== 表情编号 =====
-#define FACE_EYES  0  // 待机：眼睛
-#define FACE_SMILE 1  // 进球：笑脸
+// ===== Face IDs =====
+#define FACE_EYES  0  // Idle: eyes
+#define FACE_SMILE 1  // Goal: smiley
 
-// 16 字节对应 16 列，每字节 8 位对应一列 8 行
+// 16 bytes for 16 columns; each byte's 8 bits map to 8 rows in a column
 
-// 待机：两只方眼
+// Idle: two square eyes
 unsigned char eyes[] = {
   0x00, 0x00, 0x00, 0x00, 0x1C, 0x1C, 0x00, 0x00,
   0x00, 0x00, 0x1C, 0x1C, 0x00, 0x00, 0x00, 0x00
 };
 
-// 笑脸：进球
+// Smiley: goal
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
 };
 
-WebServer server(80);  // 网页服务器
-Servo clawServo;       // 夹爪舵机
+WebServer server(80);  // Web server
+Servo clawServo;       // Gripper servo
 
-int score = 0;                      // 当前比分
-unsigned long lastCmdTime = 0;      // 最后指令时刻
-unsigned long smileUntil = 0;       // 笑脸结束时刻
-int curFace = -1;                   // 当前表情，-1 表示未显示
+int score = 0;                      // Current score
+unsigned long lastCmdTime = 0;      // Time of the last command
+unsigned long smileUntil = 0;       // Time when the smiley ends
+int curFace = -1;                   // Current face; -1 means nothing shown
 
 void setup() {
-  // 两线拉高，总线置空闲
+  // Pull both lines HIGH to leave the bus idle
   pinMode(CLK_Pin, OUTPUT);
   pinMode(DIN_Pin, OUTPUT);
   digitalWrite(CLK_Pin, HIGH);
   digitalWrite(DIN_Pin, HIGH);
-  showFace(FACE_EYES);  // 上电显示待机表情
+  showFace(FACE_EYES);  // Show the idle face on power on
 
-  // 电机引脚
+  // Motor pins
   pinMode(MOTOR_BIN, OUTPUT);
   pinMode(MOTOR_AIN, OUTPUT);
-  ledcAttach(MOTOR_BEN, 1000, 8);  // 1 kHz，8 位
+  ledcAttach(MOTOR_BEN, 1000, 8);  // 1 kHz, 8 bit
   ledcAttach(MOTOR_AEN, 1000, 8);
   stopCar();
 
-  // 夹爪：50 Hz，脉宽 500~2500 µs
+  // Gripper: 50 Hz, pulse width 500~2500 µs
   ESP32PWM::allocateTimer(0);
   clawServo.setPeriodHertz(50);
   clawServo.attach(CLAW_SERVO_PIN, 500, 2500);
-  clawServo.write(CLAW_OPEN);  // 上电张开
+  clawServo.write(CLAW_OPEN);  // Open on power on
   delay(300);
 
-  // 连接 Wi-Fi
+  // Connect to Wi-Fi
   Serial.begin(115200);
   delay(300);
-  Serial.print("正在连接 ");
+  Serial.print("Connecting to ");
   Serial.println(WIFI_SSID);
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
 
-  // 阻塞等待连接
+  // Block while waiting for the connection
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
   Serial.println();
-  Serial.println("WiFi 已连接");
-  Serial.print("板子的 IP：");
-  Serial.println(WiFi.localIP());  // 手机浏览器访问此地址
+  Serial.println("WiFi connected");
+  Serial.print("Board IP: ");
+  Serial.println(WiFi.localIP());  // Open this address in a phone browser
 
-  // 首页
+  // Home page
   server.on("/", []() {
     server.send_P(200, "text/html; charset=utf-8", index_html);
   });
 
-  // 指令入口，d 为动作名
+  // Command entry point; d is the action name
   server.on("/cmd", []() {
     String d = server.arg("d");
-    server.send(200, "text/plain", runCmd(d));  // 返回"比分,状态"，网页直接用
+    server.send(200, "text/plain", runCmd(d));  // Return "score,status" for direct use by the web page
   });
 
-  // 比分查询，网页每秒轮询
+  // Score query, polled once per second by the web page
   server.on("/score", []() {
     server.send(200, "text/plain", String(score) + "," + faceName());
   });
 
   server.begin();
-  Serial.println("足球车已就绪");
+  Serial.println("Soccer robot is ready");
 }
 
 void loop() {
-  server.handleClient();  // 必须持续调用
+  server.handleClient();  // Must be called continuously
 
-  // 超时停车
+  // Stop on timeout
   if (millis() - lastCmdTime > STOP_AFTER) {
     stopCar();
   }
 
-  // 笑脸 3 s 后恢复待机
+  // Return to the idle face after 3 s
   if (smileUntil != 0 && millis() > smileUntil) {
     smileUntil = 0;
     showFace(FACE_EYES);
   }
 }
 
-// ===== 指令分发 =====
-// 返回 "比分,状态"，供网页同步刷新
+// ===== Command dispatch =====
+// Return "score,status" so the web page can refresh in sync
 String runCmd(String d) {
-  lastCmdTime = millis();  // 刷新超时计时
+  lastCmdTime = millis();  // Refresh the timeout timer
 
   if (d == "f") {
     goForward(SPEED_RUN);
@@ -147,75 +147,75 @@ String runCmd(String d) {
   } else if (d == "r") {
     spinRight(SPEED_TURN);
   } else if (d == "carry") {
-    clawServo.write(CLAW_OPEN);   // 带球：张开
+    clawServo.write(CLAW_OPEN);   // Dribble: open
   } else if (d == "shoot") {
-    clawServo.write(CLAW_CLOSE);  // 射门：闭合
+    clawServo.write(CLAW_CLOSE);  // Shoot: close
   } else if (d == "goal") {
-    score++;                        // 手动记分
-    celebrate();                    // 播放庆祝表情
+    score++;                        // Manual score increment
+    celebrate();                    // Show the celebration face
   } else if (d == "reset") {
-    score = 0;                      // 清零
+    score = 0;                      // Reset to zero
   } else {
-    stopCar();                      // 其余指令一律停车
+    stopCar();                      // Any other command stops the car
   }
 
   return String(score) + "," + faceName();
 }
 
-// ===== 夹爪用法 =====
-// 两个状态对应两个动作：
-//   张开 140°：球兜在爪内，行进时带球
-//   闭合 90°：爪臂收拢挤出，即射门
+// ===== Gripper usage =====
+// Two states correspond to two actions:
+//   Open 140°: the ball sits in the gripper for dribbling
+//   Closed 90°: the arms close and push the ball out to shoot
 
-// ===== 进球庆祝 =====
+// ===== Goal celebration =====
 void celebrate() {
-  showFace(FACE_SMILE);        // 切笑脸
-  smileUntil = millis() + 3000;  // 3 s 后恢复
+  showFace(FACE_SMILE);        // Switch to the smiley
+  smileUntil = millis() + 3000;  // Restore after 3 s
 }
 
-// 当前表情名，供网页显示
+// Current face name for the web page
 String faceName() {
-  if (curFace == FACE_SMILE) return "进球！";
-  return "待命";
+  if (curFace == FACE_SMILE) return "Goal!";
+  return "Standby";
 }
 
-// ===== 点阵显示 =====
-// 仅表情变化时写屏
+// ===== Dot matrix display =====
+// Write to the display only when the face changes
 void showFace(int face) {
-  if (face == curFace) return;  // 表情未变
+  if (face == curFace) return;  // Face unchanged
   curFace = face;
 
   if (face == FACE_EYES) {
-    matrix_display(eyes);   // 待机
+    matrix_display(eyes);   // Idle
   } else {
-    matrix_display(smile);  // 笑脸
+    matrix_display(smile);  // Smiley
   }
 }
 
-// 将 16 字节字模写入点阵屏显存
+// Write a 16-byte font bitmap to the dot matrix display buffer
 void matrix_display(unsigned char matrix_value[]) {
-  // 0x40：写数据模式，地址自增
+  // 0x40: write data mode with auto-increment address
   IIC_start();
   IIC_send(0x40);
   IIC_end();
 
-  // 0xC0：显存起始地址 0
+  // 0xC0: start address 0 in the display buffer
   IIC_start();
   IIC_send(0xC0);
 
-  // 连写 16 列
+  // Write 16 columns consecutively
   for (int i = 0; i < 16; i++) {
     IIC_send(matrix_value[i]);
   }
   IIC_end();
 
-  // 0x8A：开显示，亮度最大
+  // 0x8A: display on at maximum brightness
   IIC_start();
   IIC_send(0x8A);
   IIC_end();
 }
 
-// 起始条件：CLK 高电平期间 DIN 下降沿
+// Start condition: DIN falling edge while CLK is HIGH
 void IIC_start() {
   digitalWrite(CLK_Pin, HIGH);
   delayMicroseconds(3);
@@ -225,13 +225,13 @@ void IIC_start() {
   delayMicroseconds(3);
 }
 
-// 发送 1 字节，低位在前：CLK 低时置数据，上升沿采样
+// Send one byte, LSB first: set data while CLK is LOW, sample on the rising edge
 void IIC_send(unsigned char send_data) {
   for (int i = 0; i < 8; i++) {
-    digitalWrite(CLK_Pin, LOW);  // 拉低时钟，准备数据
+    digitalWrite(CLK_Pin, LOW);  // Pull the clock LOW to prepare data
     delayMicroseconds(3);
 
-    // 从 bit0 起逐位发送
+    // Send bit by bit starting from bit0
     if (send_data & 0x01) {
       digitalWrite(DIN_Pin, HIGH);
     } else {
@@ -239,14 +239,14 @@ void IIC_send(unsigned char send_data) {
     }
     delayMicroseconds(3);
 
-    digitalWrite(CLK_Pin, HIGH); // 拉高时钟，模块采样
+    digitalWrite(CLK_Pin, HIGH); // Pull the clock HIGH for the module to sample
     delayMicroseconds(3);
 
-    send_data = send_data >> 1;  // 右移，取出下一位
+    send_data = send_data >> 1;  // Shift right to get the next bit
   }
 }
 
-// 停止条件：CLK 高电平期间 DIN 上升沿
+// Stop condition: DIN rising edge while CLK is HIGH
 void IIC_end() {
   digitalWrite(CLK_Pin, LOW);
   delayMicroseconds(3);
@@ -258,35 +258,35 @@ void IIC_end() {
   delayMicroseconds(3);
 }
 
-// ===== 电机驱动 =====
-// A 路接左轮、B 路接右轮（与第 7 课一致）
-// leftSpeed 写 B 路，rightSpeed 写 A 路
+// ===== Motor driver =====
+// Channel A drives the left wheel, channel B the right wheel (as in Lesson 7)
+// leftSpeed goes to channel B, rightSpeed to channel A
 void driveMotors(int leftSpeed, int rightSpeed) {
-  leftSpeed  = constrain(leftSpeed,  -255, 255);  // 右轮限幅
-  rightSpeed = constrain(rightSpeed, -255, 255);  // 左轮限幅
+  leftSpeed  = constrain(leftSpeed,  -255, 255);  // Clamp the right wheel
+  rightSpeed = constrain(rightSpeed, -255, 255);  // Clamp the left wheel
 
-  // A 路：左轮
+  // Channel A: left wheel
   if (rightSpeed >= 0) {
-    digitalWrite(MOTOR_BIN, HIGH);     // 拉高：正转
-    ledcWrite(MOTOR_BEN, rightSpeed);  // 占空比 = 速度
+    digitalWrite(MOTOR_BIN, HIGH);     // Pull HIGH: forward
+    ledcWrite(MOTOR_BEN, rightSpeed);  // Duty cycle = speed
   } else {
-    digitalWrite(MOTOR_BIN, LOW);      // 拉低：反转
-    ledcWrite(MOTOR_BEN, -rightSpeed); // 取绝对值
+    digitalWrite(MOTOR_BIN, LOW);      // Pull LOW: reverse
+    ledcWrite(MOTOR_BEN, -rightSpeed); // Take the absolute value
   }
 
-  // B 路：右轮
+  // Channel B: right wheel
   if (leftSpeed >= 0) {
-    digitalWrite(MOTOR_AIN, HIGH);    // 拉高：正转
-    ledcWrite(MOTOR_AEN, leftSpeed);  // 占空比 = 速度
+    digitalWrite(MOTOR_AIN, HIGH);    // Pull HIGH: forward
+    ledcWrite(MOTOR_AEN, leftSpeed);  // Duty cycle = speed
   } else {
-    digitalWrite(MOTOR_AIN, LOW);     // 拉低：反转
-    ledcWrite(MOTOR_AEN, -leftSpeed); // 取绝对值
+    digitalWrite(MOTOR_AIN, LOW);     // Pull LOW: reverse
+    ledcWrite(MOTOR_AEN, -leftSpeed); // Take the absolute value
   }
 }
 
-// 基本动作
-void goForward(int speed)  { driveMotors(speed, speed); }    // 前进：左右同速正转
-void goBackward(int speed) { driveMotors(-speed, -speed); }  // 后退：左右同速反转
-void spinLeft(int speed)   { driveMotors(-speed, speed); }   // 左转：左后退右前进
-void spinRight(int speed)  { driveMotors(speed, -speed); }   // 右转：左前进右后退
-void stopCar()             { driveMotors(0, 0); }            // 停止：占空比归零
+// Basic actions
+void goForward(int speed)  { driveMotors(speed, speed); }    // Forward: both wheels forward at the same speed
+void goBackward(int speed) { driveMotors(-speed, -speed); }  // Backward: both wheels reverse at the same speed
+void spinLeft(int speed)   { driveMotors(-speed, speed); }   // Turn left: left wheel reverse, right wheel forward
+void spinRight(int speed)  { driveMotors(speed, -speed); }   // Turn right: left wheel forward, right wheel reverse
+void stopCar()             { driveMotors(0, 0); }            // Stop: duty cycle to zero

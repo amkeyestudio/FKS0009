@@ -1,86 +1,86 @@
-### 项目 12：Wi-Fi 点阵弹幕屏
+### Project 12: Wi-Fi Dot Matrix Message Display
 
-#### **1. 简介：**
+#### **1. Introduction:**
 
-![车站的 LED 指示牌](media/intro_12.jpg){width=520px}
+![LED sign at a station](media/intro_12.jpg){width=520px}
 
-第 1 课的点阵只能循环播几个写死的图案，现在把它变成一块弹幕屏：手机连上和车同一个 Wi-Fi，浏览器打开板子的地址，输入一句话，点发送，点阵上就滚出来了。
+Back in Project 1 the dot matrix could only loop through a few patterns baked into the code. Now turn it into a real message board: connect your phone to the same Wi-Fi as the robot, open the board's address in a browser, type a sentence, tap send — and the words roll across the dots.
 
-这块屏只有 16 列宽。字库里一个字母占 5 列，加上 1 列间隔就是 6 列，一屏顶多两个字——超过的必须滚起来，不滚就只剩半截。滚动每 120 毫秒挪一列，读起来刚好跟得上。
+The display is only 16 columns wide. One letter takes 5 columns plus 1 column of spacing, so 6 columns per character and at most two characters on screen at once — anything longer has to scroll, or you only see half of it. The scroll shifts one column every 120 ms, just about the pace the eye can follow.
 
-字库是幕后的主角：26 个字母加 10 个数字，每个字符 5 列，每列一个字节。想换一种字形，动的就是这些字节。
+The font is the unsung hero behind the scenes: 26 letters plus 10 digits, each character 5 columns wide with one byte per column. Want a different letter shape? Change those bytes.
 
-上电后串口打印板子拿到的地址，手机在同一个 Wi-Fi 下打开它，是一个输入框加一个发送按钮。发 HI，居中不动；发 LOVE，从右往左滚，滚完留一段空白再从头来。
+On power-up the board prints its address on serial. Open that address on a phone on the same Wi-Fi and you get an input box and a send button. Send `HI` and it sits centered; send `LOVE` and it scrolls in from the right, leaving a gap of blank columns before starting over.
 
-#### **2. 所需清单：**
+#### **2. Parts Needed:**
 
-本课用到的器件：
+Parts used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
-| ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED 点阵屏 ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 电机扩展板 ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 开发板 ×1</span> |
-| <span style="font-size:0.85em">2.4 GHz 无线路由器或手机热点 ×1</span> |  |  |
-> ⚠️ **点阵在第 2 章就装好了，本表只作对照，不用拆；下面的接线说明只标清接线方式，供对照，不必拆装。完整物料见 1.4 套件清单。**
-#### **3. 参数：**
+| ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor driver expansion board ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
+| <span style="font-size:0.85em">2.4 GHz wireless router or phone hotspot ×1</span> |  |  |
+> ⚠️ **The dot matrix was installed back in Chapter 2; this table is for reference only — there is nothing to take apart. The wiring notes below only show how the connections are made, for reference; no assembly or disassembly is required. For the complete parts list, see 1.4 Kit Parts List.**
+#### **3. Parameters:**
 
-| 项目 | 参数 |
+| Item | Value |
 | --- | --- |
-| Wi-Fi 模式 | STA，仅 2.4 GHz |
-| 网页端口 | 80 |
-| 访问方式 | 浏览器打开串口打印的 IP |
-| 字符集 | A ~ Z、0 ~ 9、空格，共 37 个 |
-| 字库规格 | 5×7，每字符 5 列，每列 1 字节 |
-| 字符占宽 | 6 列（5 列字模 + 1 列间隔） |
-| 最大字符数 | 24 |
-| 一屏容量 | 16 列，约 2 个字符 |
-| 滚动间隔 | 120 ms / 列 |
+| Wi-Fi mode | Station (STA), 2.4 GHz only |
+| Web page port | 80 |
+| Access | Open the IP printed on serial in a browser |
+| Character set | A–Z, 0–9 and space; 37 in total |
+| Font spec | 5×7; 5 columns per character, 1 byte per column |
+| Character width | 6 columns (5 font bitmap columns + 1 spacing column) |
+| Maximum characters | 24 |
+| One-screen capacity | 16 columns, about two characters |
+| Scroll interval | 120 ms per column |
 
-#### **4. 接线说明：**
+#### **4. Wiring:**
 
-| 信号 | 主控 GPIO |
+| Signal | Controller GPIO |
 | --- | :---: |
-| 点阵 CLK | IO9 |
-| 点阵 DIN | IO8 |
+| Dot matrix CLK | IO9 |
+| Dot matrix DIN | IO8 |
 
-这一课不用电机和传感器，只接点阵。Wi-Fi 是片内功能，不需要额外接线。
+This lesson uses no motors or sensors — only the dot matrix is wired. Wi-Fi is built into the chip and needs no extra wiring.
 
 ![](media/8X16_connection_diagram.png)
 
-#### **5. 流程图：**
+#### **5. Flowchart:**
 
-从手机点**发送**到点阵亮起来，中间要过四道关：
+From tapping **Send** on the phone to seeing the message light up on the dot matrix, the signal passes through four stages:
 
 ![](media/wifi_matrix_flow.png)
 
-#### **6. 测试代码：**
+#### **6. Test Code:**
 
-> **上传前先改一处**：把下面 `WIFI_SSID`、`WIFI_PASS` 换成自己的 Wi-Fi 名称和密码，不改连不上。
+> **Before uploading, change one thing**: replace `WIFI_SSID` and `WIFI_PASS` below with your own Wi-Fi name and password — otherwise it won't connect.
 >
-> 另外两点要同时满足：Wi-Fi 必须是 **2.4 GHz**（板子不支持 5 GHz），手机和车要在**同一个局域网**——否则浏览器打不开板子的 IP。
+> Two more conditions must hold at the same time: the Wi-Fi must be **2.4 GHz** (the board doesn't support 5 GHz), and the phone and the robot must be on the **same LAN** — otherwise the browser can't open the board's IP.
 
-> **本课工程有两个文件**：`12_WiFi_DotMatrix.ino` 和 `webpage.h`。网页的 HTML 全部放在 `webpage.h`，`.ino` 里只留 Arduino 逻辑；两个文件放在同一个文件夹，少一个编译不过。
+> **This project has two files**: `12_WiFi_DotMatrix.ino` and `webpage.h`. All the page HTML lives in `webpage.h`; the `.ino` keeps only the Arduino logic. Put both files in the same folder — if one is missing, compilation fails.
 
 ```cpp
 #include <WiFi.h>
 #include <WebServer.h>
-#include "webpage.h"  // 网页内容
+#include "webpage.h"  // Web page content
 
-// ===== Wi-Fi 配置 =====
-// 仅支持 2.4 GHz
-const char* WIFI_SSID = "你的WiFi名字";
-const char* WIFI_PASS = "你的WiFi密码";
+// ===== Wi-Fi configuration =====
+// Only 2.4 GHz is supported
+const char* WIFI_SSID = "Your WiFi name";
+const char* WIFI_PASS = "Your WiFi password";
 
-// ===== 点阵引脚 =====
-#define CLK_Pin 9  // 时钟，接模块 CLK
-#define DIN_Pin 8  // 数据，接模块 DIN
+// ===== Dot matrix pins =====
+#define CLK_Pin 9  // Clock, connected to module CLK
+#define DIN_Pin 8  // Data, connected to module DIN
 
-// ===== 滚动参数 =====
-#define SCROLL_MS 120  // 每列滚动间隔（ms），越小越快
-#define MAX_CHARS  24  // 最大字符数
+// ===== Scroll parameters =====
+#define SCROLL_MS 120  // Scroll interval per column (ms), smaller is faster
+#define MAX_CHARS  24  // Maximum number of characters
 
-// ===== 5×7 字库 =====
-// 每字符 5 列，1 字节/列，bit0 为最上行，bit6 为最下行
-// 索引 0~25 为 A~Z，26~35 为 0~9，36 为空格
+// ===== 5×7 font bitmap =====
+// 5 columns per character, 1 byte/column, bit0 is the top row, bit6 is the bottom row
+// Index 0~25 for A~Z, 26~35 for 0~9, 36 for space
 const uint8_t FONT[37][5] = {
   {0x7E, 0x11, 0x11, 0x11, 0x7E},  // A
   {0x7F, 0x49, 0x49, 0x49, 0x36},  // B
@@ -118,17 +118,17 @@ const uint8_t FONT[37][5] = {
   {0x01, 0x71, 0x09, 0x05, 0x03},  // 7
   {0x36, 0x49, 0x49, 0x49, 0x36},  // 8
   {0x06, 0x49, 0x49, 0x29, 0x1E},  // 9
-  {0x00, 0x00, 0x00, 0x00, 0x00}   // 空格
+  {0x00, 0x00, 0x00, 0x00, 0x00}   // Space
 };
 
-WebServer server(80);      // 网页服务器
-String msg = "HELLO";      // 待显示文字
-int scrollPos = 0;         // 当前起始列
+WebServer server(80);      // Web server
+String msg = "HELLO";      // Text to display
+int scrollPos = 0;         // Current start column
 unsigned long lastScrollAt = 0;
-bool needRedraw = true;    // 文字变化，静止显示需重绘
+bool needRedraw = true;    // Text changed, static display needs redraw
 
 void setup() {
-  // 两线拉高，总线置空闲
+  // Pull both lines high, set the bus idle
   pinMode(CLK_Pin, OUTPUT);
   pinMode(DIN_Pin, OUTPUT);
   digitalWrite(CLK_Pin, HIGH);
@@ -137,8 +137,8 @@ void setup() {
   Serial.begin(115200);
   delay(300);
 
-  // 连接 Wi-Fi
-  Serial.print("正在连接 ");
+  // Connect to Wi-Fi
+  Serial.print("Connecting ");
   Serial.println(WIFI_SSID);
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
@@ -147,28 +147,28 @@ void setup() {
     Serial.print(".");
   }
   Serial.println();
-  Serial.print("弹幕屏就绪，手机打开：http://");
+  Serial.print("Dot matrix display ready, open on your phone: http://");
   Serial.println(WiFi.localIP());
 
-  // 首页
+  // Home page
   server.on("/", []() {
     server.send_P(200, "text/html; charset=utf-8", index_html);
   });
 
-  // 接收文字
+  // Receive text
   server.on("/msg", []() {
     String t = server.arg("t");
     t.trim();
-    t.toUpperCase();                       // 字库仅含大写
+    t.toUpperCase();                       // Font contains uppercase only
     if (t.length() > MAX_CHARS) {
-      t = t.substring(0, MAX_CHARS);       // 超长截断
+      t = t.substring(0, MAX_CHARS);       // Truncate if too long
     }
     if (t.length() > 0) {
       msg = t;
-      scrollPos = 0;            // 从最右列开始滚入
-      needRedraw = true;        // 标记需重绘
+      scrollPos = 0;            // Start scrolling in from the rightmost column
+      needRedraw = true;        // Mark as needing redraw
     }
-    server.sendHeader("Location", "/");     // 返回首页
+    server.sendHeader("Location", "/");     // Back to home page
     server.send(302, "text/plain", "");
   });
 
@@ -176,56 +176,56 @@ void setup() {
 }
 
 void loop() {
-  server.handleClient();  // 处理网页请求
+  server.handleClient();  // Handle web requests
 
-  // ---- 一屏装得下：居中静止显示 ----
+  // ---- Fits on one screen: centered static display ----
   if (textWidth() <= 16) {
-    if (needRedraw) {     // 仅在文字变化时重绘
+    if (needRedraw) {     // Redraw only when text changes
       renderStatic();
       needRedraw = false;
     }
     return;
   }
 
-  // ---- 超出一屏：横向滚动 ----
+  // ---- Exceeds one screen: scroll horizontally ----
   if (millis() - lastScrollAt < SCROLL_MS) return;
   lastScrollAt = millis();
 
   renderFrame(scrollPos);
   scrollPos++;
 
-  // 滚完整句再留 16 列空白后循环
+  // After scrolling the whole text, leave 16 blank columns then loop
   int totalCols = textWidth() + 16;
   if (scrollPos >= totalCols) {
     scrollPos = 0;
   }
 }
 
-// ===== 宽度计算 =====
-// 整句占用的列数
-// 每字符 6 列，末字符不计间隔
+// ===== Width calculation =====
+// Number of columns occupied by the whole text
+// 6 columns per character, no spacing after the last character
 int textWidth() {
   if (msg.length() == 0) return 0;
   return msg.length() * 6 - 1;
 }
 
-// ===== 静止显示 =====
-// 整句居中显示在一屏 16 列内
+// ===== Static display =====
+// Display the whole text centered within 16 columns
 void renderStatic() {
   int total = textWidth();
-  int startCol = (16 - total) / 2;  // 左侧留空列数
+  int startCol = (16 - total) / 2;  // Number of blank columns on the left
 
   uint8_t cols[16];
   for (int i = 0; i < 16; i++) {
-    int idx = i - startCol;                 // 映射到整句列号
-    cols[i] = (idx >= 0) ? getColumn(idx) : 0;  // 句首之前补空
+    int idx = i - startCol;                 // Map to the column index in the whole text
+    cols[i] = (idx >= 0) ? getColumn(idx) : 0;  // Fill blank before the start of the text
   }
 
   matrix_display(cols);
 }
 
-// ===== 渲染一帧 =====
-// 从整句第 pos 列开始截取一屏
+// ===== Render one frame =====
+// Capture one screen starting from column pos of the whole text
 void renderFrame(int pos) {
   uint8_t cols[16];
 
@@ -236,52 +236,52 @@ void renderFrame(int pos) {
   matrix_display(cols);
 }
 
-// 取整句第 idx 列
+// Get column idx of the whole text
 uint8_t getColumn(int idx) {
-  if (idx < 0) return 0;                    // 尚未进入屏幕
+  if (idx < 0) return 0;                    // Not yet on screen
 
-  int charIdx = idx / 6;                    // 字符索引（每字符 6 列：5 列字模 + 1 列间隔）
-  int colIdx  = idx % 6;                    // 字符内列号
+  int charIdx = idx / 6;                    // Character index (6 columns per character: 5 font bitmap columns + 1 spacing column)
+  int colIdx  = idx % 6;                    // Column index within the character
 
-  if (charIdx >= (int)msg.length()) return 0;  // 超出句尾
-  if (colIdx >= 5) return 0;                   // 间隔列
+  if (charIdx >= (int)msg.length()) return 0;  // Beyond the end of the text
+  if (colIdx >= 5) return 0;                   // Spacing column
 
   int fi = charToIndex(msg[charIdx]);
   return FONT[fi][colIdx];
 }
 
-// 字符转字库索引
+// Convert character to font bitmap index
 int charToIndex(char c) {
   if (c >= 'A' && c <= 'Z') return c - 'A';       // A~Z → 0~25
   if (c >= '0' && c <= '9') return 26 + (c - '0'); // 0~9 → 26~35
-  return 36;                                       // 其他字符按空格处理
+  return 36;                                       // Treat other characters as space
 }
 
-// ===== 点阵驱动 =====
-// 将 16 字节字模写入点阵屏显存
+// ===== Dot matrix driver =====
+// Write 16 bytes of font bitmap to the dot matrix display buffer
 void matrix_display(unsigned char matrix_value[]) {
-  // 0x40：写数据模式，地址自增
+  // 0x40: write data mode, auto-increment address
   IIC_start();
   IIC_send(0x40);
   IIC_end();
 
-  // 0xC0：显存起始地址 0
+  // 0xC0: display buffer start address 0
   IIC_start();
   IIC_send(0xC0);
 
-  // 连写 16 列
+  // Write 16 columns consecutively
   for (int i = 0; i < 16; i++) {
     IIC_send(matrix_value[i]);
   }
   IIC_end();
 
-  // 0x8A：开显示，亮度 8/16
+  // 0x8A: display on, brightness 8/16
   IIC_start();
   IIC_send(0x8A);
   IIC_end();
 }
 
-// 起始条件：CLK 高电平期间 DIN 下降沿
+// Start condition: falling edge of DIN while CLK is HIGH
 void IIC_start() {
   digitalWrite(CLK_Pin, HIGH);
   delayMicroseconds(3);
@@ -291,13 +291,13 @@ void IIC_start() {
   delayMicroseconds(3);
 }
 
-// 发送 1 字节，低位在前：CLK 低时置数据，上升沿采样
+// Send 1 byte, LSB first: set data while CLK is LOW, sample on rising edge
 void IIC_send(unsigned char send_data) {
   for (int i = 0; i < 8; i++) {
-    digitalWrite(CLK_Pin, LOW);  // 拉低时钟，准备数据
+    digitalWrite(CLK_Pin, LOW);  // Pull clock low, prepare data
     delayMicroseconds(3);
 
-    // 从 bit0 起逐位发送
+    // Send bit by bit starting from bit0
     if (send_data & 0x01) {
       digitalWrite(DIN_Pin, HIGH);
     } else {
@@ -305,14 +305,14 @@ void IIC_send(unsigned char send_data) {
     }
     delayMicroseconds(3);
 
-    digitalWrite(CLK_Pin, HIGH); // 拉高时钟，模块采样
+    digitalWrite(CLK_Pin, HIGH); // Pull clock high, module samples
     delayMicroseconds(3);
 
-    send_data = send_data >> 1;  // 右移，取出下一位
+    send_data = send_data >> 1;  // Shift right to get the next bit
   }
 }
 
-// 停止条件：CLK 高电平期间 DIN 上升沿
+// Stop condition: rising edge of DIN while CLK is HIGH
 void IIC_end() {
   digitalWrite(CLK_Pin, LOW);
   delayMicroseconds(3);
@@ -325,45 +325,45 @@ void IIC_end() {
 }
 ```
 
-#### **7. 代码解释：**
+#### **7. Code Explanation:**
 
-**(1) 账号、引脚、两个参数**
+**(1) Credentials, pins and two parameters**
 
 ```cpp
-const char* WIFI_SSID = "你的WiFi名字";
-const char* WIFI_PASS = "你的WiFi密码";
+const char* WIFI_SSID = "Your WiFi name";
+const char* WIFI_PASS = "Your WiFi password";
 
-#define CLK_Pin 9  // 时钟，接模块 CLK
-#define DIN_Pin 8  // 数据，接模块 DIN
+#define CLK_Pin 9  // Clock, connected to module CLK
+#define DIN_Pin 8  // Data, connected to module DIN
 
-#define SCROLL_MS 120  // 每列滚动间隔（ms），越小越快
-#define MAX_CHARS  24  // 最大字符数
+#define SCROLL_MS 120  // Scroll interval per column (ms), smaller is faster
+#define MAX_CHARS  24  // Maximum number of characters
 ```
 
-两个 Wi-Fi 常量必须在编译前改成自己的，不改连不上。`SCROLL_MS 120` 是滚动时每列停留的时间，滚完 16 列要 1.92 秒；改 60 快一倍，但字会糊得看不清。`MAX_CHARS 24` 是输入上限，超了截断。
+Both Wi-Fi constants must be changed to your own before compiling, or the connection will fail. `SCROLL_MS 120` is how long each column stays put during scrolling; a full 16 columns take 1.92 seconds. Set it to 60 and it runs twice as fast, but the text blurs into an unreadable smear. `MAX_CHARS 24` is the input limit — anything longer is truncated.
 
-**(2) 字库：37 个字符，每个 5 列**
+**(2) The font: 37 characters, 5 columns each**
 
 ```cpp
 const uint8_t FONT[37][5] = {
 ```
 
-二维数组，第一维是 37 个字符（0～25 是 A～Z，26～35 是 0～9，36 是空格），第二维是 5 个字节——一个字符占 5 列，每个字节一位管一行，bit0 在最上。
+A two-dimensional array: the first dimension holds 37 characters (0–25 for A–Z, 26–35 for 0–9 and 36 for space), the second holds 5 bytes — one character occupies 5 columns, with each bit of a byte controlling one row, bit0 at the top.
 
-点阵屏只有 8 行高，小写字母的上下伸展（b、p、g）在这个高度里画不出区别，所以字库只收大写、数字和空格。要加符号，就在 `FONT` 后面追加 5 个字节，并把索引号一起改。
+The display is only 8 rows high, so the ascenders and descenders that distinguish lowercase letters (b, p, g) can't be represented at that height. That's why the font contains only capitals, digits and spaces. To add a symbol, append 5 bytes to `FONT` and update the index numbers accordingly.
 
-**(3) 四个全局状态**
+**(3) Four global state variables**
 
 ```cpp
-String msg = "HELLO";      // 待显示文字
-int scrollPos = 0;         // 当前起始列
+String msg = "HELLO";      // Text to display
+int scrollPos = 0;         // Current start column
 unsigned long lastScrollAt = 0;
-bool needRedraw = true;    // 文字变化，静止显示需重绘
+bool needRedraw = true;    // Text changed, static display needs redraw
 ```
 
-这四个变量是网页回调和 `loop()` 之间唯一的通道：回调改 `msg`，`loop()` 读 `msg` 决定画什么。`scrollPos` 记滚动到第几列，`lastScrollAt` 记上一次滚动的时刻（不用 `delay`，靠 `millis()` 算间隔），`needRedraw` 标记"文字换了，静止画面要重画一次"。
+These four variables are the only channel between the web callbacks and `loop()`: a callback changes `msg`, and `loop()` reads `msg` to decide what to draw. `scrollPos` tracks which column the scroll has reached; `lastScrollAt` stores the time of the last scroll step (no `delay` here — the interval comes from `millis()`); `needRedraw` means "the text changed, redraw the static image once".
 
-**(4) `setup()`：连 Wi-Fi**
+**(4) `setup()`: connect to Wi-Fi**
 
 ```cpp
   WiFi.mode(WIFI_STA);
@@ -374,49 +374,51 @@ bool needRedraw = true;    // 文字变化，静止显示需重绘
   }
 ```
 
-`WIFI_STA` 是"连别人的路由器"模式，不是自己做热点。`while` 循环会一直卡在这里直到连上，每半秒打一个点——连不上就一直打点，看到这个现象先查账号密码和 2.4 GHz。
+`WIFI_STA` is "connect to somebody else's router" mode, not "act as a hotspot". The `while` loop blocks here until the connection succeeds, printing a dot every half second — if it never connects it keeps printing dots, so when you see that, check the credentials and the 2.4 GHz band first.
 
-连上之后打印的 `WiFi.localIP()` 就是手机要访问的地址。
+Once connected, `WiFi.localIP()` is the address the phone needs to visit.
 
-**(5) 网页那部分：只负责把文字递进来**
+**(5) The web part: it only hands the text in**
 
 ```cpp
+  // Home page
   server.on("/", []() {
-    server.send_P(200, "text/html; charset=utf-8", INDEX_HTML);
+    server.send_P(200, "text/html; charset=utf-8", index_html);
   });
 
+  // Receive text
   server.on("/msg", []() {
     String t = server.arg("t");
-    t.trim();                              // 去首尾空白
-    t.toUpperCase();                       // 字库仅含大写
+    t.trim();
+    t.toUpperCase();                       // The font only contains uppercase letters
     if (t.length() > MAX_CHARS) {
-      t = t.substring(0, MAX_CHARS);       // 超长截断
+      t = t.substring(0, MAX_CHARS);       // Truncate if too long
     }
     if (t.length() > 0) {
       msg = t;
-      scrollPos = 0;
-      needRedraw = true;
+      scrollPos = 0;            // Start scrolling in from the far right column
+      needRedraw = true;        // Mark as needing a redraw
     }
-    server.sendHeader("Location", "/");    // 跳回首页
+    server.sendHeader("Location", "/");     // Return to the home page
     server.send(302, "text/plain", "");
   });
 
   server.begin();
 ```
 
-这是 WebServer 库的标准写法，不是本课的重点，知道它干了什么就够了：`/` 把 `webpage.h` 里那段 HTML 发出去，`/msg` 接住手机提交的文字，**去空格、转大写、截到 24 个字符**（字库只有大写和数字），存进 `msg`，再 302 跳回首页——不跳的话按刷新会重复提交上一次的文字。
+This is the standard WebServer pattern and not the focus of the lesson; it's enough to know what it does: `/` sends the HTML stored in `webpage.h`, while `/msg` receives the text submitted by the phone, **trims whitespace, converts it to uppercase and truncates it to 24 characters** (the font has only capitals and digits), stores it in `msg`, then redirects with a 302 back to the home page — without the redirect, refreshing the page would resubmit the previous text.
 
-回调里只改三个全局变量，一帧都不画。真正画点在 `loop()` 里，也就是下面几节：这段文字怎么变成 16 列点阵上的画面。
+The callbacks only change three global variables and draw nothing. The real drawing happens in `loop()` — the sections below explain how that text becomes an image on 16 columns of dots.
 
-**(6) `loop()`：装得下就静止**
+**(6) `loop()`: if it fits, hold it still**
 
 ```cpp
 void loop() {
-  server.handleClient();  // 处理网页请求
+  server.handleClient();  // Handle web requests
 
-  // ---- 一屏装得下：居中静止显示 ----
+  // ---- Fits on one screen: centered static display ----
   if (textWidth() <= 16) {
-    if (needRedraw) {     // 仅在文字变化时重绘
+    if (needRedraw) {     // Redraw only when text changes
       renderStatic();
       needRedraw = false;
     }
@@ -424,23 +426,23 @@ void loop() {
   }
 ```
 
-`handleClient()` 必须每轮都调，网页才有响应——它只处理"有没有请求"，没有就立刻返回，不阻塞。
+`handleClient()` must be called on every pass or the page won't respond — it only checks "is there a request?", returns immediately when there isn't, and never blocks.
 
-`loop()` 一秒跑几千轮。没有 `needRedraw` 这个标志，静止画面也会被重画几千次，每次都是 20 多次 GPIO 翻转 + 四段 I2C 时序，白白占着 CPU，网页响应也变慢。有这个标志，同一句话只画一次。
+`loop()` runs thousands of times a second. Without the `needRedraw` flag, a static image would be redrawn thousands of times, each redraw costing more than twenty GPIO toggles plus four I²C transactions — burning CPU for nothing and slowing the web page down. With the flag, the same sentence is drawn only once.
 
-那个 `return` 也重要：装得下就直接结束这一轮，不往下走滚动逻辑。
+That `return` matters too: when the text fits, end the pass right there and skip the scrolling logic.
 
-**(7) `loop()`：装不下就滚动**
+**(7) `loop()`: if it doesn't fit, scroll**
 
 ```cpp
-  // ---- 超出一屏：横向滚动 ----
+  // ---- Exceeds one screen: scroll horizontally ----
   if (millis() - lastScrollAt < SCROLL_MS) return;
   lastScrollAt = millis();
 
   renderFrame(scrollPos);
   scrollPos++;
 
-  // 滚完整句再留 16 列空白后循环
+  // After scrolling the whole text, leave 16 blank columns then loop
   int totalCols = textWidth() + 16;
   if (scrollPos >= totalCols) {
     scrollPos = 0;
@@ -448,11 +450,11 @@ void loop() {
 }
 ```
 
-用 `millis()` 判断间隔而不是 `delay(120)`：`delay` 会把整个 `loop()` 卡住，这期间网页请求没人处理，手机点提交要等半天。用时间戳比较，滚一列之后立刻返回，下一轮还能顺手处理请求。
+Using `millis()` for the interval instead of `delay(120)`: `delay` would freeze the whole `loop()`, and during that freeze nothing would handle web requests, so tapping Send on the phone would hang. Comparing timestamps lets us return immediately after shifting one column, leaving the next pass free to pick up requests.
 
-`totalCols = textWidth() + 16` 是"整句宽度再加一屏空白"，滚到句尾之后屏幕空一遍再从头开始，看起来有节奏。
+`totalCols = textWidth() + 16` means "the full width of the sentence plus one blank screen". After the sentence finishes scrolling, the screen empties once before starting over, which gives the display a sense of rhythm.
 
-**(8) `textWidth()`：一个字符 6 列**
+**(8) `textWidth()`: six columns per character**
 
 ```cpp
 int textWidth() {
@@ -461,21 +463,21 @@ int textWidth() {
 }
 ```
 
-每个字符占 6 列：5 列点阵 + 1 列间隔。`-1` 是因为最后一个字符后面不需要间隔。
+Each character takes 6 columns: 5 columns of font bitmap plus 1 spacing column. The `-1` is because no spacing is needed after the last character.
 
-所以 `"AB"` 是 6+6−1 = 11 列，`"ABC"` 是 17 列——刚好超过 16，开始滚。16 列的屏最多放两个字符静止显示，三个起就滚。
+So `"AB"` is 6+6−1 = 11 columns and `"ABC"` is 17 — just over 16, so scrolling starts. A 16-column screen can hold at most two characters statically; three or more and it scrolls.
 
-**(9) 把整句映射到 16 列：`renderStatic()` 和 `renderFrame()`**
+**(9) Mapping the whole sentence onto 16 columns: `renderStatic()` and `renderFrame()`**
 
 ```cpp
 void renderStatic() {
   int total = textWidth();
-  int startCol = (16 - total) / 2;  // 左侧留空列数
+  int startCol = (16 - total) / 2;  // Number of blank columns on the left
 
   uint8_t cols[16];
   for (int i = 0; i < 16; i++) {
-    int idx = i - startCol;                 // 映射到整句列号
-    cols[i] = (idx >= 0) ? getColumn(idx) : 0;  // 句首之前补空
+    int idx = i - startCol;                 // Map to the column index in the whole text
+    cols[i] = (idx >= 0) ? getColumn(idx) : 0;  // Fill blank before the start of the text
   }
 
   matrix_display(cols);
@@ -492,77 +494,81 @@ void renderFrame(int pos) {
 }
 ```
 
-两个函数都只做一件事：**凑出 16 列数据，交给 `matrix_display()` 写屏**。区别只在起点的算法。
+Both functions do one thing: **build 16 columns of data and hand them to `matrix_display()` to write to the screen**. Only the starting-point math differs.
 
-`renderStatic()` 要居中，先算左边该留几列空：`(16 - total) / 2`。整句 11 列时留 2 列，屏幕第 0、1 列是空的，文字从第 2 列开始。循环里 `i - startCol` 把"屏幕列号"换算成"整句列号"，前两列算出负数，说明还没到句首，直接补 0（灭）。
+`renderStatic()` centers the text, so it first works out how many blank columns to leave on the left: `(16 - total) / 2`. For an 11-column sentence that's 2 blanks, screen columns 0 and 1 stay empty and the text begins at column 2. In the loop, `i - startCol` converts a "screen column" into a "sentence column"; for the first two columns the result is negative, meaning we haven't reached the start of the sentence yet, so we fill with 0 (off).
 
-`renderFrame()` 用于滚动，起点是传进来的 `pos`：屏幕第 `i` 列取整句第 `pos + i` 列。`pos` 每帧加 1，整个窗口就往右移一列，看起来是文字向左走。句尾之后 `getColumn()` 返回 0，自然留白。
+`renderFrame()` is for scrolling, with the starting point passed in as `pos`: screen column `i` takes sentence column `pos + i`. Add one to `pos` each frame and the whole window shifts one column to the right, which looks like the text moving left. Past the end of the sentence `getColumn()` returns 0, leaving natural blank space.
 
-两个函数末尾都是 `matrix_display(cols)`——16 个字节一送，屏上就是这一帧。点阵驱动本身在第 1 课讲过，这里不再展开。
+Both functions end with `matrix_display(cols)` — send 16 bytes and that frame appears on the display. The dot matrix driver itself was covered in Project 1 and isn't expanded on here.
 
-**(10) `getColumn()`：一次算一列**
+**(10) `getColumn()`: compute one column at a time**
 
 ```cpp
 uint8_t getColumn(int idx) {
-  int charIdx = idx / 6;                    // 第几个字符
-  int colIdx  = idx % 6;                    // 字符内第几列
-  if (charIdx >= (int)msg.length()) return 0;
-  if (colIdx >= 5) return 0;                // 间隔列
+  if (idx < 0) return 0;                    // Not yet on screen
+
+  int charIdx = idx / 6;                    // Character index (6 columns per character: 5 font columns + 1 spacing column)
+  int colIdx  = idx % 6;                    // Column index within the character
+
+  if (charIdx >= (int)msg.length()) return 0;  // Past the end of the text
+  if (colIdx >= 5) return 0;                   // Spacing column
+
   int fi = charToIndex(msg[charIdx]);
   return FONT[fi][colIdx];
 }
 ```
 
-滚动时每一帧只需要 16 列，没必要先把整句几百列拼进内存。给一个全局列号 `idx`，除 6 得字符下标、模 6 得字符内列号，直接去字库取。
+Each scrolling frame needs only 16 columns, so there's no reason to assemble the whole sentence — hundreds of columns — in memory first. Given a global column index `idx`, divide by 6 to get the character index and take the remainder mod 6 to get the column within that character, then fetch it straight from the font.
 
-`colIdx == 5` 是间隔列，返回 0（灭）；超出句尾也返回 0（留白）。除法和取余必须成对出现，只用其中一个就会串字。
+`colIdx == 5` is the spacing column and returns 0 (off); past the end of the sentence also returns 0 (blank). Division and modulo must appear as a pair — using only one of them will run characters together.
 
-`renderFrame(pos)` 就是 `for (i=0..15) cols[i] = getColumn(pos + i)`，把窗口从第 `pos` 列开始截 16 列出来。`renderStatic()` 则是先算居中偏移 `startCol`，再让 `i - startCol` 当全局列号。
+`renderFrame(pos)` is simply `for (i=0..15) cols[i] = getColumn(pos + i)`, cutting a 16-column window starting at column `pos`. `renderStatic()` first computes the centering offset `startCol`, then uses `i - startCol` as the global column index.
 
-**(11) `charToIndex()`：索引是连续排的**
+**(11) `charToIndex()`: indices are packed consecutively**
 
 ```cpp
 int charToIndex(char c) {
   if (c >= 'A' && c <= 'Z') return c - 'A';        // A~Z → 0~25
   if (c >= '0' && c <= '9') return 26 + (c - '0'); // 0~9 → 26~35
-  return 36;                                       // 其他字符按空格
+  return 36;                                       // Treat other characters as space
 }
 ```
 
-`'A' - 'A' = 0`、`'Z' - 'A' = 25`，字母靠 ASCII 连续性直接算出下标，不用查表。数字接在后面 26～35，第 37 项（下标 36）是空白，兜住所有字库里没有的字符——中文、标点、小写字母（已经被 `toUpperCase` 转掉了）都落到这一项。
+`'A' - 'A' = 0` and `'Z' - 'A' = 25`, so letters use ASCII continuity to compute their index directly — no lookup table needed. Digits follow at 26–35, and entry 37 (index 36) is blank, catching everything the font doesn't contain — Chinese characters, punctuation and lowercase letters (already converted by `toUpperCase`) all land in that slot.
 
-#### **8. 运行现象：**
+#### **8. What You'll See:**
 
-上电后串口打印：
+After power on, the serial port prints:
 
 ```text
-正在连接 你的WiFi名字
+Connecting Your WiFi name
 .....
-弹幕屏就绪，手机打开：http://192.168.1.23
+Dot matrix display ready, open on your phone: http://192.168.1.23
 ```
 
-手机连同一个 Wi-Fi，浏览器输入这个地址，出现一个深色页面：输入框、**发送到点阵**按钮，下面两行说明。
+Connect the phone to the same Wi-Fi, open that address in a browser, and a dark page appears: an input box, a **Send to Dot Matrix** button, and two lines of instructions below.
 
-| 输入 | 点阵表现 |
+| Input | Dot matrix behavior |
 | --- | --- |
-| `HI` | 居中静止显示 |
-| `LOVE` | 从右往左滚动，滚完留 16 列空白再循环 |
-| `HELLO WORLD` | 滚动，字符间距均匀 |
+| `HI` | Centered and held still |
+| `LOVE` | Scrolls right to left, then leaves 16 blank columns before looping |
+| `HELLO WORLD` | Scrolls with even spacing between characters |
 
-> 【图片待补】输入 `LOVE` 后点阵滚动到中间位置的实拍图。
+> [Image to be added] A photo of the dot matrix at a mid-scroll position after entering `LOVE`.
 
-#### **9. 常见问题解决：**
+#### **9. Troubleshooting:**
 
-**Wi-Fi 连不上、网页打不开，按这个顺序查：**
+**If Wi-Fi won't connect or the page won't open, check in this order:**
 
-(1) **账号密码换了没有**：代码开头的 `WIFI_SSID`、`WIFI_PASS` 还是占位符就烧进去，一定连不上，改成自己路由器的名称和密码。
+(1) **Did you change the credentials?** If `WIFI_SSID` and `WIFI_PASS` at the top of the code are still placeholders when you flash, it will never connect; replace them with your router's name and password.
 
-(2) **串口一行字都没有**：按一下板子上的 RESET 键再试，可能是上一版程序卡住了。
+(2) **Nothing at all on serial?** Press the RESET button on the board and try again — the previous sketch may be stuck.
 
 ![](media/RESET.png){width=340px}
 
-(3) **串口一直冒点、拿不到 IP**：Wi-Fi 连接失败。路由器必须是 **2.4 GHz**，5 GHz 板子不支持；没有 2.4 G 就开手机热点（热点默认 2.4 G）。
+(3) **Dots keep printing on serial, no IP?** Wi-Fi connection failed. The router must be **2.4 GHz**; the board doesn't support 5 GHz. If you have no 2.4 G network, turn on a phone hotspot (hotspots default to 2.4 G).
 
-(4) **拿到 IP 但页面打不开**：地址要带 `http://`，IP 以串口打印的为准；手机必须连同一个 Wi-Fi，两边 IP 前三段要一样。
+(4) **Got an IP but the page won't open?** The address must include `http://`, and the IP must be the one printed on serial; the phone must be on the same Wi-Fi, and the first three octets of both IPs must match.
 
-(5) **网段对、还是打不开**：进路由器后台把**AP 隔离**关掉，开了它同一 Wi-Fi 下的设备互相访问不了。
+(5) **Same subnet but still won't open?** Log in to the router settings and turn off **AP isolation**; when it's enabled, devices on the same Wi-Fi can't reach one another.

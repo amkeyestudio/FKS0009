@@ -1,56 +1,56 @@
-### 项目 6：循迹传感器
+### Project 6: Line-Tracking Sensor
 
-#### **1. 简介：**
+#### **1. Introduction:**
 
-把车翻过来，朝地面那一面有一排五只黑色小方块。每只里面是一对红外管：一只往下照，一只看反射回来的光——地面白就反光，黑就吸掉，接收管把这个差别变成高电平或低电平。
+Turn the Mini Tracked Tank V4.0 over and you'll find five small black blocks along the side that faces the ground. Each one hides a pair of infrared tubes: one shines down, the other watches the light that bounces back. A white surface reflects; a black line swallows the light. The receiver turns that difference into a clean HIGH or LOW.
 
-五只探头要是各占一根引脚，主控又得腾地方，所以它们全挂在一颗 PCF8574 上，只用两根线（IO8、IO9）把读数送回来。这五路其实是一个字节里的五个位，拼起来就是从 0 到 31 的一个数。
+Giving each of those five sensors its own pin would eat up the controller board's precious GPIO, so they are all hung off a single PCF8574 and reach the controller through just two wires. The five readings are really five bits of one byte, which means the robot's entire view of the floor fits into a single number. Getting the bit order right matters more than it looks — swap two of them and the position the robot thinks it sees is simply wrong.
 
-先不急着让车跑，只把五路读数打到串口上，每 200 毫秒一行。车放在白纸上五个都是 0；用手指或黑胶带挡在哪颗探头下面，对应那一位就变 1；整排压在黑线上，五个全变 1。
+Before letting the robot drive anywhere, try reading the five channels on their own. Lay it on white paper and every channel should say one thing; cover a sensor with a finger or a strip of black tape and only the corresponding channel should change. The easy mistake is forgetting that these sensors work by reflected light: in strong sunlight, or if the sensors sit too far off the ground, every reading can look the same and you'll chase a problem that isn't in the code.
 
-五个 0 和 1 从左到右排开，就是车对脚下地面的全部认知——下一课开车要靠它。
+Those five 0s and 1s, laid out from left to right, are the robot's entire knowledge of the floor beneath it — and the next lesson will drive using nothing else.
 
-#### **2. 所需清单：**
+#### **2. Required Parts:**
 
-本课用到的器件：
+Parts used in this lesson:
 
 |   |   |   |
 | :---: | :---: | :---: |
-| ![](../media/kit_02.png){width=170px}<br><span style="font-size:0.85em">履带底盘总成（含循迹传感器） ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 电机扩展板 ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 开发板 ×1</span> |
+| ![](../media/kit_02.png){width=170px}<br><span style="font-size:0.85em">Tracked chassis assembly (with line-tracking sensor) ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor driver expansion board ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
 
-> ⚠️ **这套传感器在第 2 章装配底盘时已经固定好、线也走好了，本表只作对照，不用拆；下面的接线说明只标清接线方式，供对照，不必拆装。完整物料见 1.4 套件清单。**
-我
+> ⚠️ **This sensor was already fixed in place and wired when the chassis was assembled in Chapter 2. This table is for reference only — do not remove it. The wiring notes below only show how the connections are made, for reference; no disassembly is needed. For the full parts list, see 1.4 Kit List.**
 
-#### **3. 参数：**
 
-| 项目 | 参数 |
+#### **3. Parameters:**
+
+| Item | Parameter |
 | --- | --- |
-| 扩展芯片 | PCF8574，I2C 转 8 位并行 |
-| I2C 地址 | 0x20（A2 A1 A0 全接地） |
+| Expansion chip | PCF8574, I2C to 8-bit parallel |
+| I2C address | 0x20 (A2, A1 and A0 all tied to ground) |
 | SDA / SCL | IO8 / IO9 |
-| 总线速率 | 400 kHz（快速模式） |
-| 使用通道 | 5 路：P4 P0 P1 P2 P3（左 → 右） |
-| 电平逻辑 | 压黑线读 0，代码取反后为 1 |
-| 打印周期 | 200 ms |
+| Bus speed | 400 kHz (fast mode) |
+| Channels used | 5: P4 P0 P1 P2 P3 (left → right) |
+| Logic level | 0 when over a black line, inverted to 1 in code |
+| Print period | 200 ms |
 
-#### **4. 接线说明：**
+#### **4. Wiring:**
 
-| 信号 | 主控 GPIO | 说明 |
+| Signal | Controller GPIO | Notes |
 | --- | :---: | --- |
-| SDA | IO8 | 与点阵 DIN 共用，本课不用点阵 |
-| SCL | IO9 | 与点阵 CLK 共用，本课不用点阵 |
-| VCC | 5V | 由扩展板供给 |
-| GND | GND | 共地 |
+| SDA | IO8 | Shared with the dot matrix DIN; the dot matrix is not used in this lesson |
+| SCL | IO9 | Shared with the dot matrix CLK; the dot matrix is not used in this lesson |
+| VCC | 5V | Supplied by the expansion board |
+| GND | GND | Common ground |
 
 ![](media/PRO6.png)
 
-#### **5. 流程图：**
+#### **5. Flowchart:**
 
-读取流程只有三步，但位序和取反两处最容易弄错：
+The read takes only three steps, but bit order and inversion are the two easiest things to get wrong:
 
 ![](media/track_read_flow.png)
 
-#### **6. 测试代码：**
+#### **6. Test Code:**
 
 ```cpp
 #include <Wire.h>
@@ -58,11 +58,11 @@
 
 PCF8574 pcf8574(0x20);
 
-#define OUTA P4  // 最左
-#define OUTB P0  // 左
-#define OUTC P1  // 中
-#define OUTD P2  // 右
-#define OUTE P3  // 最右
+#define OUTA P4  // Far left
+#define OUTB P0  // Left
+#define OUTC P1  // Center
+#define OUTD P2  // Right
+#define OUTE P3  // Far right
 
 void setup() {
   Serial.begin(115200);
@@ -82,11 +82,11 @@ void setup() {
 void loop() {
   PCF8574::DigitalInput val = pcf8574.digitalReadAll();
 
-  int A = !val.p4; // 最左
-  int B = !val.p0; // 左
-  int C = !val.p1; // 中
-  int D = !val.p2; // 右
-  int E = !val.p3; // 最右
+  int A = !val.p4; // Far left
+  int B = !val.p0; // Left
+  int C = !val.p1; // Center
+  int D = !val.p2; // Right
+  int E = !val.p3; // Far right
 
   Serial.printf("A:%d  B:%d  C:%d  D:%d  E:%d\n", A, B, C, D, E);
 
@@ -94,9 +94,9 @@ void loop() {
 }
 ```
 
-#### **7. 代码解释：**
+#### **7. Code Explanation:**
 
-**(1) 两个头文件和一个芯片对象**
+**(1) Two header files and one chip object**
 
 ```cpp
 #include <Wire.h>
@@ -105,32 +105,32 @@ void loop() {
 PCF8574 pcf8574(0x20);
 ```
 
-循迹传感器的五对红外管不是直接接主控，而是全接到一颗 PCF8574 上。这颗芯片是 8 位 I2C 转并行口，`0x20` 是它的从机地址——板上有跳线可以改，改了就跟着改这个数。主控只用 SDA/SCL 两根线，就能一次读到 8 个引脚的电平。
+The five infrared pairs of the line-tracking sensor don't connect to the controller directly; they all go to a single PCF8574. That chip is an 8-bit I2C-to-parallel port, and `0x20` is its slave address — there are jumpers on the board to change it, so change this number too if you move them. With just the SDA/SCL two wires, the controller can read all eight pins at once.
 
-**(2) 五路引脚的编号不是按顺序排的**
+**(2) The five pin numbers are not in sequential order**
 
 ```cpp
-#define OUTA P4  // 最左
-#define OUTB P0  // 左
-#define OUTC P1  // 中
-#define OUTD P2  // 右
-#define OUTE P3  // 最右
+#define OUTA P4  // Far left
+#define OUTB P0  // Left
+#define OUTC P1  // Center
+#define OUTD P2  // Right
+#define OUTE P3  // Far right
 ```
 
-最左边那一路接的是 **P4**，剩下四路才是 P0～P3。这是扩展板布线定的，改不了。按 P0～P4 的顺序去对应"最左到最右"，读出来的位置会整体错一位，第 7 课的循迹会直接跑飞。
+The far-left channel is **P4**; the other four are P0 to P3. That's fixed by the expansion board's wiring and can't be changed. If you map P0–P4 to "left to right" in order, every position will be off by one and the line tracking in Lesson 7 will immediately run off the track.
 
-**(3) I2C 提到 400 kHz**
+**(3) Raising I2C to 400 kHz**
 
 ```cpp
   Wire.begin();
   Wire.setClock(400000);
 ```
 
-这三句写在 `setup()` 里，上电只跑一次。`Wire.begin()` 不传参数时用的是默认引脚 IO8/IO9——正好和点阵共用。两课分开上没事，第 15 课要把它们塞进同一个程序，就得靠 `Wire.end()` 交替让路。
+These lines are in `setup()` and run only once at power-on. With no arguments, `Wire.begin()` uses the default pins IO8/IO9 — exactly the ones shared with the dot matrix. That's fine when the lessons are run separately; in Lesson 15 both have to live in one program, so `Wire.end()` is used to hand the bus back and forth.
 
-`setClock(400000)` 把 I2C 提到 400 kHz（快速模式），这是 PCF8574 的上限。默认的 100 kHz 读一次要 0.9 ms，循迹要 5 ms 读一轮，提速之后读一个字节只要约 45 µs。
+`setClock(400000)` raises I2C to 400 kHz (fast mode), the PCF8574's upper limit. At the default 100 kHz a read takes 0.9 ms while line tracking needs a 5 ms cycle; after the speed-up, one byte takes only about 45 µs.
 
-**(4) 先说"当输入用"，再读**
+**(4) Declare them as inputs before reading**
 
 ```cpp
   pcf8574.begin();
@@ -141,55 +141,55 @@ PCF8574 pcf8574(0x20);
   pcf8574.pinMode(OUTE, INPUT);
 ```
 
-这六句也在 `setup()` 里，紧跟在 `Wire.begin()` 后面。PCF8574 的引脚是"准双向"的：输出时是强驱动，输入时必须先写 1 把它放成高阻态，外部电路才能把电平拉低。库里的 `pinMode(pin, INPUT)` 就是替你写这个 1。
+These six lines are also in `setup()`, right after `Wire.begin()`. PCF8574 pins are quasi-bidirectional: they drive strongly as outputs, but as inputs you must first write a 1 to put them in a high-impedance state so an external circuit can pull the line low. The library's `pinMode(pin, INPUT)` writes that 1 for you.
 
-**漏掉这一步读到全是 0**，看起来像"五路都压线"，其实是引脚被自己摁住了。五条一条都不能少。
+**Skip this and every reading comes back 0**. It looks as if all five sensors are on the line, when in fact the pins are holding themselves down. None of the five lines can be omitted.
 
-**(5) 一次读回 8 位，不是读 5 次**
+**(5) Read all 8 bits in one go, not five separate reads**
 
 ```cpp
   PCF8574::DigitalInput val = pcf8574.digitalReadAll();
 ```
 
-`digitalReadAll()` 发一次 I2C 读，把 8 个引脚打包成一个结构体回来，里面每个引脚是一个位（`val.p0` … `val.p7`）。逐位调用 `digitalRead()` 也能用，但那是 5 次 I2C 事务，慢 5 倍。
+`digitalReadAll()` issues one I2C read and returns all eight pins packed into a struct, with each pin as one bit (`val.p0` … `val.p7`). Calling `digitalRead()` bit by bit also works, but that's five I2C transactions and five times slower.
 
-P5～P7 这三路空着，读回来的值没有意义，不管它。
+P5 to P7 are unused; their readings are meaningless, so ignore them.
 
-**(6) 每一路都要加 `!`**
+**(6) Every channel needs a `!`**
 
 ```cpp
-  int A = !val.p4; // 最左
-  int B = !val.p0; // 左
-  int C = !val.p1; // 中
-  int D = !val.p2; // 右
-  int E = !val.p3; // 最右
+  int A = !val.p4; // Far left
+  int B = !val.p0; // Left
+  int C = !val.p1; // Center
+  int D = !val.p2; // Right
+  int E = !val.p3; // Far right
 ```
 
-红外对管压到黑线上时反射弱，模块把这判成低电平——**看到线读到的是 0**。直接拿 0 去做判断，后面写逻辑全是反的，所以这里统一取反，让"1 = 看到线"。
+When an infrared pair is over a black line the reflection is weak and the module reads it as LOW — **seeing a line returns 0**. If you fed 0 straight into your logic, everything downstream would be inverted, so all five are negated here to make "1 = line detected".
 
-取反只在这一处做，后面所有代码都按"1 有线"来理解，不要一会儿反一会儿不反。
+Do the inversion only here; every later piece of code reads "1 means line present". Don't invert in one place and not in another.
 
-拿白纸和黑胶带各扫一遍就能验证这一步：白纸上每一位都应是 1，黑线上对应位变 0。只有某一位始终不变，才是那一路的发射管或接收管坏了；五路全不变，先查 I2C 地址（0x20）和接线。
+You can verify this by sweeping white paper and black tape: on white paper every bit should be 1, and over a black line the matching bit becomes 0. Only if one bit never changes is the transmitter or receiver on that channel broken; if all five stay the same, check the I2C address (0x20) and the wiring first.
 
-**(7) `printf` 打印五个值**
+**(7) `printf` prints the five values**
 
 ```cpp
   Serial.printf("A:%d  B:%d  C:%d  D:%d  E:%d\n", A, B, C, D, E);
 ```
 
-`printf` 是 C 语言的格式化输出，`%d` 是整数的占位符，五个 `%d` 依次对上后面五个变量。中间那两个空格是为了让串口监视器里的数字对齐，方便肉眼比对哪一路变了。
+`printf` is C's formatted output; `%d` is the placeholder for an integer, and the five `%d`s match the five variables that follow in order. The two spaces in between keep the numbers aligned in the Serial Monitor so you can see at a glance which channel changed.
 
-**(8) 200 ms 读一轮**
+**(8) One read every 200 ms**
 
 ```cpp
   delay(200);
 ```
 
-每秒 5 行，划线时能看清是哪一路先变。去掉这个延时，串口会刷屏快到看不清，反而不好判断。
+Five lines per second make it easy to see which channel changes first as you draw a line. Remove the delay and the Serial Monitor scrolls too fast to read, which makes judgement harder, not easier.
 
-#### **8. 运行现象：**
+#### **8. What You'll See:**
 
-上电后串口每 200 ms 打印一行，五个数字对应从左到右五个探头：
+After power-on the Serial Monitor prints a line every 200 ms; the five numbers correspond to the five sensors from left to right:
 
 ```text
 A:0  B:0  C:1  D:0  E:0
@@ -198,21 +198,21 @@ A:0  B:1  C:0  D:1  E:0
 A:1  B:1  C:1  D:1  E:1
 ```
 
-把车放在白纸上，五个都是 0；用手指或黑胶带挡在某一颗探头下面，对应位置变 1；把整排压在黑线上，五个全变 1。
+Put the robot on white paper and all five are 0; cover one sensor with a finger or black tape and its position becomes 1; lay the whole row over a black line and all five become 1.
 
-> 【图片待补】整车压在黑色循迹线上、串口五行全为 1 的实拍图（含串口画面）。
+> [Image to be added] A photo of the whole robot sitting on the black line-tracking tape with all five serial readings at 1 (including the Serial Monitor).
 
-两个常见现象：
+Two common observations:
 
-- 五个数一直是 0，手指挡上去也不变——先查 4P 插头有没有插到底，再查 SDA / SCL 是否插反。I2C 接反不会烧，但一个字节也读不回来。
-- 读数偶尔跳变——探头离地太高（正常 5～8 mm）或环境光太强。循迹传感器靠反射光工作，正午的太阳直射会让它一直读到白。
+- All five numbers stay at 0, even with a finger over a sensor — first check that the 4P plug is fully seated, then check whether SDA / SCL are reversed. Reversed I2C won't burn anything, but you won't read a single byte.
+- Readings occasionally jump — the sensors sit too high above the floor (normally 5–8 mm) or the ambient light is too strong. Line-tracking sensors work by reflected light, and direct noon sunlight makes them read white all the time.
 
-#### **9. 常见问题解决：**
+#### **9. Troubleshooting:**
 
-(1) 串口里五个数一直是 0，手指挡上去也不变：先查循迹板的 4P 插头有没有插到底，再看 SDA / SCL 是不是插反。`Wire.begin()` 用的是 IO8/IO9，接反不会烧板子，但一个字节也读不回来。
+(1) All five numbers in the Serial Monitor stay at 0, unchanged by a finger: first check that the line-tracking board's 4P plug is fully seated, then check whether SDA / SCL are reversed. `Wire.begin()` uses IO8/IO9; reversing them won't damage the board, but you won't read a single byte.
 
-(2) 读数偶尔跳变：探头离地太高或者环境光太强。循迹靠反射光工作，探头离地保持 5～8 mm，正午太阳直射会让它一直读到白，挪到阴影里再试。
+(2) Readings occasionally jump: the sensors sit too high or the ambient light is too strong. Line tracking relies on reflected light; keep the sensors 5–8 mm above the floor. Direct noon sunlight makes them read white constantly, so move into the shade and try again.
 
-(3) 某一位始终不变、其余正常：那一路上要么是发射管、要么是接收管坏了。拿白纸和黑胶带各扫一遍，正常的话白纸上每一位都是 1、黑线上对应位变 0。
+(3) One bit never changes while the others work: either the transmitter or the receiver on that channel has failed. Sweep with white paper and black tape — normally every bit is 1 on white and the matching bit becomes 0 over black.
 
-(4) 五路全 0 或全 1：全 0 是没插电或者 I2C 没起来；全 1 是五路都压着黑线，或者探头离地太近贴着地面。
+(4) All five are 0 or all five are 1: all 0 means no power or I2C failed to start; all 1 means all five channels are over a black line, or the sensors are so close to the floor that they're touching it.

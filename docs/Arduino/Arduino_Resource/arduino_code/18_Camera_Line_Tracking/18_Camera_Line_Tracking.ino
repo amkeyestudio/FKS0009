@@ -1,198 +1,198 @@
-#include "AiCam.h"  // 视觉模块驱动
+#include "AiCam.h"  // Vision module driver
 
-// ===== 电机引脚 =====
-#define MOTOR_AIN 38  // A 路方向：左轮
-#define MOTOR_AEN 21  // A 路调速：左轮
-#define MOTOR_BIN 40  // B 路方向：右轮
-#define MOTOR_BEN 41  // B 路调速：右轮
+// ===== Motor pins =====
+#define MOTOR_AIN 38  // Channel A direction: left wheel
+#define MOTOR_AEN 21  // Channel A speed: left wheel
+#define MOTOR_BIN 40  // Channel B direction: right wheel
+#define MOTOR_BEN 41  // Channel B speed: right wheel
 
-// ===== 视觉模块串口 =====
-// 主控 RX←模块 TX，主控 TX→模块 RX，需共地
-// 按实际接线修改
-#define CAM_RX 18  // 主控接收脚
-#define CAM_TX 17  // 主控发送脚
+// ===== Vision module serial =====
+// Controller RX <- module TX, controller TX -> module RX, common ground required
+// Modify according to actual wiring
+#define CAM_RX 18  // Controller receive pin
+#define CAM_TX 17  // Controller transmit pin
 
-// ===== 点阵引脚 =====
-#define CLK_Pin 9  // 时钟，接模块 CLK
-#define DIN_Pin 8  // 数据，接模块 DIN
+// ===== Dot matrix pins =====
+#define CLK_Pin 9  // Clock, connected to module CLK
+#define DIN_Pin 8  // Data, connected to module DIN
 
-// ===== 循线参数 =====
-#define BASE_SPEED   130  // 直行基础速度
-#define KP           0.4  // 比例系数
-#define KD           0.6  // 微分系数，抑制超调
-#define TURN_MAX      90  // 单侧修正上限
-#define D_MAX         50  // 微分项限幅
+// ===== Line tracking parameters =====
+#define BASE_SPEED   130  // Base speed for straight travel
+#define KP           0.4  // Proportional coefficient
+#define KD           0.6  // Derivative coefficient, suppresses overshoot
+#define TURN_MAX      90  // Max correction per side
+#define D_MAX         50  // Derivative term clamp
 
-// ===== 丢线找线 =====
-#define SEARCH_SPEED  90  // 找线转速
-#define SEARCH_DEAD   15  // 找线死区
-#define LOST_TIMEOUT 600  // 找线超时（ms）
+// ===== Line loss and search =====
+#define SEARCH_SPEED  90  // Line search rotation speed
+#define SEARCH_DEAD   15  // Line search dead zone
+#define LOST_TIMEOUT 600  // Line search timeout (ms)
 
-// ===== 有效标志 =====
-#define LINE_OK 5  // 模块第三字段为 5 表示识别到线
+// ===== Valid flag =====
+#define LINE_OK 5  // Third field = 5 means line recognized
 
-// ===== 表情编号 =====
-#define FACE_EYES     0  // 待机：眼睛
-#define FACE_SMILE    1  // 跟线：笑脸
-#define FACE_SURPRISE 2  // 找线：瞪眼
-#define FACE_SAD      3  // 超时：苦脸
+// ===== Expression IDs =====
+#define FACE_EYES     0  // Standby: eyes
+#define FACE_SMILE    1  // Line tracking: smile
+#define FACE_SURPRISE 2  // Line search: wide eyes
+#define FACE_SAD      3  // Timeout: sad face
 
-// 16 字节对应 16 列，每字节 8 位对应一列 8 行
+// 16 bytes for 16 columns, 8 bits per byte for 8 rows per column
 
-// 待机：两只方眼
+// Standby: two square eyes
 unsigned char eyes[] = {
   0x00, 0x00, 0x00, 0x00, 0x1C, 0x1C, 0x00, 0x00,
   0x00, 0x00, 0x1C, 0x1C, 0x00, 0x00, 0x00, 0x00
 };
 
-// 笑脸：跟线稳定
+// Smile: tracking stably
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
 };
 
-// 瞪眼：正在找线
+// Wide eyes: searching for line
 unsigned char surprise[] = {
   0x00, 0x00, 0x00, 0x00, 0x3E, 0x3E, 0x00, 0xC0,
   0xC0, 0x00, 0x3E, 0x3E, 0x00, 0x00, 0x00, 0x00
 };
 
-// 苦脸：找线超时
+// Sad face: line search timeout
 unsigned char sad[] = {
   0x00, 0x00, 0x00, 0x00, 0x08, 0x08, 0x80, 0x40,
   0x40, 0x80, 0x08, 0x08, 0x00, 0x00, 0x00, 0x00
 };
 
-AiCam aiCam(CAM_RX, CAM_TX);  // 视觉模块实例
+AiCam aiCam(CAM_RX, CAM_TX);  // Vision module instance
 
-int lastError = 0;            // 上次偏差，丢线时决定找线方向
-bool hasLast = false;         // 是否已有上次偏差
-unsigned long lostStart = 0;  // 丢线起始时刻，0 表示未丢线
-int curFace = -1;             // 当前表情，-1 未显示
+int lastError = 0;            // Previous error, determines search direction on line loss
+bool hasLast = false;         // Whether a previous error exists
+unsigned long lostStart = 0;  // Time of line loss, 0 means no loss
+int curFace = -1;             // Current expression, -1 means none shown
 
 void setup() {
-  // 两线拉高，总线置空闲
+  // Pull both lines high to set the bus idle
   pinMode(CLK_Pin, OUTPUT);
   pinMode(DIN_Pin, OUTPUT);
   digitalWrite(CLK_Pin, HIGH);
   digitalWrite(DIN_Pin, HIGH);
 
-  // 电机引脚
+  // Motor pins
   pinMode(MOTOR_BIN, OUTPUT);
   pinMode(MOTOR_AIN, OUTPUT);
-  ledcAttach(MOTOR_BEN, 1000, 8);  // 1 kHz，8 位
+  ledcAttach(MOTOR_BEN, 1000, 8);  // 1 kHz, 8-bit
   ledcAttach(MOTOR_AEN, 1000, 8);
-  stopCar();                       // 上电停车
+  stopCar();                       // Stop at power on
 
-  // 显示待机表情
+  // Show standby expression
   showFace(FACE_EYES);
 
-  // 启动视觉模块，循线模式
+  // Start vision module in line tracking mode
   aiCam.begin();
   aiCam.setMode("line");
 
-  delay(1000);  // 等模式切换完成
+  delay(1000);  // Wait for mode switch to complete
 }
 
 void loop() {
-  aiCam.readSerial();  // 每轮读取串口
+  aiCam.readSerial();  // Read serial each loop
 
-  int offset = aiCam.getLineOffset();  // 偏差：负偏左，正偏右
-  int valid  = aiCam.getLineValid();   // 有效标志，5 为识别到线
+  int offset = aiCam.getLineOffset();  // Offset: negative left, positive right
+  int valid  = aiCam.getLineValid();   // Valid flag, 5 means line recognized
 
   if (valid == LINE_OK) {
-    // 识别到线：PD 换算差速
-    lostStart = 0;         // 清丢线计时
-    showFace(FACE_SMILE);  // 显示笑脸
+    // Line recognized: PD computes differential speed
+    lostStart = 0;         // Clear line-loss timer
+    showFace(FACE_SMILE);  // Show smile
 
-    int error = offset;  // 当前偏差
+    int error = offset;  // Current error
 
-    // 微分项：偏差变化量，抑制超调
+    // Derivative term: change in error, suppresses overshoot
     int dError = 0;
     if (hasLast) {
       dError = error - lastError;
-      dError = constrain(dError, -D_MAX, D_MAX);  // 限幅
+      dError = constrain(dError, -D_MAX, D_MAX);  // Clamp
     }
 
-    // 差速 = P×偏差 + D×偏差变化
+    // Differential = P*error + D*error change
     int correction = (int)(error * KP + dError * KD);
 
-    // 修正量限幅
+    // Clamp correction
     correction = constrain(correction, -TURN_MAX, TURN_MAX);
 
-    // 修正为正（偏右）时左快右慢，车头右偏
-    // 修正为负时相反
+    // Positive correction (line to the right): left faster, right slower
+    // Negative correction: the opposite
     driveMotors(BASE_SPEED + correction, BASE_SPEED - correction);
 
-    lastError = error;  // 保存本次偏差
+    lastError = error;  // Save current error
     hasLast = true;
   } else {
-    // 未识别到线：按上次偏差方向找线
-    if (lostStart == 0) {    // 刚丢线
-      lostStart = millis();  // 开始计时
+    // Line not recognized: search in the direction of previous error
+    if (lostStart == 0) {    // Line just lost
+      lostStart = millis();  // Start timer
     }
 
     if (millis() - lostStart < LOST_TIMEOUT) {
-      showFace(FACE_SURPRISE);  // 找线中
+      showFace(FACE_SURPRISE);  // Searching for line
 
-      // 死区内方向不明，停车
+      // Direction unknown within dead zone, stop
       if (lastError > SEARCH_DEAD) {
-        driveMotors(SEARCH_SPEED, -SEARCH_SPEED);   // 线原在右：向右找
+        driveMotors(SEARCH_SPEED, -SEARCH_SPEED);   // Line was on the right: search right
       } else if (lastError < -SEARCH_DEAD) {
-        driveMotors(-SEARCH_SPEED, SEARCH_SPEED);   // 线原在左：向左找
+        driveMotors(-SEARCH_SPEED, SEARCH_SPEED);   // Line was on the left: search left
       } else {
-        stopCar();                                  // 方向不明，停车
+        stopCar();                                  // Direction unknown, stop
       }
     } else {
-      showFace(FACE_SAD);  // 找线超时
-      stopCar();           // 脱线停车
+      showFace(FACE_SAD);  // Line search timeout
+      stopCar();           // Stop when off line
     }
   }
 
-  delay(5);  // 5 ms 一轮
+  delay(5);  // 5 ms per loop
 }
 
-// ===== 点阵显示 =====
-// 仅表情变化时写屏
+// ===== Dot matrix display =====
+// Only update display when expression changes
 void showFace(int face) {
-  if (face == curFace) return;  // 表情未变
+  if (face == curFace) return;  // Expression unchanged
   curFace = face;
 
   if (face == FACE_EYES) {
-    matrix_display(eyes);       // 待机
+    matrix_display(eyes);       // Standby
   } else if (face == FACE_SMILE) {
-    matrix_display(smile);      // 笑脸
+    matrix_display(smile);      // Smile
   } else if (face == FACE_SURPRISE) {
-    matrix_display(surprise);   // 瞪眼
+    matrix_display(surprise);   // Wide eyes
   } else {
-    matrix_display(sad);        // 苦脸
+    matrix_display(sad);        // Sad face
   }
 }
 
-// 将 16 字节字模写入点阵屏显存
+// Write 16-byte font bitmap to dot matrix display buffer
 void matrix_display(unsigned char matrix_value[]) {
-  // 0x40：写数据模式，地址自增
+  // 0x40: write data mode, auto-increment address
   IIC_start();
   IIC_send(0x40);
   IIC_end();
 
-  // 0xC0：显存起始地址 0
+  // 0xC0: display buffer start address 0
   IIC_start();
   IIC_send(0xC0);
 
-  // 连写 16 列
+  // Write 16 columns consecutively
   for (int i = 0; i < 16; i++) {
     IIC_send(matrix_value[i]);
   }
   IIC_end();
 
-  // 0x8A：开显示，亮度最大
+  // 0x8A: display on, maximum brightness
   IIC_start();
   IIC_send(0x8A);
   IIC_end();
 }
 
-// 起始条件：CLK 高电平期间 DIN 下降沿
+// Start condition: DIN falling edge while CLK is HIGH
 void IIC_start() {
   digitalWrite(CLK_Pin, HIGH);
   delayMicroseconds(3);
@@ -202,13 +202,13 @@ void IIC_start() {
   delayMicroseconds(3);
 }
 
-// 发送 1 字节，低位在前：CLK 低时置数据，上升沿采样
+// Send one byte, LSB first: set data while CLK is LOW, sample on rising edge
 void IIC_send(unsigned char send_data) {
   for (int i = 0; i < 8; i++) {
-    digitalWrite(CLK_Pin, LOW);  // 拉低时钟，准备数据
+    digitalWrite(CLK_Pin, LOW);  // Pull clock low to prepare data
     delayMicroseconds(3);
 
-    // 从 bit0 起逐位发送
+    // Send bit by bit starting from bit0
     if (send_data & 0x01) {
       digitalWrite(DIN_Pin, HIGH);
     } else {
@@ -216,14 +216,14 @@ void IIC_send(unsigned char send_data) {
     }
     delayMicroseconds(3);
 
-    digitalWrite(CLK_Pin, HIGH); // 拉高时钟，模块采样
+    digitalWrite(CLK_Pin, HIGH); // Pull clock high, module samples
     delayMicroseconds(3);
 
-    send_data = send_data >> 1;  // 右移，取出下一位
+    send_data = send_data >> 1;  // Shift right for next bit
   }
 }
 
-// 停止条件：CLK 高电平期间 DIN 上升沿
+// Stop condition: DIN rising edge while CLK is HIGH
 void IIC_end() {
   digitalWrite(CLK_Pin, LOW);
   delayMicroseconds(3);
@@ -235,35 +235,35 @@ void IIC_end() {
   delayMicroseconds(3);
 }
 
-// ===== 电机驱动 =====
-// A 路(38/21)接左轮、B 路(40/41)接右轮
-// leftSpeed 写 A 路、rightSpeed 写 B 路；先限幅 ±255，再取绝对值给占空比
+// ===== Motor driver =====
+// Channel A (38/21) drives left wheel, channel B (40/41) drives right wheel
+// leftSpeed to channel A, rightSpeed to channel B; clamp to +/-255 first, then take absolute value for duty cycle
 void driveMotors(int leftSpeed, int rightSpeed) {
-  leftSpeed  = constrain(leftSpeed,  -255, 255);  // 左轮限幅
-  rightSpeed = constrain(rightSpeed, -255, 255);  // 右轮限幅
+  leftSpeed  = constrain(leftSpeed,  -255, 255);  // Left wheel clamp
+  rightSpeed = constrain(rightSpeed, -255, 255);  // Right wheel clamp
 
-  // A 路：左轮
+  // Channel A: left wheel
   if (leftSpeed >= 0) {
-    digitalWrite(MOTOR_AIN, HIGH);    // 拉高：正转
-    ledcWrite(MOTOR_AEN, leftSpeed);  // 占空比 = 速度
+    digitalWrite(MOTOR_AIN, HIGH);    // Pull high: forward
+    ledcWrite(MOTOR_AEN, leftSpeed);  // Duty cycle = speed
   } else {
-    digitalWrite(MOTOR_AIN, LOW);     // 拉低：反转
-    ledcWrite(MOTOR_AEN, -leftSpeed); // 取绝对值
+    digitalWrite(MOTOR_AIN, LOW);     // Pull low: reverse
+    ledcWrite(MOTOR_AEN, -leftSpeed); // Absolute value
   }
 
-  // B 路：右轮
+  // Channel B: right wheel
   if (rightSpeed >= 0) {
-    digitalWrite(MOTOR_BIN, HIGH);     // 拉高：正转
-    ledcWrite(MOTOR_BEN, rightSpeed);  // 占空比 = 速度
+    digitalWrite(MOTOR_BIN, HIGH);     // Pull high: forward
+    ledcWrite(MOTOR_BEN, rightSpeed);  // Duty cycle = speed
   } else {
-    digitalWrite(MOTOR_BIN, LOW);      // 拉低：反转
-    ledcWrite(MOTOR_BEN, -rightSpeed); // 取绝对值
+    digitalWrite(MOTOR_BIN, LOW);      // Pull low: reverse
+    ledcWrite(MOTOR_BEN, -rightSpeed); // Absolute value
   }
 }
 
-// 基本动作
-void goForward(int speed)  { driveMotors(speed, speed); }    // 前进：左右同速正转
-void goBackward(int speed) { driveMotors(-speed, -speed); }  // 后退：左右同速反转
-void spinLeft(int speed)   { driveMotors(-speed, speed); }   // 左转：左后退右前进
-void spinRight(int speed)  { driveMotors(speed, -speed); }   // 右转：左前进右后退
-void stopCar()             { driveMotors(0, 0); }            // 停止：占空比归零
+// Basic movements
+void goForward(int speed)  { driveMotors(speed, speed); }    // Forward: both wheels forward at same speed
+void goBackward(int speed) { driveMotors(-speed, -speed); }  // Backward: both wheels reverse at same speed
+void spinLeft(int speed)   { driveMotors(-speed, speed); }   // Spin left: left reverse, right forward
+void spinRight(int speed)  { driveMotors(speed, -speed); }   // Spin right: left forward, right reverse
+void stopCar()             { driveMotors(0, 0); }            // Stop: duty cycle zero

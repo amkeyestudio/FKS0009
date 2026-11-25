@@ -1,23 +1,23 @@
 #include <WiFi.h>
 #include <WebServer.h>
-#include "webpage.h"  // 网页内容
+#include "webpage.h"  // Web page content
 
-// ===== Wi-Fi 配置 =====
-// 仅支持 2.4 GHz
-const char* WIFI_SSID = "你的WiFi名字";
-const char* WIFI_PASS = "你的WiFi密码";
+// ===== Wi-Fi configuration =====
+// Only supports 2.4 GHz
+const char* WIFI_SSID = "Your WiFi name";
+const char* WIFI_PASS = "Your WiFi password";
 
-// ===== 点阵引脚 =====
-#define CLK_Pin 9  // 时钟，接模块 CLK
-#define DIN_Pin 8  // 数据，接模块 DIN
+// ===== Dot matrix pins =====
+#define CLK_Pin 9  // Clock, connected to the module CLK pin
+#define DIN_Pin 8  // Data, connected to the module DIN pin
 
-// ===== 滚动参数 =====
-#define SCROLL_MS 120  // 每列滚动间隔（ms），越小越快
-#define MAX_CHARS  24  // 最大字符数
+// ===== Scroll parameters =====
+#define SCROLL_MS 120  // Scroll interval per column (ms); smaller is faster
+#define MAX_CHARS  24  // Maximum number of characters
 
-// ===== 5×7 字库 =====
-// 每字符 5 列，1 字节/列，bit0 为最上行，bit6 为最下行
-// 索引 0~25 为 A~Z，26~35 为 0~9，36 为空格
+// ===== 5×7 font library =====
+// 5 columns per character, 1 byte per column, bit0 is the top row, bit6 is the bottom row
+// Indices 0~25 for A~Z, 26~35 for 0~9, 36 for space
 const uint8_t FONT[37][5] = {
   {0x7E, 0x11, 0x11, 0x11, 0x7E},  // A
   {0x7F, 0x49, 0x49, 0x49, 0x36},  // B
@@ -55,17 +55,17 @@ const uint8_t FONT[37][5] = {
   {0x01, 0x71, 0x09, 0x05, 0x03},  // 7
   {0x36, 0x49, 0x49, 0x49, 0x36},  // 8
   {0x06, 0x49, 0x49, 0x29, 0x1E},  // 9
-  {0x00, 0x00, 0x00, 0x00, 0x00}   // 空格
+  {0x00, 0x00, 0x00, 0x00, 0x00}   // Space
 };
 
-WebServer server(80);      // 网页服务器
-String msg = "HELLO";      // 待显示文字
-int scrollPos = 0;         // 当前起始列
+WebServer server(80);      // Web server
+String msg = "HELLO";      // Text to display
+int scrollPos = 0;         // Current starting column
 unsigned long lastScrollAt = 0;
-bool needRedraw = true;    // 文字变化，静止显示需重绘
+bool needRedraw = true;    // Text changed; the static display needs a redraw
 
 void setup() {
-  // 两线拉高，总线置空闲
+  // Pull both lines high to set the bus idle
   pinMode(CLK_Pin, OUTPUT);
   pinMode(DIN_Pin, OUTPUT);
   digitalWrite(CLK_Pin, HIGH);
@@ -74,8 +74,8 @@ void setup() {
   Serial.begin(115200);
   delay(300);
 
-  // 连接 Wi-Fi
-  Serial.print("正在连接 ");
+  // Connect to Wi-Fi
+  Serial.print("Connecting to ");
   Serial.println(WIFI_SSID);
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
@@ -84,28 +84,28 @@ void setup() {
     Serial.print(".");
   }
   Serial.println();
-  Serial.print("弹幕屏就绪，手机打开：http://");
+  Serial.print("Dot matrix display ready, open on your phone: http://");
   Serial.println(WiFi.localIP());
 
-  // 首页
+  // Home page
   server.on("/", []() {
     server.send_P(200, "text/html; charset=utf-8", index_html);
   });
 
-  // 接收文字
+  // Receive text
   server.on("/msg", []() {
     String t = server.arg("t");
     t.trim();
-    t.toUpperCase();                       // 字库仅含大写
+    t.toUpperCase();                       // The font only contains uppercase letters
     if (t.length() > MAX_CHARS) {
-      t = t.substring(0, MAX_CHARS);       // 超长截断
+      t = t.substring(0, MAX_CHARS);       // Truncate if too long
     }
     if (t.length() > 0) {
       msg = t;
-      scrollPos = 0;            // 从最右列开始滚入
-      needRedraw = true;        // 标记需重绘
+      scrollPos = 0;            // Start scrolling in from the far right column
+      needRedraw = true;        // Mark as needing a redraw
     }
-    server.sendHeader("Location", "/");     // 返回首页
+    server.sendHeader("Location", "/");     // Return to the home page
     server.send(302, "text/plain", "");
   });
 
@@ -113,56 +113,56 @@ void setup() {
 }
 
 void loop() {
-  server.handleClient();  // 处理网页请求
+  server.handleClient();  // Handle web page requests
 
-  // ---- 一屏装得下：居中静止显示 ----
+  // ---- Fits on one screen: display statically centered ----
   if (textWidth() <= 16) {
-    if (needRedraw) {     // 仅在文字变化时重绘
+    if (needRedraw) {     // Redraw only when the text changes
       renderStatic();
       needRedraw = false;
     }
     return;
   }
 
-  // ---- 超出一屏：横向滚动 ----
+  // ---- Wider than one screen: scroll horizontally ----
   if (millis() - lastScrollAt < SCROLL_MS) return;
   lastScrollAt = millis();
 
   renderFrame(scrollPos);
   scrollPos++;
 
-  // 滚完整句再留 16 列空白后循环
+  // After the full text has scrolled, leave 16 blank columns before looping
   int totalCols = textWidth() + 16;
   if (scrollPos >= totalCols) {
     scrollPos = 0;
   }
 }
 
-// ===== 宽度计算 =====
-// 整句占用的列数
-// 每字符 6 列，末字符不计间隔
+// ===== Width calculation =====
+// Number of columns occupied by the whole text
+// 6 columns per character, no spacing after the last character
 int textWidth() {
   if (msg.length() == 0) return 0;
   return msg.length() * 6 - 1;
 }
 
-// ===== 静止显示 =====
-// 整句居中显示在一屏 16 列内
+// ===== Static display =====
+// Display the whole text centered within 16 columns
 void renderStatic() {
   int total = textWidth();
-  int startCol = (16 - total) / 2;  // 左侧留空列数
+  int startCol = (16 - total) / 2;  // Number of blank columns on the left
 
   uint8_t cols[16];
   for (int i = 0; i < 16; i++) {
-    int idx = i - startCol;                 // 映射到整句列号
-    cols[i] = (idx >= 0) ? getColumn(idx) : 0;  // 句首之前补空
+    int idx = i - startCol;                 // Map to the column index in the whole text
+    cols[i] = (idx >= 0) ? getColumn(idx) : 0;  // Fill in blanks before the start of the text
   }
 
   matrix_display(cols);
 }
 
-// ===== 渲染一帧 =====
-// 从整句第 pos 列开始截取一屏
+// ===== Render one frame =====
+// Take one screen starting from column pos of the whole text
 void renderFrame(int pos) {
   uint8_t cols[16];
 
@@ -173,52 +173,52 @@ void renderFrame(int pos) {
   matrix_display(cols);
 }
 
-// 取整句第 idx 列
+// Get column idx of the whole text
 uint8_t getColumn(int idx) {
-  if (idx < 0) return 0;                    // 尚未进入屏幕
+  if (idx < 0) return 0;                    // Not yet on screen
 
-  int charIdx = idx / 6;                    // 字符索引（每字符 6 列：5 列字模 + 1 列间隔）
-  int colIdx  = idx % 6;                    // 字符内列号
+  int charIdx = idx / 6;                    // Character index (6 columns per character: 5 font columns + 1 spacing column)
+  int colIdx  = idx % 6;                    // Column index within the character
 
-  if (charIdx >= (int)msg.length()) return 0;  // 超出句尾
-  if (colIdx >= 5) return 0;                   // 间隔列
+  if (charIdx >= (int)msg.length()) return 0;  // Past the end of the text
+  if (colIdx >= 5) return 0;                   // Spacing column
 
   int fi = charToIndex(msg[charIdx]);
   return FONT[fi][colIdx];
 }
 
-// 字符转字库索引
+// Convert a character to a font index
 int charToIndex(char c) {
   if (c >= 'A' && c <= 'Z') return c - 'A';       // A~Z → 0~25
   if (c >= '0' && c <= '9') return 26 + (c - '0'); // 0~9 → 26~35
-  return 36;                                       // 其他字符按空格处理
+  return 36;                                       // Treat other characters as spaces
 }
 
-// ===== 点阵驱动 =====
-// 将 16 字节字模写入点阵屏显存
+// ===== Dot matrix driver =====
+// Write 16 bytes of font data to the dot matrix display buffer
 void matrix_display(unsigned char matrix_value[]) {
-  // 0x40：写数据模式，地址自增
+  // 0x40: write data mode, auto-increment address
   IIC_start();
   IIC_send(0x40);
   IIC_end();
 
-  // 0xC0：显存起始地址 0
+  // 0xC0: display buffer start address 0
   IIC_start();
   IIC_send(0xC0);
 
-  // 连写 16 列
+  // Write 16 columns consecutively
   for (int i = 0; i < 16; i++) {
     IIC_send(matrix_value[i]);
   }
   IIC_end();
 
-  // 0x8A：开显示，亮度 8/16
+  // 0x8A: display on, brightness 8/16
   IIC_start();
   IIC_send(0x8A);
   IIC_end();
 }
 
-// 起始条件：CLK 高电平期间 DIN 下降沿
+// Start condition: DIN falling edge while CLK is HIGH
 void IIC_start() {
   digitalWrite(CLK_Pin, HIGH);
   delayMicroseconds(3);
@@ -228,13 +228,13 @@ void IIC_start() {
   delayMicroseconds(3);
 }
 
-// 发送 1 字节，低位在前：CLK 低时置数据，上升沿采样
+// Send one byte, least significant bit first: set data while CLK is LOW, sample on the rising edge
 void IIC_send(unsigned char send_data) {
   for (int i = 0; i < 8; i++) {
-    digitalWrite(CLK_Pin, LOW);  // 拉低时钟，准备数据
+    digitalWrite(CLK_Pin, LOW);  // Pull the clock low to prepare the data
     delayMicroseconds(3);
 
-    // 从 bit0 起逐位发送
+    // Send bit by bit starting from bit0
     if (send_data & 0x01) {
       digitalWrite(DIN_Pin, HIGH);
     } else {
@@ -242,14 +242,14 @@ void IIC_send(unsigned char send_data) {
     }
     delayMicroseconds(3);
 
-    digitalWrite(CLK_Pin, HIGH); // 拉高时钟，模块采样
+    digitalWrite(CLK_Pin, HIGH); // Pull the clock high, module samples
     delayMicroseconds(3);
 
-    send_data = send_data >> 1;  // 右移，取出下一位
+    send_data = send_data >> 1;  // Shift right to get the next bit
   }
 }
 
-// 停止条件：CLK 高电平期间 DIN 上升沿
+// Stop condition: DIN rising edge while CLK is HIGH
 void IIC_end() {
   digitalWrite(CLK_Pin, LOW);
   delayMicroseconds(3);

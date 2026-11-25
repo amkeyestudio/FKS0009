@@ -1,86 +1,86 @@
-### 项目 11：红外遥控车
+### Project 11: IR Remote Control Car
 
-#### **1. 简介：**
+#### **1. Introduction:**
 
-![遥控车越障](media/intro_11.jpg){width=520px}
+![RC car clearing an obstacle](media/intro_11.jpg){width=520px}
 
-给车装一只遥控器：方向键按下就走，松开就停。红外是单向的，车没法回话，你怎么知道它还听不听得见？办法是在程序里挂一个 1.5 秒的计时，收到有效按键就重新计时，超时没有新指令就自己停下。
+Give the robot a remote: press a direction key and it moves, release and it stops. But infrared is one-way — the car can't answer back — so how do you know it still hears you? Add a 1.5 s watchdog: every valid key restarts the timer, and if no new command arrives before it runs out, the car stops by itself.
 
-按住不放时，遥控器发的不是新指令，而是一帧帧很短的重复标记，只能说明还是这个键，说不清按了多久。车拿这些标记只做一件事：把计时续上，动作不重复执行。
+Hold a key down and the remote doesn't send fresh commands. It sends short repeat markers that only say "still this key", with no hint of how long you've held it. The car uses those markers for one thing only — refreshing the timer — and never repeats the action.
 
-方向键对应四个动作：上、下两轮同速前进后退，左、右两轮一正一反原地打转，OK 立即停车。
+The four direction keys map to four motions: up and down drive both tracks at the same speed forward or backward; left and right drive the two sides in opposite directions to spin in place; OK stops immediately.
 
-按上，车往前走；松手约 1.5 秒，它自己停住，串口也不再打印。
+Press up and the car moves forward; let go and about 1.5 s later it stops on its own, and the serial output goes quiet too.
 
-#### **2. 所需清单：**
+#### **2. Parts Needed:**
 
-本课用到的器件：
+Parts used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
-| ![](../media/kit_12.png){width=200px}<br><span style="font-size:0.85em">17 键红外遥控器（JMFP-4） ×1</span> | ![](../media/ir_receiver.png){width=200px}<br><span style="font-size:0.85em">红外接收头 ×1</span> | ![](../media/kit_04.png){width=200px}<br><span style="font-size:0.85em">DRV8835 电机扩展板 ×1</span> |
-| ![](../media/kit_03.png){width=200px}<br><span style="font-size:0.85em">ESP32-S3 开发板 ×1</span> | ![](../media/kit_02.png){width=200px}<br><span style="font-size:0.85em">履带底盘总成 ×1</span> |  |
-> ⚠️ **全是第 2 章装好的器件，本表只作对照，不用拆；下面的接线说明只标清接线方式，供对照，不必拆装。完整物料见 1.4 套件清单。**
-#### **3. 参数：**
+| ![](../media/kit_12.png){width=200px}<br><span style="font-size:0.85em">17-key IR remote control (JMFP-4) ×1</span> | ![](../media/ir_receiver.png){width=200px}<br><span style="font-size:0.85em">IR receiver ×1</span> | ![](../media/kit_04.png){width=200px}<br><span style="font-size:0.85em">DRV8835 motor driver expansion board ×1</span> |
+| ![](../media/kit_03.png){width=200px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | ![](../media/kit_02.png){width=200px}<br><span style="font-size:0.85em">Tracked chassis assembly ×1</span> |  |
+> ⚠️ **All parts were installed back in Chapter 2; this table is for reference only — there is nothing to take apart. The wiring notes below only show how the connections are made, for reference; no assembly or disassembly is required. For the complete parts list, see 1.4 Kit Parts List.**
+#### **3. Parameters:**
 
-| 项目 | 参数 |
+| Item | Value |
 | --- | --- |
-| 接收脚 | IO48 |
-| 直行速度 | 180 |
-| 原地转速度 | 180 |
-| 指令超时 | 1500 ms |
-| 键值 | 上 70、下 21、左 68、右 67、OK 64 |
-| 循环周期 | 无延时，靠 `decode()` 自身节流 |
+| Receiver pin | IO48 |
+| Straight travel speed | 180 |
+| Spin-in-place speed | 180 |
+| Command timeout | 1500 ms |
+| Key codes | Up 70, Down 21, Left 68, Right 67, OK 64 |
+| Loop period | No delay; throttled by `decode()` itself |
 
-#### **4. 接线说明：**
+#### **4. Wiring:**
 
-| 信号 | 主控 GPIO |
+| Signal | Controller GPIO |
 | --- | :---: |
-| 红外接收 OUT | IO48 |
-| 左轮 AIN / AEN | IO38 / IO21 |
-| 右轮 BIN / BEN | IO40 / IO41 |
+| IR receiver OUT | IO48 |
+| Left wheel AIN / AEN | IO38 / IO21 |
+| Right wheel BIN / BEN | IO40 / IO41 |
 
-#### **5. 流程图：**
+#### **5. Flowchart:**
 
-主循环做两件事：有信号就处理，没信号就看超时。两件事互不阻塞，所以车不会因为等按键而停住响应：
+The main loop does two independent things: handle a signal if there is one, and check the timeout if there isn't. Neither blocks the other, so waiting for a key never freezes the car's response:
 
 ![](media/ir_car_flow.png)
 
-#### **6. 测试代码：**
+#### **6. Test Code:**
 
 ```cpp
-#include <IRremote.hpp>  // 红外解码库
+#include <IRremote.hpp>  // Infrared (IR) decoding library
 
-// ===== 引脚 =====
-#define IR_RECEIVE_PIN 48  // 红外接收头，IO48
+// ===== Pins =====
+#define IR_RECEIVE_PIN 48  // IR receiver, IO48
 
-#define MOTOR_AIN 38  // A 路方向
-#define MOTOR_AEN 21  // A 路调速
-#define MOTOR_BIN 40  // B 路方向
-#define MOTOR_BEN 41  // B 路调速
+#define MOTOR_AIN 38  // Channel A direction
+#define MOTOR_AEN 21  // Channel A speed control
+#define MOTOR_BIN 40  // Channel B direction
+#define MOTOR_BEN 41  // Channel B speed control
 
-// ===== 速度 =====
-#define SPEED_RUN  180  // 直行
-#define SPEED_TURN 180  // 原地转
+// ===== Speed =====
+#define SPEED_RUN  180  // Straight travel
+#define SPEED_TURN 180  // Spin in place
 
-// ===== 遥控器键值 =====
-// 换遥控器后需按串口打印值修改
+// ===== Remote control key values =====
+// After changing the remote control, update these values to match the Serial Monitor output
 #define KEY_UP    70
 #define KEY_DOWN  21
 #define KEY_LEFT  68
 #define KEY_RIGHT 67
 #define KEY_STOP  64
 
-// 指令超时（ms）自动停车，遥控器失联时避免失控
+// Auto-stop after command timeout (ms) to avoid losing control if the remote disconnects
 #define STOP_AFTER 1500
 
-unsigned long lastKeyTime = 0;  // 最后有效按键时刻
+unsigned long lastKeyTime = 0;  // Timestamp of the last valid key press
 
 void setup() {
   Serial.begin(115200);
   delay(1000);
 
-  Serial.println("红外遥控车启动，用方向盘控制");
+  Serial.println("IR remote control car started; control it with the direction pad");
   IrReceiver.begin(IR_RECEIVE_PIN, DISABLE_LED_FEEDBACK);
 
   pinMode(MOTOR_BIN, OUTPUT);
@@ -88,7 +88,7 @@ void setup() {
   ledcAttach(MOTOR_BEN, 1000, 8);
   ledcAttach(MOTOR_AEN, 1000, 8);
 
-  stopCar();  // 上电停车
+  stopCar();  // Stop on power on
 }
 
 void loop() {
@@ -97,7 +97,7 @@ void loop() {
     bool holding = IrReceiver.decodedIRData.flags & IRDATA_FLAGS_IS_REPEAT;
 
     if (holding) {
-      // 长按只刷新超时计时
+      // A long press only refreshes the timeout timer
       lastKeyTime = millis();
     } else if (isKnownKey(cmd)) {
       handleKey(cmd);
@@ -107,33 +107,33 @@ void loop() {
     IrReceiver.resume();
   }
 
-  // 超过 1.5 s 无有效按键即停车
+  // Stop if no valid key press for more than 1.5 s
   if (millis() - lastKeyTime > STOP_AFTER) {
     stopCar();
   }
 }
 
-// 按键处理
+// Key handling
 void handleKey(uint8_t cmd) {
   switch (cmd) {
     case KEY_UP:
-      Serial.println("前进");
+      Serial.println("Forward");
       goForward(SPEED_RUN);
       break;
     case KEY_DOWN:
-      Serial.println("后退");
+      Serial.println("Backward");
       goBackward(SPEED_RUN);
       break;
     case KEY_LEFT:
-      Serial.println("左转");
+      Serial.println("Turn left");
       spinLeft(SPEED_TURN);
       break;
     case KEY_RIGHT:
-      Serial.println("右转");
+      Serial.println("Turn right");
       spinRight(SPEED_TURN);
       break;
     case KEY_STOP:
-      Serial.println("停车");
+      Serial.println("Stop");
       stopCar();
       break;
     default:
@@ -141,20 +141,20 @@ void handleKey(uint8_t cmd) {
   }
 }
 
-// 是否为已定义按键
+// Whether the key is a defined key
 bool isKnownKey(uint8_t cmd) {
   return cmd == KEY_UP || cmd == KEY_DOWN || cmd == KEY_LEFT ||
          cmd == KEY_RIGHT || cmd == KEY_STOP;
 }
 
-// ===== 电机驱动 =====
-// A 路接左轮、B 路接右轮，与第 7 课一致
-// 若左右相反，互换下面两段
+// ===== Motor driver =====
+// Channel A drives the left wheel, channel B drives the right wheel, same as Lesson 7
+// If left and right are reversed, swap the two sections below
 void driveMotors(int leftSpeed, int rightSpeed) {
   leftSpeed  = constrain(leftSpeed,  -255, 255);
   rightSpeed = constrain(rightSpeed, -255, 255);
 
-  // A 路：左轮
+  // Channel A: left wheel
   if (rightSpeed >= 0) {
     digitalWrite(MOTOR_BIN, HIGH);
     ledcWrite(MOTOR_BEN, rightSpeed);
@@ -163,7 +163,7 @@ void driveMotors(int leftSpeed, int rightSpeed) {
     ledcWrite(MOTOR_BEN, -rightSpeed);
   }
 
-  // B 路：右轮
+  // Channel B: right wheel
   if (leftSpeed >= 0) {
     digitalWrite(MOTOR_AIN, HIGH);
     ledcWrite(MOTOR_AEN, leftSpeed);
@@ -173,23 +173,32 @@ void driveMotors(int leftSpeed, int rightSpeed) {
   }
 }
 
-void goForward(int speed)  { driveMotors(speed, speed); }    // 前进：两轮同速正转
-void goBackward(int speed) { driveMotors(-speed, -speed); }  // 后退：两轮同速反转
-void spinLeft(int speed)   { driveMotors(-speed, speed); }   // 左转：左轮后退、右轮前进
-void spinRight(int speed)  { driveMotors(speed, -speed); }   // 右转：左轮前进、右轮后退
-void stopCar()             { driveMotors(0, 0); }            // 停：占空比归零
+void goForward(int speed)  { driveMotors(speed, speed); }    // Forward: both wheels rotate forward at the same speed
+void goBackward(int speed) { driveMotors(-speed, -speed); }  // Backward: both wheels rotate in reverse at the same speed
+void spinLeft(int speed)   { driveMotors(-speed, speed); }   // Turn left: left wheel backward, right wheel forward
+void spinRight(int speed)  { driveMotors(speed, -speed); }   // Turn right: left wheel forward, right wheel backward
+void stopCar()             { driveMotors(0, 0); }            // Stop: duty cycle set to zero
 ```
 
-#### **7. 代码解释：**
+#### **7. Code Explanation:**
 
-**(1) 引脚、速度、键值**
+**(1) Pins, speed and key codes**
 
 ```cpp
-#define IR_RECEIVE_PIN 48  // 红外接收头，IO48
+// ===== Pins =====
+#define IR_RECEIVE_PIN 48  // IR receiver, IO48
 
-#define SPEED_RUN  180  // 直行
-#define SPEED_TURN 180  // 原地转
+#define MOTOR_AIN 38  // Channel A direction
+#define MOTOR_AEN 21  // Channel A speed control
+#define MOTOR_BIN 40  // Channel B direction
+#define MOTOR_BEN 41  // Channel B speed control
 
+// ===== Speed =====
+#define SPEED_RUN  180  // Straight travel
+#define SPEED_TURN 180  // Spin in place
+
+// ===== Remote control key values =====
+// After changing the remote control, update these values to match the Serial Monitor output
 #define KEY_UP    70
 #define KEY_DOWN  21
 #define KEY_LEFT  68
@@ -197,35 +206,45 @@ void stopCar()             { driveMotors(0, 0); }            // 停：占空比�
 #define KEY_STOP  64
 ```
 
-180 约 71% 占空比，比循迹的 115 高——遥控要的是"按下去立刻动"，不需要循迹那种细腻的修正余量。
+A value of 180 is roughly a 71% duty cycle — higher than the 115 used for line tracking, because remote control wants "move the instant you press" rather than the fine corrective margin line tracking needs.
 
-五个键值和第 10 课完全一样，是从那一课串口打印的结果抄过来的。换遥控器就要重抄一遍。
+The five key codes are exactly the same as in Project 10; they were copied from that lesson's serial output. Change the remote and you'll have to copy them again.
 
-**(2) `loop()` 里是两件独立的事**
+**(2) Two independent things in `loop()`**
 
 ```cpp
 void loop() {
   if (IrReceiver.decode()) {
-    ...
+    uint8_t cmd = IrReceiver.decodedIRData.command;
+    bool holding = IrReceiver.decodedIRData.flags & IRDATA_FLAGS_IS_REPEAT;
+
+    if (holding) {
+      // A long press only refreshes the timeout timer
+      lastKeyTime = millis();
+    } else if (isKnownKey(cmd)) {
+      handleKey(cmd);
+      lastKeyTime = millis();
+    }
+
     IrReceiver.resume();
   }
 
-  // 超过 1.5 s 无有效按键即停车
+  // Stop if no valid key press for more than 1.5 s
   if (millis() - lastKeyTime > STOP_AFTER) {
     stopCar();
   }
 }
 ```
 
-两个 `if` 平级，没有嵌套。收不到红外时第一个 `if` 直接跳过，第二个照样执行——这就是"互不阻塞"的意思。
+The two `if` statements are siblings, not nested. When no IR arrives the first `if` is simply skipped and the second still runs — that's what "non-blocking" means.
 
-如果把超时检查写进 `if (decode())` 里面，一旦没有按键就永远进不去，车会一直保持上一个动作冲下去。这是本课结构上最关键的一点。
+If you moved the timeout check inside `if (decode())`, it would never run whenever no key is pressed and the car would keep charging ahead with its last command. Structurally, this is the most important point in the lesson.
 
-**(3) 长按只刷计时，不重复执行**
+**(3) A long press only refreshes the timer, never repeats the action**
 
 ```cpp
     if (holding) {
-      // 长按只刷新超时计时
+      // A long press only refreshes the timeout timer
       lastKeyTime = millis();
     } else if (isKnownKey(cmd)) {
       handleKey(cmd);
@@ -233,11 +252,11 @@ void loop() {
     }
 ```
 
-长按方向键时，遥控器每 108 ms 发一个重复帧。如果每一帧都调 `handleKey()`，等于每秒重发 9 次"前进"，串口被刷满，电机指令也被反复重设。
+While you hold a direction key, the remote sends a repeat frame every 108 ms. Calling `handleKey()` for every frame would re-issue "forward" nine times a second, flooding the serial output and resetting the motor command over and over.
 
-这里长按只做一件事：把 `lastKeyTime` 往后推，让超时别触发。动作本身在按下那一帧就已经执行过了。
+Here a long press does exactly one thing: push `lastKeyTime` forward so the timeout doesn't fire. The action itself was already executed on the frame when the key went down.
 
-**(4) `isKnownKey()` 为什么单独一个函数**
+**(4) Why `isKnownKey()` is its own function**
 
 ```cpp
 bool isKnownKey(uint8_t cmd) {
@@ -246,85 +265,85 @@ bool isKnownKey(uint8_t cmd) {
 }
 ```
 
-遥控器上还有数字键、音量键等一堆没定义的键。这些键按下去 `handleKey()` 会走到 `default: break;`，什么也不做——但它们**不该续命**。
+The remote also has number keys, volume keys and a bunch of undefined buttons. Pressing those makes `handleKey()` fall through to `default: break;` and do nothing — but they **should not keep the car alive**.
 
-所以时间戳只在 `isKnownKey()` 为真时才刷新：按了没用的键，1.5 秒后车照样停。这是安全设计，不是多余判断。
+That's why the timestamp is refreshed only when `isKnownKey()` is true: press a useless key and the car still stops after 1.5 seconds. This is a safety design, not a redundant check.
 
-**(5) `handleKey()` 的五个 `case`**
+**(5) The five `case`s in `handleKey()`**
 
 ```cpp
 void handleKey(uint8_t cmd) {
   switch (cmd) {
     case KEY_UP:
-      Serial.println("前进");
+      Serial.println("Forward");
       goForward(SPEED_RUN);
       break;
 ```
 
-一个键对一个动作，每个 `case` 都以 `break` 收尾。漏了 `break` 会"贯穿"到下一个 `case`：按"前进"结果执行了"后退"的代码。
+One key maps to one action, and every `case` ends with `break`. Forget the `break` and execution "falls through" into the next `case` — press forward and you'd end up running the backward code.
 
-`default: break;` 兜住所有没定义的码值——虽然 `isKnownKey()` 已经把那些键拦在外面了，双保险。
+`default: break;` catches every undefined code — a second layer of protection, since `isKnownKey()` has already filtered those keys out.
 
-**(6) `lastKeyTime` 和 1.5 秒**
+**(6) `lastKeyTime` and the 1.5 seconds**
 
 ```cpp
-unsigned long lastKeyTime = 0;  // 最后有效按键时刻
+unsigned long lastKeyTime = 0;  // Timestamp of the last valid key press
 ```
 
-`millis()` 返回的是开机以来的毫秒数，类型是 `unsigned long`，所以这个变量必须用同类型存，用 `int` 装不下（约 24 天就溢出成负数）。
+`millis()` returns milliseconds since power on as an `unsigned long`, so this variable must use the same type; an `int` would overflow into negatives in roughly 24 days.
 
 ```cpp
 #define STOP_AFTER 1500
 ```
 
-红外是单向通信，遥控器发出去就完事，车不知道按键有没有被收到。手松开、遥控器没电、走出接收范围、被阳光直射干扰——这几种情况在车上看起来完全一样：再也收不到帧。
+IR is one-way communication: the remote sends and that's the end of it, so the car has no idea whether the key arrived. Releasing the button, a dead remote, walking out of range and strong sunlight interference all look identical from the car — no more frames.
 
-1.5 秒是"人能感觉到延迟"和"车不会冲太远"之间的折中。真车可以缩到 300 ms 更安全，但按键换向时会有一顿一顿的感觉。
+1.5 seconds is a compromise between "a delay a person can feel" and "the car won't run too far". A real car could shorten it to 300 ms to be safer, but you'd feel a stutter when changing direction.
 
-方向键能一直按住，靠的也是这个：每收到一帧就重新计时，108 ms 一帧，计时器永远到不了 1500 ms；松手之后不再有帧，计时器走满就停。
+Holding a direction key works for the same reason: each frame restarts the timer, frames arrive every 108 ms so the counter can never reach 1500 ms; once you let go there are no more frames, the timer fills up and the car stops.
 
-**(7) `driveMotors()` 的参数顺序，以及一处写反的注释**
+**(7) The parameter order of `driveMotors()`, and a misplaced comment**
 
 ```cpp
 void driveMotors(int leftSpeed, int rightSpeed) {
 ```
 
-和循迹课一样，**左轮在前**，和第 2 课相反。
+As in the line-tracking lesson, **the left wheel comes first** — the opposite of Project 2.
 
-函数体里 `// A 路：左轮` 那行注释贴在 `if (rightSpeed >= 0)` 上方，位置是错的——那一段处理的是 `rightSpeed`，对应 B 路右轮。下面 `// B 路：右轮` 同样贴反了。
+Inside the function, the comment `// Channel A: left wheel` sits above `if (rightSpeed >= 0)`, which is the wrong place: that block handles `rightSpeed`, i.e. channel B and the right wheel. The `// Channel B: right wheel` comment below is swapped in the same way.
 
-以 `MOTOR_AIN` / `MOTOR_BIN` 这两个名字为准，注释当没看见。这也是为什么第 2 课特意强调过参数顺序：这几个函数长得太像，注释又不可靠。
+Trust the names `MOTOR_AIN` / `MOTOR_BIN` and ignore those comments. This is why Project 2 made a point of the parameter order: these functions look almost identical and the comments aren't reliable.
 
-`stopCar()` 在超时分支里每轮都会被调用一次，看起来重复，其实就是不停地写 0——不写的话车会保持上一个 PWM 值继续跑。
+`stopCar()` is called on every pass through the timeout branch. It looks redundant, but all it does is keep writing zero — skip it and the car would hold its last PWM value and keep running.
 
-#### **8. 运行现象：**
+#### **8. What You'll See:**
 
-上电后串口打印 `红外遥控车启动，用方向盘控制`。按方向键：
+After power on, the serial port prints the startup message for the IR remote control car. Press a direction key:
 
-| 按键 | 串口 | 车 |
+| Key | Serial | Car |
 | --- | --- | --- |
-| ↑ | 前进 | 两轮同速正转 |
-| ↓ | 后退 | 两轮同速反转 |
-| ← | 左转 | 左轮反转、右轮正转，原地打转 |
-| → | 右转 | 左轮正转、右轮反转 |
-| OK | 停车 | 立即停 |
+| ↑ | Forward | Both wheels rotate forward at the same speed |
+| ↓ | Backward | Both wheels rotate in reverse at the same speed |
+| ← | Turn left | Left wheel reverses, right wheel goes forward — spin in place |
+| → | Turn right | Left wheel goes forward, right wheel reverses |
+| OK | Stop | Stops immediately |
 
-松手后约 1.5 s，车自己停下（串口不会再打印，因为 `stopCar()` 在超时分支里被静默调用）。
+About 1.5 s after you release the key, the car stops by itself (nothing more is printed, because `stopCar()` is called silently in the timeout branch).
 
-> 【图片待补】串口打印五个按键动作的连续截图。
+> [Image to be added] Continuous screenshots of the serial output for the five key actions.
 
-如果按键动作对不上——按**上**车却后退——说明左右电机线接反了，或者 `driveMotors()` 的两个形参在调用时写反了。先用第 2 课的方法单独测电机，确认 A 路带的是左轮，再回来查这里。
+If the actions don't match — press **Up** and the car goes backward — the left and right motor wires are reversed, or the two arguments of `driveMotors()` were swapped at the call site. Test the motors individually using the method from Project 2, confirm that channel A drives the left wheel, then come back here.
 
-遥控距离变短、偶尔没反应，多数是接收头被车壳挡住一角。它是侧面受光的，正对遥控器效果最好，装在底盘边缘朝前是合适的。
+If the range shrinks and the car occasionally misses a press, the receiver is likely partly hidden by the shell. It senses from the side and works best when facing the remote directly, so mounting it at the front edge of the chassis with a clear view forward is a good choice.
 
-#### **9. 常见问题解决：**
+#### **9. Troubleshooting:**
 
-(1) 按遥控器完全没动静、串口也不打印动作：键值不匹配。`KEY_UP = 70` 这几个宏是按配套遥控器定的，换一把遥控器码就变了。先看第 10 课串口打印出来的实际键值，照着改这几个宏。
+(1) Nothing happens at all and the serial port prints no action: the key codes don't match. Macros such as `KEY_UP = 70` were set for the supplied remote; a different remote sends different codes. First read the actual values printed in Project 10, then edit these macros to match.
 
-(2) 动作和按键对不上，按**上**车却后退：左右电机线接反了，或者 `goForward()` 那两个参数写反。先用第 2 课的方法单独测电机，确认 A 路带的是左轮。
+(2) The actions don't match the keys — press **Up** and the car goes backward: the left and right motor wires are reversed, or the two arguments of `goForward()` were swapped. Test the motors individually using the method from Project 2 and confirm that channel A drives the left wheel.
 
-(3) 遥控距离变短、偶尔按了没反应：接收头被车壳挡住了一角。它是侧面受光的，装在底盘边缘朝前、别让外壳遮住，效果最好。
+(3) The range gets shorter and some presses are missed: the receiver is partly hidden by the car shell. It senses from the side, so mounting it at the front edge of the chassis, facing forward and unobstructed, works best.
 
-(4) 松手之后车还在跑：超时判断失效了。`STOP_AFTER` 是 1500 ms，确认 `loop()` 里那个 `if (millis() - lastKeyTime > STOP_AFTER)` 没被注释掉。
+(4) The car keeps running after you release the key: the timeout check has failed. `STOP_AFTER` is 1500 ms; check that the `if (millis() - lastKeyTime > STOP_AFTER)` line in `loop()` hasn't been commented out.
 
-(5) 按一下只动一次、再按没反应：`IrReceiver.resume()` 没被调用。库收完一帧会停下来等你处理，不 resume 就只收得到第一帧。
+(5) One press moves the car once and then nothing: `IrReceiver.resume()` isn't being called. After the library receives a frame it stops and waits for you to process it; without `resume()` it only ever receives the first frame.

@@ -3,68 +3,68 @@
 
 #include <Arduino.h>
 
-// ===== 串口参数 =====
-// 模块固定 9600 8N1
+// ===== Serial parameters =====
+// Module fixed at 9600 8N1
 #define CAM_BAUD 9600
 
-// ===== 数据缓存 =====
-// 模块内部完成图像处理，串口只回传结果
+// ===== Data buffer =====
+// The module processes images internally and reports results over serial only
 struct CamData {
-  int faceX = 0;            // 人脸中心 X
-  int faceY = 0;            // 人脸中心 Y
-  bool faceValid = false;   // 本帧是否检测到
+  int faceX = 0;            // Face center X
+  int faceY = 0;            // Face center Y
+  bool faceValid = false;   // Detected in this frame
 
-  String color;             // 颜色名，如 RED
-  bool colorValid = false;  // 本帧是否识别到
+  String color;             // Color name, e.g. RED
+  bool colorValid = false;  // Recognized in this frame
 
-  String qr;                // 二维码内容
-  bool qrValid = false;     // 本帧是否识别到
+  String qr;                // QR code content
+  bool qrValid = false;     // Recognized in this frame
 
-  String card;              // 任务卡编号
-  bool cardValid = false;   // 本帧是否识别到
+  String card;              // Task card ID
+  bool cardValid = false;   // Recognized in this frame
 
-  int lineOffset = 0;       // 偏差：负偏左，正偏右
-  int lineAngle = 0;        // 角度：负左倾，正右倾
-  int lineValid = 0;        // 有效标志，5 为识别到线
+  int lineOffset = 0;       // Offset: negative left, positive right
+  int lineAngle = 0;        // Angle: negative left tilt, positive right tilt
+  int lineValid = 0;        // Valid flag, 5 means line recognized
 };
 
-// ===== 驱动类 =====
-// 封装串口收发与解析，业务代码不接触串口细节
+// ===== Driver class =====
+// Wraps serial I/O and parsing so application code need not handle serial details
 class AiCam {
 public:
-  AiCam(uint8_t rxPin, uint8_t txPin);  // 传入主控 RX / TX 引脚
+  AiCam(uint8_t rxPin, uint8_t txPin);  // Controller RX/TX pins
 
-  void begin();                          // 启动串口，setup() 调用一次
-  void sendCmd(const String &cmd);       // 发送一条指令
-  void setMode(const String &mode);      // 切换模式：face / color / qr / card / line
-  void readSerial();                     // 读取回传，loop() 每轮调用
+  void begin();                          // Start serial, called once from setup()
+  void sendCmd(const String &cmd);       // Send a command
+  void setMode(const String &mode);      // Switch mode: face / color / qr / card / line
+  void readSerial();                     // Read reports, called each loop()
 
-  String getColor();                     // 取识别到的颜色名
-  bool isColorValid();                   // 本帧是否识别到
-  void clearColor();                     // 清空颜色缓存
-  void flushInput();                     // 清空串口积压数据
+  String getColor();                     // Get recognized color name
+  bool isColorValid();                   // Recognized in this frame
+  void clearColor();                     // Clear color buffer
+  void flushInput();                     // Clear serial backlog
 
-  int getFaceX();                        // 取人脸中心 X
-  int getFaceY();                        // 取人脸中心 Y
-  bool isFaceValid();                    // 本帧是否检测到
+  int getFaceX();                        // Get face center X
+  int getFaceY();                        // Get face center Y
+  bool isFaceValid();                    // Detected in this frame
 
-  String getQrCode();                    // 取二维码内容
-  String getCard();                      // 取任务卡编号
+  String getQrCode();                    // Get QR code content
+  String getCard();                      // Get task card ID
 
-  int getLineOffset();                   // 取循线偏差
-  int getLineAngle();                    // 取循线角度
-  int getLineValid();                    // 取循线有效标志
+  int getLineOffset();                   // Get line tracking offset
+  int getLineAngle();                    // Get line tracking angle
+  int getLineValid();                    // Get line tracking valid flag
 
 private:
-  uint8_t _rxPin;                        // 主控接收脚
-  uint8_t _txPin;                        // 主控发送脚
-  HardwareSerial *_serial;               // 硬件串口，指向 Serial2
+  uint8_t _rxPin;                        // Controller receive pin
+  uint8_t _txPin;                        // Controller transmit pin
+  HardwareSerial *_serial;               // Hardware serial, points to Serial2
 
-  CamData _data;                         // 数据缓存
-  String _rxLine;                        // 接收缓冲，按行累积
+  CamData _data;                         // Data buffer
+  String _rxLine;                        // Receive buffer, accumulated by line
 
-  bool parseLine(const String &line, String &mode, String &data);  // 拆分为模式与数据
-  void updateData(const String &mode, const String &data);         // 按模式写进缓存
+  bool parseLine(const String &line, String &mode, String &data);  // Split into mode and data
+  void updateData(const String &mode, const String &data);         // Write to buffer by mode
 };
 
 #endif

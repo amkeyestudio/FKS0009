@@ -1,71 +1,71 @@
-### 项目 15：Wi-Fi 全功能车
+### Project 15: Wi-Fi Multi-Function Car
 
-#### **1. 简介：**
+#### **1. Introduction:**
 
-前面十四课的代码，到这里合成一份：手动遥控、循迹、避障、跟随，四种模式在同一个网页上切换，点阵跟着换表情，云台和夹爪随时能调。六百多行，全书最长的一份。
+The code from the first fourteen lessons comes together here in one sketch: manual remote control, line tracking, obstacle avoidance and following, four modes switched on the same web page, with the dot matrix changing its expression to match and the pan-tilt and gripper always at your command. At more than six hundred lines, it is the longest program in the book.
 
-四套功能单独跑都没问题，合到一起第一件事是抢线：点阵占着 IO8、IO9，循迹传感器的总线也是这两根。于是改成按模式分时占用——循迹时把线交给传感器、点阵让开，其余模式反过来。
+All four functions work fine on their own, but put them together and the first thing you hit is a fight over the same lines: the dot matrix holds IO8 and IO9, and the line-tracking sensor's bus uses those same two pins. The fix is to claim the lines by mode with time-division multiplexing — while tracking, hand them to the sensor and let the dot matrix step aside; in every other mode, reverse the arrangement.
 
-第二件事是等待。避障要转舵机、停 300 毫秒、再测距，这段时间网页会僵住；改成把避障拆成五步，每步只做一件事，靠计时往前推，谁也不用等谁。模式切换也各自带一段收尾：先停车、云台回中、清掉上一段的记忆，再进入新模式。
+The second problem is waiting. Obstacle avoidance turns a servo, pauses for 300 ms, then measures a distance, and during that wait the web page freezes. The fix is to break avoidance into five steps, each doing just one thing and advancing on a timer, so nothing has to wait for anything else. Every mode switch also gets its own cleanup: stop the car, recenter the pan-tilt, clear the previous mode's memory, and only then enter the new mode.
 
-手机页面顶部四个模式按钮。手动模式点阵笑脸，循迹关屏，避障感叹号，跟随爱心；切换的一瞬间车会先停一下、云台回正，然后按新模式动起来。
+Four mode buttons sit at the top of the phone page. Manual mode shows a smiley on the dot matrix, line tracking blanks the screen, obstacle avoidance shows an exclamation mark, and following shows a heart. The moment you switch, the car stops briefly and the pan-tilt returns to center before it starts moving in the new mode.
 
-#### **2. 所需清单：**
+#### **2. Parts List:**
 
-本课用到的器件：
+Parts used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
-| ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 开发板 ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 电机扩展板 ×1</span> | ![](../media/kit_02.png){width=170px}<br><span style="font-size:0.85em">履带底盘总成（含循迹传感器） ×1</span> |
-| ![](../media/kit_05.png){width=170px}<br><span style="font-size:0.85em">超声波模块（带外壳） ×1</span> | ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED 点阵屏 ×1</span> | ![](../media/kit_13.png){width=170px}<br><span style="font-size:0.85em">9G 舵机（180°） ×2</span> |
-| <span style="font-size:0.85em">2.4 GHz 无线路由器或手机热点 ×1</span> |  |  |
-> ⚠️ **全部器件都在第 2 章装好，本表只作对照，不用拆；下面的接线说明只标清接线方式，供对照，不必拆装。完整物料见 1.4 套件清单。**
-#### **3. 参数：**
+| ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_02.png){width=170px}<br><span style="font-size:0.85em">Tracked chassis assembly (with line-tracking sensor) ×1</span> |
+| ![](../media/kit_05.png){width=170px}<br><span style="font-size:0.85em">Ultrasonic module (with housing) ×1</span> | ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_13.png){width=170px}<br><span style="font-size:0.85em">9G servo (180°) ×2</span> |
+| <span style="font-size:0.85em">2.4 GHz Wi-Fi router or phone hotspot ×1</span> |  |  |
+> ⚠️ **All parts were assembled in Chapter 2; this table is only for reference and nothing needs to be taken apart. The wiring notes below only show how the connections are made, also for reference — no disassembly is needed. For the full parts list, see 1.4 Kit Contents.**
+#### **3. Parameters:**
 
-| 项目 | 参数 |
+| Item | Parameter |
 | --- | --- |
-| 工作模式 | manual / line / avoid / follow |
-| 手动超时 | 1500 ms |
-| 循迹直行速度 | 115 |
-| 循迹急转 | 内侧反转 95、外侧 125 |
-| 跟随区间 | 30～50 cm 前进，小于 10 cm 后退 |
-| 避障阈值 | 小于 15 cm 视为障碍 |
-| 避障状态 | AV_GO → AV_LEFT → AV_RIGHT → AV_TURN → AV_TURNING |
-| 云台步进 | 15° / 次 |
-| 夹爪角度 | 张开 140°、夹紧 90° |
-| 点阵与循迹 | 共用 IO8 / IO9，按模式独占 |
+| Operating mode | manual / line / avoid / follow |
+| Manual timeout | 1500 ms |
+| Line-tracking straight speed | 115 |
+| Line-tracking sharp turn | Inner wheel reverse 95, outer wheel 125 |
+| Following range | Move forward at 30–50 cm, back up below 10 cm |
+| Obstacle threshold | Below 15 cm counts as an obstacle |
+| Obstacle-avoidance states | AV_GO → AV_LEFT → AV_RIGHT → AV_TURN → AV_TURNING |
+| Pan-tilt step | 15° per step |
+| Gripper angle | Open 140°, closed 90° |
+| Dot matrix and line tracking | Share IO8 / IO9, exclusively claimed by mode |
 
-#### **4. 接线说明：**
+#### **4. Wiring:**
 
-| 模块 | 引脚 | 主控 GPIO |
+| Module | Pin | Controller GPIO |
 | --- | --- | :---: |
-| 左轮电机 | AIN / AEN | IO38 / IO21 |
-| 右轮电机 | BIN / BEN | IO40 / IO41 |
-| 超声波 | Trig / Echo | IO13 / IO12 |
-| 点阵 | CLK / DIN | IO9 / IO8 |
-| 循迹 I2C | SCL / SDA | IO9 / IO8 |
-| 云台舵机 | 信号 | IO42 |
-| 夹爪舵机 | 信号 | IO11 |
+| Left wheel motor | AIN / AEN | IO38 / IO21 |
+| Right wheel motor | BIN / BEN | IO40 / IO41 |
+| Ultrasonic | Trig / Echo | IO13 / IO12 |
+| Dot matrix | CLK / DIN | IO9 / IO8 |
+| Line-tracking I2C | SCL / SDA | IO9 / IO8 |
+| Pan-tilt servo | Signal | IO42 |
+| Gripper servo | Signal | IO11 |
 
-> **注意**：接线图中的元器件只用于说明接线关系，实际接线时不需要把清单中带外壳的元器件拆开。
+> **Note**: The components in the wiring diagram are only there to show the connections; you do not need to take the cased parts from the parts list apart when wiring.
 
-注意 **IO8 / IO9 出现两次**，这不是笔误：点阵是软件模拟时序的**假 I2C**，循迹是真的硬件 I2C，两者抢同一对引脚，靠代码分时切换。
+**IO8 / IO9 appear twice** and that is no typo: the dot matrix uses a **"fake I2C"** built from software-timed GPIO, while line tracking uses real hardware I2C. Both claim the same pin pair, and the code switches between them by time-division multiplexing.
 
 ![](media/PRO15.png)
 
-#### **5. 流程图：**
+#### **5. Flowchart:**
 
-主循环按模式分发，四种模式谁在跑由 `carMode` 决定：
+The main loop dispatches by mode; `carMode` decides which of the four is running:
 
 ![](media/multi_mode_flow.png)
 
-#### **6. 测试代码：**
+#### **6. Test Code:**
 
-> **上传前先改一处**：把下面 `ssid`、`password` 换成自己的 Wi-Fi 名称和密码，不改连不上。
+> **Change one thing before uploading**: replace `ssid` and `password` below with your own Wi-Fi name and password, or the connection will fail.
 >
-> 另外两点要同时满足：Wi-Fi 必须是 **2.4 GHz**（板子不支持 5 GHz），手机和车要在**同一个局域网**——否则浏览器打不开板子的 IP。
+> Two more conditions must both hold: the Wi-Fi must be **2.4 GHz** (the board does not support 5 GHz), and the phone and the car must be on the **same LAN** — otherwise the browser cannot open the board's IP address.
 
-> **本课工程有两个文件**：`15_WiFi_MultiFunction.ino` 和 `webpage.h`。网页的 HTML 全部放在 `webpage.h`，`.ino` 里只留 Arduino 逻辑；两个文件放在同一个文件夹，少一个编译不过。
+> **This lesson's project has two files**: `15_WiFi_MultiFunction.ino` and `webpage.h`. All the web page HTML lives in `webpage.h`; the `.ino` holds only the Arduino logic. Put both files in the same folder — compilation fails if either is missing.
 
 ```cpp
 #include <WiFi.h>
@@ -73,118 +73,118 @@
 #include <ESP32Servo.h>
 #include <Wire.h>
 #include <PCF8574.h>
-#include "webpage.h"  // 网页内容
+#include "webpage.h"  // Web page content
 
 // ===== Wi-Fi =====
-// 仅支持 2.4 GHz
-const char* ssid = "你的WiFi名字";
-const char* password = "你的WiFi密码";
+// Only 2.4 GHz is supported
+const char* ssid = "Your WiFi name";
+const char* password = "Your WiFi password";
 
-// ===== 全局对象 =====
-WebServer server(80);  // 网页服务器
-Servo myClaw;          // 夹爪舵机
-Servo myPan;           // 云台舵机
+// ===== Global objects =====
+WebServer server(80);  // Web server
+Servo myClaw;          // Gripper servo
+Servo myPan;           // Pan-tilt servo
 
-// ===== 电机引脚 =====
-// A 路接左轮，B 路接右轮（上车实测）
-// A/B 是驱动板通道号，不是左右
-#define MOTOR_AIN 38  // A 路方向：左轮
-#define MOTOR_AEN 21  // A 路调速：左轮
-#define MOTOR_BIN 40  // B 路方向：右轮
-#define MOTOR_BEN 41  // B 路调速：右轮
+// ===== Motor pins =====
+// Channel A drives the left wheel, channel B the right wheel (verified on the car)
+// A/B are driver board channel numbers, not left/right
+#define MOTOR_AIN 38  // Channel A direction: left wheel
+#define MOTOR_AEN 21  // Channel A speed: left wheel
+#define MOTOR_BIN 40  // Channel B direction: right wheel
+#define MOTOR_BEN 41  // Channel B speed: right wheel
 
-// ===== 点阵引脚 =====
-// 8×16 点阵，软件模拟时序，无设备地址
-// 与循迹模块 SDA/SCL 共用 io8/io9
-// 仅在切换模式时刷屏，避免干扰循迹总线
-#define CLK_Pin 9   // 时钟，接点阵 CLK
-#define DIN_Pin 8   // 数据，接点阵 DIN
+// ===== Dot matrix pins =====
+// 8x16 dot matrix, software-simulated timing, no device address
+// Shares io8/io9 with the line-tracking module's SDA/SCL
+// Only refresh the display when switching modes to avoid interfering with the line-tracking bus
+#define CLK_Pin 9   // Clock, connect to dot matrix CLK
+#define DIN_Pin 8   // Data, connect to dot matrix DIN
 
-// ===== 超声波引脚 =====
-const int trigPin = 13;  // 触发
-const int echoPin = 12;  // 回响
+// ===== Ultrasonic pins =====
+const int trigPin = 13;  // Trigger
+const int echoPin = 12;  // Echo
 
-// ===== 舵机 =====
-const int PAN_PIN  = 42;           // 云台舵机
-const int CLAW_PIN = 11;           // 夹爪舵机
-const int CLAW_OPEN_ANGLE  = 140;  // 张开
-const int CLAW_CLOSE_ANGLE = 90;   // 夹紧
-const int SERVO_STEP = 15;         // 云台单次步进角度
-int servoAngle = CLAW_CLOSE_ANGLE; // 夹爪当前角度，上电夹紧
-int panAngle = 90;                 // 云台当前角度，上电朝正前
-                                   // 0° 指右，180° 指左
+// ===== Servos =====
+const int PAN_PIN  = 42;           // Pan-tilt servo
+const int CLAW_PIN = 11;           // Gripper servo
+const int CLAW_OPEN_ANGLE  = 140;  // Open
+const int CLAW_CLOSE_ANGLE = 90;   // Closed
+const int SERVO_STEP = 15;         // Pan-tilt step angle per move
+int servoAngle = CLAW_CLOSE_ANGLE; // Current gripper angle, closed on power on
+int panAngle = 90;                 // Current pan-tilt angle, faces straight ahead on power on
+                                   // 0° points right, 180° points left
 
-// ===== 循迹模块（PCF8574）=====
+// ===== Line-tracking module (PCF8574) =====
 PCF8574 pcf8574(0x20);
-#define OUTA P4  // 最左
-#define OUTB P0  // 左
-#define OUTC P1  // 中
-#define OUTD P2  // 右
-#define OUTE P3  // 最右
+#define OUTA P4  // Far left
+#define OUTB P0  // Left
+#define OUTC P1  // Center
+#define OUTD P2  // Right
+#define OUTE P3  // Far right
 
-const int BASE_SPEED = 115;  // 循迹直行速度
-const int SPIN_SPEED = 125;  // 急转外侧轮速度
-const int INNER_SPEED = 95;  // 急转内侧轮（反转）
-uint8_t lastDir = 0;         // 0 直行，1 线在左，2 线在右
+const int BASE_SPEED = 115;  // Line-tracking straight speed
+const int SPIN_SPEED = 125;  // Outer wheel speed for sharp turns
+const int INNER_SPEED = 95;  // Inner wheel for sharp turns (reverse)
+uint8_t lastDir = 0;         // 0 straight, 1 line on left, 2 line on right
 unsigned long lostStartTime = 0;
 
-// 点阵与循迹共用 io8/io9，按模式独占：
-//   循迹模式 → 关屏，io8/io9 归 I2C
-//   其余模式 → 释放 I2C，io8/io9 归点阵
+// Dot matrix and line tracking share io8/io9, exclusively by mode:
+//   Line-tracking mode -> display off, io8/io9 go to I2C
+//   Other modes -> release I2C, io8/io9 go to dot matrix
 
-// ===== 跟随参数 =====
-const long safeDistance = 30;        // 30~50：跟随
-const long closeDistanceFollow = 10; // 小于 10：后退
-const long maxDistance = 50;         // 大于 50：目标丢失
+// ===== Following parameters =====
+const long safeDistance = 30;        // 30-50: following
+const long closeDistanceFollow = 10; // Less than 10: back up
+const long maxDistance = 50;         // Greater than 50: target lost
 
-// ===== 避障参数 =====
-const long closeDistanceAvoid = 15;  // 小于 15：视为障碍
-long leftDistance = 0;               // 左侧距离
-long rightDistance = 0;              // 右侧距离
+// ===== Obstacle avoidance parameters =====
+const long closeDistanceAvoid = 15;  // Less than 15: treated as an obstacle
+long leftDistance = 0;               // Left-side distance
+long rightDistance = 0;              // Right-side distance
 
-// ===== 工作模式 =====
-String carMode = "manual";  // 模式：manual / line / avoid / follow
+// ===== Operating modes =====
+String carMode = "manual";  // Modes: manual / line / avoid / follow
 
-// 手动模式指令超时（ms）
+// Manual mode command timeout (ms)
 #define MANUAL_TIMEOUT 1500
 unsigned long lastCmdTime = 0;
 
-// 避障状态机，避免阻塞网页
+// Obstacle avoidance state machine, avoids blocking the web page
 enum AvoidStep { AV_GO, AV_LEFT, AV_RIGHT, AV_TURN, AV_TURNING };
 AvoidStep avStep = AV_GO;
 unsigned long avTime = 0;
 
-// ===== 点阵字模 =====
-// 16 字节对应 16 列，每字节 8 位对应一列 8 行，1 亮 0 灭
+// ===== Dot matrix font bitmaps =====
+// 16 bytes correspond to 16 columns, each byte's 8 bits to 8 rows in a column, 1 = on, 0 = off
 
-// 笑脸：手动
+// Smiling face: manual
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
 };
 
-// 向下箭头：循迹备用
-// 当前循迹模式关屏，暂未使用
+// Down arrow: spare for line tracking
+// Display off in current line-tracking mode, not used for now
 unsigned char arrow_down[] = {
   0x00, 0x00, 0x00, 0x00, 0x10, 0x30, 0x7E, 0xFE,
   0xFE, 0x7E, 0x30, 0x10, 0x00, 0x00, 0x00, 0x00
 };
 
-// 感叹号：避障
+// Exclamation mark: obstacle avoidance
 unsigned char alert_sign[] = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5F,
   0x5F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-// 爱心：跟随
+// Heart: following
 unsigned char heart[] = {
   0x00, 0x00, 0x00, 0x00, 0x08, 0x1C, 0x3E, 0x7C,
   0x7C, 0x3E, 0x1C, 0x08, 0x00, 0x00, 0x00, 0x00
 };
 
-// ===== 点阵驱动（软件模拟时序）=====
+// ===== Dot matrix driver (software-simulated timing) =====
 
-// 起始条件：CLK 高时 DIN 拉低
+// Start condition: DIN pulled LOW while CLK is HIGH
 void IIC_start() {
   digitalWrite(DIN_Pin, HIGH);
   delayMicroseconds(5);
@@ -196,7 +196,7 @@ void IIC_start() {
   delayMicroseconds(5);
 }
 
-// 发送 1 字节，低位在前：CLK 低置数据，高电平采样
+// Send one byte, LSB first: set data while CLK is LOW, sample when HIGH
 void IIC_send(unsigned char send_data) {
   for (int i = 0; i < 8; i++) {
     digitalWrite(CLK_Pin, LOW);
@@ -215,7 +215,7 @@ void IIC_send(unsigned char send_data) {
   delayMicroseconds(5);
 }
 
-// 结束条件：CLK 高时 DIN 拉高
+// Stop condition: DIN pulled HIGH while CLK is HIGH
 void IIC_end() {
   digitalWrite(CLK_Pin, LOW);
   delayMicroseconds(5);
@@ -227,15 +227,15 @@ void IIC_end() {
   delayMicroseconds(5);
 }
 
-// 写 16 字节显存并开屏
-// 纯刷屏，不处理总线归属，约 3 ms
+// Write 16 bytes to the display buffer and turn the display on
+// Just refresh the display, no bus ownership handling, about 3 ms
 void matrix_write(unsigned char matrix_value[]) {
-  // 0x40：写数据模式，地址自增
+  // 0x40: write data mode, auto-increment address
   IIC_start();
   IIC_send(0x40);
   IIC_end();
 
-  // 0xC0：从第 0 列起写
+  // 0xC0: start writing from column 0
   IIC_start();
   IIC_send(0xC0);
   for (int i = 0; i < 16; i++) {
@@ -243,63 +243,63 @@ void matrix_write(unsigned char matrix_value[]) {
   }
   IIC_end();
 
-  // 0x8F：开显示，最大亮度
+  // 0x8F: display on, maximum brightness
   IIC_start();
   IIC_send(0x8F);
   IIC_end();
 }
 
-// 0x88：关显示，显存内容保留
+// 0x88: display off, display buffer contents retained
 void matrix_off() {
   IIC_start();
   IIC_send(0x88);
   IIC_end();
 }
 
-// 刷屏后引脚仍归点阵（不交还 I2C）
+// After refresh, pins remain with the dot matrix (not returned to I2C)
 void matrix_show(unsigned char matrix_value[]) {
-  Wire.end();                     // 释放 io8/io9 的 I2C 占用
+  Wire.end();                     // Release io8/io9 from I2C use
   pinMode(CLK_Pin, OUTPUT);
   pinMode(DIN_Pin, OUTPUT);
   digitalWrite(CLK_Pin, HIGH);
   digitalWrite(DIN_Pin, HIGH);
 
-  matrix_write(matrix_value);     // 写屏
+  matrix_write(matrix_value);     // Write to display
 }
 
-// 按模式处理点阵
-// 循迹模式关屏并把 io8/io9 交给 I2C
+// Handle the dot matrix according to mode
+// Line-tracking mode turns display off and hands io8/io9 to I2C
 void showModeIcon() {
   if (carMode == "line") {
     Wire.end();
     pinMode(CLK_Pin, OUTPUT);
     pinMode(DIN_Pin, OUTPUT);
-    matrix_off();                 // 关显示
+    matrix_off();                 // Turn display off
 
-    Wire.begin();                 // io8/io9 交给循迹
+    Wire.begin();                 // Hand io8/io9 to line tracking
     Wire.setClock(400000);
     pcf8574.begin();
     return;
   }
 
-  // 其余模式不使用 I2C
-  if (carMode == "manual")     matrix_show(smile);       // 手动：笑脸
-  else if (carMode == "avoid") matrix_show(alert_sign);  // 避障：感叹号
-  else                         matrix_show(heart);       // 跟随：爱心
+  // Other modes do not use I2C
+  if (carMode == "manual")     matrix_show(smile);       // Manual: smiling face
+  else if (carMode == "avoid") matrix_show(alert_sign);  // Obstacle avoidance: exclamation mark
+  else                         matrix_show(heart);       // Following: heart
 }
 
-// ===== 电机控制 =====
+// ===== Motor control =====
 
-// 只写 PWM，不处理方向
-// 形参为左右轮，内部映射到 B/A 路
+// Only write PWM, do not handle direction
+// Parameters are left/right wheels, mapped internally to channels B/A
 void setMotor(int leftSpeed, int rightSpeed) {
-  ledcWrite(MOTOR_AEN, leftSpeed);    // B 路：右轮
-  ledcWrite(MOTOR_BEN, rightSpeed);   // A 路：左轮
+  ledcWrite(MOTOR_AEN, leftSpeed);    // Channel B: right wheel
+  ledcWrite(MOTOR_BEN, rightSpeed);   // Channel A: left wheel
 }
 
-// 速度带符号：正转 / 反转
-// 形参为左右轮，内部映射到 B/A 路
-// 循迹模式使用
+// Signed speed: forward / reverse
+// Parameters are left/right wheels, mapped internally to channels B/A
+// Used in line-tracking mode
 void driveLine(int leftSpeed, int rightSpeed) {
   leftSpeed  = constrain(leftSpeed,  -255, 255);
   rightSpeed = constrain(rightSpeed, -255, 255);
@@ -321,40 +321,40 @@ void driveLine(int leftSpeed, int rightSpeed) {
   }
 }
 
-// 前进：方向脚拉高
+// Forward: direction pin HIGH
 void forward(int leftSpeed, int rightSpeed) {
   digitalWrite(MOTOR_BIN, HIGH);
   digitalWrite(MOTOR_AIN, HIGH);
   setMotor(leftSpeed, rightSpeed);
 }
 
-// 后退：方向脚拉低
+// Backward: direction pin LOW
 void back(int leftSpeed, int rightSpeed) {
   digitalWrite(MOTOR_BIN, LOW);
   digitalWrite(MOTOR_AIN, LOW);
   setMotor(leftSpeed, rightSpeed);
 }
 
-// 左转：右轮正转，左轮反转
+// Turn left: right wheel forward, left wheel reverse
 void left(int leftSpeed, int rightSpeed) {
   digitalWrite(MOTOR_BIN, HIGH);
   digitalWrite(MOTOR_AIN, LOW);
   setMotor(leftSpeed, rightSpeed);
 }
 
-// 右转：右轮反转，左轮正转
+// Turn right: right wheel reverse, left wheel forward
 void right(int leftSpeed, int rightSpeed) {
   digitalWrite(MOTOR_BIN, LOW);
   digitalWrite(MOTOR_AIN, HIGH);
   setMotor(leftSpeed, rightSpeed);
 }
 
-// 停车
+// Stop
 void stopMotor() {
   setMotor(0, 0);
 }
 
-// ===== 超声波测距 =====
+// ===== Ultrasonic distance measurement =====
 int getDistance() {
   long duration;
   int distance;
@@ -365,20 +365,20 @@ int getDistance() {
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
 
-  // 25 ms 超时，避免无回波时阻塞
+  // 25 ms timeout to avoid blocking when there is no echo
   duration = pulseIn(echoPin, HIGH, 25000);
   distance = duration * 0.034 / 2;
 
   if (distance < 2 || distance > 300) {
-    distance = 0;  // 超量程置无效
+    distance = 0;  // Out of range, set invalid
   }
   return distance;
 }
 
-// ===== 1. 循迹模式 =====
+// ===== 1. Line-tracking mode =====
 void runLine() {
   static unsigned long lastRead = 0;
-  if (millis() - lastRead < 5) return;  // 5 ms 读一次
+  if (millis() - lastRead < 5) return;  // Read once every 5 ms
   lastRead = millis();
 
   PCF8574::DigitalInput val = pcf8574.digitalReadAll();
@@ -392,52 +392,52 @@ void runLine() {
   uint8_t state = (A << 4) | (B << 3) | (C << 2) | (D << 1) | E;
 
   if (state != 0) {
-    lostStartTime = 0;  // 压到线，清丢线计时
+    lostStartTime = 0;  // On the line, clear the line-lost timer
   }
 
   switch (state) {
     case 0b00100:
     case 0b01110:
     case 0b11111:
-      driveLine(BASE_SPEED, BASE_SPEED);      // 居中直行
+      driveLine(BASE_SPEED, BASE_SPEED);      // Centered, go straight
       lastDir = 0;
       break;
 
     case 0b01100:
-      driveLine(85, BASE_SPEED);              // 偏左：右轮降速
+      driveLine(85, BASE_SPEED);              // Left of line: slow right wheel
       lastDir = 1;
       break;
 
     case 0b01000:
     case 0b11100:
-      driveLine(45, SPIN_SPEED);              // 偏左较大
+      driveLine(45, SPIN_SPEED);              // Far left of line
       lastDir = 1;
       break;
 
     case 0b11000:
     case 0b10000:
-      driveLine(-INNER_SPEED, SPIN_SPEED);    // 严重偏左：原地左转
+      driveLine(-INNER_SPEED, SPIN_SPEED);    // Far left: spin left in place
       lastDir = 1;
       break;
 
     case 0b00110:
-      driveLine(BASE_SPEED, 85);              // 偏右：左轮降速
+      driveLine(BASE_SPEED, 85);              // Right of line: slow left wheel
       lastDir = 2;
       break;
 
     case 0b00010:
     case 0b00111:
-      driveLine(SPIN_SPEED, 45);              // 偏右较大
+      driveLine(SPIN_SPEED, 45);              // Far right of line
       lastDir = 2;
       break;
 
     case 0b00011:
     case 0b00001:
-      driveLine(SPIN_SPEED, -INNER_SPEED);    // 严重偏右：原地右转
+      driveLine(SPIN_SPEED, -INNER_SPEED);    // Far right: spin right in place
       lastDir = 2;
       break;
 
-    case 0b00000:                             // 全部脱线
+    case 0b00000:                             // All sensors off the line
       if (lostStartTime == 0) {
         lostStartTime = millis();
       }
@@ -446,7 +446,7 @@ void runLine() {
         else if (lastDir == 2) driveLine(SPIN_SPEED, -INNER_SPEED);
         else                   stopMotor();
       } else {
-        stopMotor();                          // 超时未找到，停车
+        stopMotor();                          // Not found before timeout, stop
       }
       break;
 
@@ -455,7 +455,7 @@ void runLine() {
   }
 }
 
-// ===== 2. 跟随模式 =====
+// ===== 2. Following mode =====
 void runFollow() {
   static unsigned long lastCheck = 0;
   if (millis() - lastCheck < 100) return;
@@ -464,16 +464,16 @@ void runFollow() {
   long d = getDistance();
 
   if (d > safeDistance && d <= maxDistance) {
-    forward(150, 150);                        // 30~50 cm：前进
+    forward(150, 150);                        // 30-50 cm: go forward
   } else if (d < closeDistanceFollow && d > 0) {
-    back(105, 150);                           // 小于 10 cm：后退
+    back(105, 150);                           // Less than 10 cm: back up
   } else {
-    stopMotor();                              // 其余情况停止
+    stopMotor();                              // Stop otherwise
   }
 }
 
-// ===== 3. 避障模式 =====
-// 状态机分步执行，不阻塞
+// ===== 3. Obstacle avoidance mode =====
+// State machine executes step by step, no blocking
 void runAvoidance() {
   switch (avStep) {
     case AV_GO: {
@@ -481,20 +481,20 @@ void runAvoidance() {
       if (d > 0 && d <= closeDistanceAvoid) {
         stopMotor();
         panAngle = 180;
-        myPan.write(panAngle);        // 云台左转
+        myPan.write(panAngle);        // Pan-tilt turns left
         avTime = millis();
         avStep = AV_LEFT;
       } else {
-        forward(150, 150);            // 无障碍，前进
+        forward(150, 150);            // No obstacle, go forward
       }
       break;
     }
 
     case AV_LEFT:
-      if (millis() - avTime >= 300) { // 等舵机到位再测
+      if (millis() - avTime >= 300) { // Wait for servo to settle before measuring
         leftDistance = getDistance();
         panAngle = 0;
-        myPan.write(panAngle);        // 云台右转
+        myPan.write(panAngle);        // Pan-tilt turns right
         avTime = millis();
         avStep = AV_RIGHT;
       }
@@ -504,7 +504,7 @@ void runAvoidance() {
       if (millis() - avTime >= 300) {
         rightDistance = getDistance();
         panAngle = 90;
-        myPan.write(panAngle);        // 云台回正
+        myPan.write(panAngle);        // Pan-tilt returns to center
         avTime = millis();
         avStep = AV_TURN;
       }
@@ -512,7 +512,7 @@ void runAvoidance() {
 
     case AV_TURN:
       if (millis() - avTime >= 100) {
-        if (leftDistance > rightDistance) left(255, 255);   // 向较空一侧转向
+        if (leftDistance > rightDistance) left(255, 255);   // Turn toward the side with more space
         else                              right(255, 255);
         avTime = millis();
         avStep = AV_TURNING;
@@ -520,7 +520,7 @@ void runAvoidance() {
       break;
 
     case AV_TURNING:
-      if (millis() - avTime >= 500) { // 转向 0.5 s 后重新探测
+      if (millis() - avTime >= 500) { // Re-measure 0.5 s after turning
         stopMotor();
         avStep = AV_GO;
       }
@@ -528,46 +528,46 @@ void runAvoidance() {
   }
 }
 
-// ===== 模式切换 =====
+// ===== Mode switching =====
 void setMode(String m) {
   if (m == "manual" || m == "line" || m == "avoid" || m == "follow") {
-    bool changed = (carMode != m);   // 是否真的切换
+    bool changed = (carMode != m);   // Whether the mode actually changed
     carMode = m;
-    stopMotor();      // 换模式先停车
+    stopMotor();      // Stop before changing mode
     avStep = AV_GO;
     lostStartTime = 0;
     panAngle = 90;
-    myPan.write(90);  // 云台回正
+    myPan.write(90);  // Pan-tilt returns to center
     lastCmdTime = millis();
 
-    Serial.print("切换到模式：");
+    Serial.print("Switched to mode: ");
     Serial.println(carMode);
 
-    // 仅在模式变化时刷屏
-    // 避免反复占用循迹 I2C 总线
+    // Only refresh the display when the mode changes
+    // Avoid repeatedly occupying the line-tracking I2C bus
     if (changed) showModeIcon();
   }
 }
 
-// ===== 网页请求处理 =====
+// ===== Web page request handling =====
 void handleCmd() {
-  // 模式切换请求
+  // Mode switch request
   if (server.hasArg("mode")) {
     setMode(server.arg("mode"));
     server.send(200, "text/plain", "OK");
     return;
   }
 
-  // 动作指令
+  // Action command
   String moveCommand = server.arg("move");
 
-  // 云台与夹爪：任何模式下可用
+  // Pan-tilt and gripper: available in any mode
   if (moveCommand == "servo_plus") {
-    panAngle = min(180, panAngle + SERVO_STEP);   // 左转
+    panAngle = min(180, panAngle + SERVO_STEP);   // Turn left
     myPan.write(panAngle);
   }
   else if (moveCommand == "servo_minus") {
-    panAngle = max(0, panAngle - SERVO_STEP);     // 右转
+    panAngle = max(0, panAngle - SERVO_STEP);     // Turn right
     myPan.write(panAngle);
   }
   else if (moveCommand == "claw_open") {
@@ -579,8 +579,8 @@ void handleCmd() {
     myClaw.write(servoAngle);
   }
   else {
-    // 行驶指令：先切回手动再执行
-    // 顺序不可反，setMode 内含停车
+    // Driving command: switch back to manual first, then execute
+    // Order cannot be reversed, setMode includes a stop
     if (carMode != "manual") {
       setMode("manual");
     }
@@ -596,31 +596,31 @@ void handleCmd() {
   server.send(200, "text/plain", "OK");
 }
 
-// ===== 初始化 =====
+// ===== Initialization =====
 void setup() {
   Serial.begin(115200);
   delay(500);
 
-  // 1. 点阵：两线置空闲后刷屏
-  // 此时 I2C 未初始化，直接用 matrix_write
+  // 1. Dot matrix: set both lines idle, then refresh
+  // I2C is not initialized yet, call matrix_write directly
   pinMode(CLK_Pin, OUTPUT);
   pinMode(DIN_Pin, OUTPUT);
   digitalWrite(CLK_Pin, HIGH);
   digitalWrite(DIN_Pin, HIGH);
   matrix_write(smile);
 
-  // 2. 电机
+  // 2. Motors
   pinMode(MOTOR_BIN, OUTPUT);
   pinMode(MOTOR_AIN, OUTPUT);
-  ledcAttach(MOTOR_BEN, 1000, 8);  // 1 kHz，8 位
+  ledcAttach(MOTOR_BEN, 1000, 8);  // 1 kHz, 8-bit
   ledcAttach(MOTOR_AEN, 1000, 8);
   stopMotor();
 
-  // 3. 超声波
+  // 3. Ultrasonic
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
 
-  // 4. 两个舵机
+  // 4. Two servos
   ESP32PWM::allocateTimer(0);
   ESP32PWM::allocateTimer(1);
 
@@ -632,7 +632,7 @@ void setup() {
   myClaw.attach(CLAW_PIN, 500, 2500);
   myClaw.write(servoAngle);
 
-  // 5. 循迹模块
+  // 5. Line-tracking module
   Wire.begin();
   Wire.setClock(400000);
   pcf8574.begin();
@@ -643,7 +643,7 @@ void setup() {
   pcf8574.pinMode(OUTE, INPUT);
 
   // 6. Wi-Fi
-  Serial.print("正在连接 ");
+  Serial.print("Connecting to ");
   Serial.println(ssid);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
@@ -653,11 +653,11 @@ void setup() {
     Serial.print(".");
   }
   Serial.println();
-  Serial.println("WiFi 已连接");
-  Serial.print("板子的 IP：");
+  Serial.println("WiFi connected");
+  Serial.print("Board IP: ");
   Serial.println(WiFi.localIP());
 
-  // 7. 网页路由
+  // 7. Web page routes
   server.on("/", []() {
     server.send_P(200, "text/html; charset=utf-8", index_html);
   });
@@ -667,12 +667,12 @@ void setup() {
   });
 
   server.begin();
-  Serial.println("网页服务已启动，默认手动模式");
+  Serial.println("Web server started, default manual mode");
 }
 
-// ===== 主循环 =====
+// ===== Main loop =====
 void loop() {
-  server.handleClient();  // 处理网页请求
+  server.handleClient();  // Handle web page requests
 
   if (carMode == "line") {
     runLine();
@@ -681,7 +681,7 @@ void loop() {
   } else if (carMode == "follow") {
     runFollow();
   } else {
-    // 手动模式：超时停车
+    // Manual mode: stop on timeout
     if (millis() - lastCmdTime > MANUAL_TIMEOUT) {
       stopMotor();
     }
@@ -689,40 +689,40 @@ void loop() {
 }
 ```
 
-#### **7. 代码解释：**
+#### **7. Code Explanation:**
 
-**(1) 全课最难的一处：IO8 / IO9 要分时复用**
+**(1) The trickiest part of the lesson: time-division multiplexing IO8 / IO9**
 
-点阵是软件模拟 I2C，占着 IO8（DIN）和 IO9（CLK）；循迹传感器是硬件 I2C，也占 IO8（SDA）和 IO9（SCL）。同一组引脚，两套协议，**不能同时开**。
+The dot matrix runs a software-emulated I2C on IO8 (DIN) and IO9 (CLK); the line-tracking sensor uses hardware I2C on IO8 (SDA) and IO9 (SCL) as well. Two protocols, one pin pair — **they cannot both be active at once**.
 
 ```cpp
-#define CLK_Pin 9   // 时钟，接点阵 CLK
-#define DIN_Pin 8   // 数据，接点阵 DIN
+#define CLK_Pin 9   // Clock, connect to dot matrix CLK
+#define DIN_Pin 8   // Data, connect to dot matrix DIN
 ```
 
-这两个宏和第 1 课一样，但这课它们和 `Wire` 抢同一组脚。理解这一点，后面所有 `Wire.end()` / `Wire.begin()` 才有意义——不是"重新初始化"，是**把引脚从硬件 I2C 手里抢回来当普通 GPIO 用，用完再还回去**。
+These two macros are the same as in Lesson 1, but here they fight `Wire` for the same pins. That is what makes every later `Wire.end()` / `Wire.begin()` meaningful — it is not a "re-initialization", but **taking the pins back from hardware I2C to use as plain GPIO, then handing them back when finished**.
 
-**(2) `matrix_show()`：刷屏前先关硬件 I2C**
+**(2) `matrix_show()`: shut down hardware I2C before refreshing the display**
 
 ```cpp
 void matrix_show(unsigned char matrix_value[]) {
-  Wire.end();                     // 释放 io8/io9 的 I2C 占用
+  Wire.end();                     // Release io8/io9 from I2C use
   pinMode(CLK_Pin, OUTPUT);
   pinMode(DIN_Pin, OUTPUT);
   digitalWrite(CLK_Pin, HIGH);
   digitalWrite(DIN_Pin, HIGH);
 
-  matrix_write(matrix_value);     // 写屏
+  matrix_write(matrix_value);     // Write to display
 }
 ```
 
-`Wire.end()` 把硬件 I2C 外设关掉，引脚退回普通 GPIO 状态；接着重新 `pinMode` 成输出并拉高，总线回到空闲态，然后才走点阵自己的软件时序。
+`Wire.end()` turns off the hardware I2C peripheral, returning the pins to plain GPIO; they are then reconfigured as outputs and pulled HIGH, bringing the bus back to idle, before the dot matrix's own software timing takes over.
 
-少 `Wire.end()` 的后果：`digitalWrite` 改了引脚电平，但 I2C 外设还挂在那两根线上，电平会被它拽回去，屏上显示乱码或者干脆不亮。
+Without `Wire.end()`, `digitalWrite` changes the pin levels but the I2C peripheral is still attached to those two lines and pulls them back, leaving garbage on the display or no display at all.
 
-注意函数名后面没有交还 I2C 的动作——刷完屏引脚仍归点阵，要等下一次循迹读取前才还（见下一节）。
+Note that the function does not hand I2C back at the end — after the refresh the pins still belong to the dot matrix and are only returned just before the next line-tracking read (see the next section).
 
-**(3) `showModeIcon()`：循迹模式要关屏并交还总线**
+**(3) `showModeIcon()`: blank the display and return the bus in line-tracking mode**
 
 ```cpp
 void showModeIcon() {
@@ -730,41 +730,41 @@ void showModeIcon() {
     Wire.end();
     pinMode(CLK_Pin, OUTPUT);
     pinMode(DIN_Pin, OUTPUT);
-    matrix_off();                 // 关显示
+    matrix_off();                 // Turn display off
 
-    Wire.begin();                 // io8/io9 交给循迹
+    Wire.begin();                 // Hand io8/io9 to line tracking
     Wire.setClock(400000);
     pcf8574.begin();
     return;
   }
 ```
 
-关屏动作本身要用点阵的软件时序，所以先把 I2C 停掉；关完立刻 `Wire.begin()` 把引脚还给循迹，再重新设 400 kHz、重新初始化 PCF8574，然后 `return`——循迹模式不显示任何图案。
+Blanking the display itself needs the dot matrix's software timing, so I2C is stopped first; the moment that is done, `Wire.begin()` hands the pins back to line tracking, the bus is reset to 400 kHz and the PCF8574 re-initialized, and then the function `return`s — line-tracking mode shows no pattern at all.
 
-`0x88` 是"关显示"命令（在 `matrix_off()` 里），屏上内容还在显存里，只是不亮。下次切回别的模式，`0x8A` 一开就恢复。
+`0x88` is the "display off" command (in `matrix_off()`): the content stays in the display buffer, it is simply not lit. Switch back to another mode and `0x8A` turns it on again immediately.
 
-**(4) `setMode()`：换模式先清残留**
+**(4) `setMode()`: clear leftovers before changing mode**
 
 ```cpp
 void setMode(String m) {
   if (m == "manual" || m == "line" || m == "avoid" || m == "follow") {
-    bool changed = (carMode != m);   // 是否真的切换
+    bool changed = (carMode != m);   // Whether the mode actually changed
     carMode = m;
-    stopMotor();      // 换模式先停车
+    stopMotor();      // Stop before changing mode
     avStep = AV_GO;
     lostStartTime = 0;
     panAngle = 90;
-    myPan.write(90);  // 云台回正
+    myPan.write(90);  // Pan-tilt returns to center
     lastCmdTime = millis();
 ```
 
-第一行先校验 `m` 是不是四个合法模式之一，不合法的字符串直接丢弃，`carMode` 不会被改成乱七八糟的值。
+The first line checks whether `m` is one of the four valid modes; an invalid string is simply discarded, so `carMode` never gets set to nonsense.
 
-换模式时上一模式可能正处在任意中间状态：还在往前走、云台歪在 180°、丢线计时已经走了 1 秒。所以四件事一起做——停车、避障状态机回第一步、清掉循迹丢线计时、云台回正。
+When switching, the old mode could be in any intermediate state: still driving forward, the pan-tilt stuck at 180°, or a lost-line timer already one second in. So four things happen together — stop the motors, reset the obstacle-avoidance state machine to its first step, clear the line-tracking lost-line timer, and recenter the pan-tilt.
 
-`lastCmdTime = millis()` 也在里面：刚切完模式就判超时，手动模式会立刻停车，看起来像"按了没反应"。
+`lastCmdTime = millis()` is in there too: without it, the timeout check right after a switch would stop the car immediately in manual mode, looking like "the button did nothing".
 
-**(5) `changed` 挡住的是反复刷屏**
+**(5) `changed` prevents repeated display refreshes**
 
 ```cpp
     if (changed) showModeIcon();
@@ -772,57 +772,57 @@ void setMode(String m) {
 }
 ```
 
-网页每发一次模式请求都会调 `setMode()`，哪怕点的还是当前模式。不判 `changed`，连点十次"循迹"就会刷十次屏，每次都要 `Wire.end()` / `Wire.begin()` 折腾一遍 I2C 总线，循迹采样被打断，车在原地抖。
+Every mode request from the page calls `setMode()`, even if you tapped the current mode again. Without the `changed` check, tapping "line tracking" ten times refreshes the display ten times, each round thrashing the I2C bus with `Wire.end()` / `Wire.begin()`; line-tracking samples are interrupted and the car jitters in place.
 
-**(6) 四种模式共用一个 `loop()`，靠 `static` 计时不靠 `delay`**
+**(6) Four modes share one `loop()`: timing with `static` instead of `delay`**
 
 ```cpp
 void runLine() {
   static unsigned long lastRead = 0;
-  if (millis() - lastRead < 5) return;  // 5 ms 读一次
+  if (millis() - lastRead < 5) return;  // Read once every 5 ms
   lastRead = millis();
 ```
 
-`static` 让 `lastRead` 在两次调用之间保住值——普通局部变量每次进函数都重新初始化成 0，起不到"记住上次是什么时候跑的"作用。
+`static` lets `lastRead` keep its value between calls — an ordinary local variable is re-initialized to 0 on every entry, so it cannot "remember when it last ran".
 
-这两行是四种模式通用的节流写法：进来先看距离上次执行够不够久，不够就直接 `return`，一个字节的 I2C 都不读。
+These two lines are the throttle shared by all four modes: on entry, check whether enough time has passed since the last run; if not, just `return` without reading a single byte over I2C.
 
-为什么不能像第 7 课那样写 `delay(5)`：`loop()` 里还有 `server.handleClient()`，`delay()` 一卡，网页就没响应了。四个模式函数轮流被调用，任何一个里出现 `delay()`，其他三个和网页处理全被拖住。
+Why not write `delay(5)` as in Lesson 7? `loop()` also calls `server.handleClient()`, and a `delay()` stall leaves the web page unresponsive. The four mode functions are called in turn; a `delay()` in any one of them drags down the other three and the page handling along with it.
 
-三个模式的节拍各不相同，都写在各自函数的头两行：
+The three modes run at different rhythms, each written into the first two lines of its own function:
 
-| 模式 | 判据 | 周期 |
+| Mode | Criterion | Period |
 | --- | --- | --- |
-| `runLine()` | `millis() - lastRead < 5` | 5 ms（200 Hz） |
-| `runFollow()` | `millis() - lastCheck < 100` | 100 ms（10 Hz） |
-| `runAvoidance()` | 每个状态各带一个 `avTime` | 300 / 100 / 500 ms |
+| `runLine()` | `millis() - lastRead < 5` | 5 ms (200 Hz) |
+| `runFollow()` | `millis() - lastCheck < 100` | 100 ms (10 Hz) |
+| `runAvoidance()` | Each state carries its own `avTime` | 300 / 100 / 500 ms |
 
-循迹要快，慢了就冲出线；跟随和人脸一样 10 Hz 足够；避障要等舵机转到位，最慢。三种节拍能同时存在，靠的就是"谁进来谁自己看表，不够时间就退出去"，而不是在哪个函数里睡一觉。
+Line tracking must be fast or the car runs off the line; following is fine at 10 Hz, same as face following; obstacle avoidance is slowest because it waits for the servo to reach position. All three rhythms coexist because "whoever enters checks its own clock and leaves if there is not enough time" — not because any function goes to sleep.
 
-**(7) 避障从"等"改成了状态机**
+**(7) Obstacle avoidance changes from "waiting" to a state machine**
 
-第 4 课的避障是一路 `delay(300)` 串下来的，整整 1 秒多里程序什么都不干。这课要同时伺候网页请求，不能再这么写：
+In Lesson 4, obstacle avoidance was a chain of `delay(300)` calls that left the program doing nothing for over a second. With web requests to serve at the same time, that will no longer do:
 
 ```cpp
     case AV_LEFT:
-      if (millis() - avTime >= 300) { // 等舵机到位再测
+      if (millis() - avTime >= 300) { // Wait for servo to settle before measuring
         leftDistance = getDistance();
         panAngle = 0;
-        myPan.write(panAngle);        // 云台右转
+        myPan.write(panAngle);        // Pan-tilt turns right
         avTime = millis();
         avStep = AV_RIGHT;
       }
       break;
 ```
 
-每个状态只做一件事、立刻返回。等到时间了才进下一个状态，中间这段时间 `loop()` 已经转了几百轮，`handleClient()` 一直在跑。
+Each state does one thing and returns immediately; it only advances when its time is up. In between, `loop()` has spun hundreds of times and `handleClient()` has kept running.
 
-**(8) 五个状态串成一轮**
+**(8) Five states make up one cycle**
 
 ```cpp
     case AV_TURN:
       if (millis() - avTime >= 100) {
-        if (leftDistance > rightDistance) left(255, 255);   // 向较空一侧转向
+        if (leftDistance > rightDistance) left(255, 255);   // Turn toward the side with more space
         else                              right(255, 255);
         avTime = millis();
         avStep = AV_TURNING;
@@ -830,11 +830,11 @@ void runLine() {
       break;
 ```
 
-`AV_GO`（前进 + 测前方）→ `AV_LEFT`（转头 180°、等 300 ms、测一次）→ `AV_RIGHT`（转头 0°、等 300 ms、测一次）→ `AV_TURN`（回正、等 100 ms、选边转）→ `AV_TURNING`（转 500 ms 后停）。
+`AV_GO` (move forward + measure ahead) → `AV_LEFT` (turn head 180°, wait 300 ms, take a reading) → `AV_RIGHT` (turn head 0°, wait 300 ms, take a reading) → `AV_TURN` (recenter, wait 100 ms, pick a side) → `AV_TURNING` (turn for 500 ms, then stop).
 
-五个状态走完一轮约 1.2 秒，这 1.2 秒被切成五段，每段之间 `loop()` 都能去处理网页请求，所以网页全程不卡。这就是状态机换掉 `delay` 的全部收益。
+One full cycle of the five states takes about 1.2 seconds, sliced into five segments, with `loop()` free to handle web requests between every one — so the page never stalls. That is the entire payoff of replacing `delay` with a state machine.
 
-**(9) 行驶指令要先切回手动，而且顺序不能反**
+**(9) Driving commands must switch back to manual first, and the order cannot be reversed**
 
 ```cpp
     if (carMode != "manual") {
@@ -845,17 +845,17 @@ void runLine() {
     if (moveCommand == "forward")       forward(180, 180);
 ```
 
-在循迹模式按"前进"，得先退出循迹，否则 `loop()` 每轮都被 `runLine()` 抢走，手动指令下一轮就被覆盖。
+To press "forward" while in line-tracking mode, you must leave tracking first; otherwise `runLine()` claims every pass of `loop()` and your manual command is overwritten on the next round.
 
-**先切模式、再发动作**，这个顺序不能换。`setMode()` 里有一句 `stopMotor()`，如果先 `forward()` 再 `setMode()`，车刚动起来立刻被这一句停掉，表现是"按了前进只抖一下"。
+**Switch mode first, then send the action** — the order cannot be flipped. `setMode()` contains a `stopMotor()` call; if you `forward()` before `setMode()`, the car is stopped the instant it starts moving, so "pressing forward only makes it twitch".
 
-云台和夹爪那四个分支排在前面，不碰模式——不管当前在循迹还是避障，都能直接扭头、开合爪子。
+The four pan-tilt and gripper branches come first and do not touch the mode — whether you are tracking or avoiding obstacles, you can always turn the head and open or close the gripper.
 
-**(10) `loop()`：一个入口，四条分支**
+**(10) `loop()`: one entry point, four branches**
 
 ```cpp
 void loop() {
-  server.handleClient();  // 处理网页请求
+  server.handleClient();  // Handle web page requests
 
   if (carMode == "line") {
     runLine();
@@ -864,7 +864,7 @@ void loop() {
   } else if (carMode == "follow") {
     runFollow();
   } else {
-    // 手动模式：超时停车
+    // Manual mode: stop on timeout
     if (millis() - lastCmdTime > MANUAL_TIMEOUT) {
       stopMotor();
     }
@@ -872,26 +872,26 @@ void loop() {
 }
 ```
 
-`handleClient()` 永远排第一，任何模式下网页都能响应。四条分支里只有一条会跑，`carMode` 是唯一的开关。
+`handleClient()` always comes first, so the page responds in every mode. Only one of the four branches runs; `carMode` is the single switch.
 
-四种模式的节奏差得很远：手动模式没有周期，完全由网页指令驱动，超过 `MANUAL_TIMEOUT`（1500 ms）没新指令就停车；循迹 5 ms 一轮（200 Hz），必须快；跟随 100 ms 一轮（10 Hz），和第 5 课一致；避障靠 `avTime` 分段，最慢，一轮约 1.2 秒。
+The four modes run at very different tempos: manual has no period at all and is driven entirely by page commands, stopping if no new command arrives within `MANUAL_TIMEOUT` (1500 ms); line tracking runs every 5 ms (200 Hz) and must be fast; following runs every 100 ms (10 Hz), same as Lesson 5; obstacle avoidance is segmented by `avTime` and is the slowest, about 1.2 seconds per cycle.
 
-整课从头到尾没有一句 `delay()`——不是不想用，是用不得。`delay()` 会把整个 `loop()` 卡住，四条模式共用这一个 `loop()`，任何一条里出现长 `delay()`，网页响应就会跟着卡死。
+There is not a single `delay()` anywhere in the lesson — not for lack of wanting, but because it is forbidden. `delay()` stalls the whole `loop()`; with all four modes sharing that one loop, a long `delay()` in any branch would freeze the web response along with it.
 
-**(11) 两套电机函数：`driveLine()` 和 `setMotor()`**
+**(11) Two sets of motor functions: `driveLine()` and `setMotor()`**
 
 ```cpp
 void setMotor(int leftSpeed, int rightSpeed) {
-  ledcWrite(MOTOR_AEN, leftSpeed);    // B 路：右轮
-  ledcWrite(MOTOR_BEN, rightSpeed);   // A 路：左轮
+  ledcWrite(MOTOR_AEN, leftSpeed);    // Channel B: right wheel
+  ledcWrite(MOTOR_BEN, rightSpeed);   // Channel A: left wheel
 }
 ```
 
-`setMotor()` 只写两个 PWM 值，不碰方向脚，所以参数必须是正数。方向由上层决定：`forward()` 把两颗方向脚拉高、`back()` 拉低、`left()` / `right()` 一高一低。这套是第 5 课的写法。
+`setMotor()` only writes two PWM values and never touches the direction pins, so its arguments must be positive. Direction is decided upstream: `forward()` pulls both direction pins HIGH, `back()` LOW, and `left()` / `right()` set one HIGH and the other LOW. This is the approach from Lesson 5.
 
-函数里那两行注释的位置是反的：`ledcWrite(MOTOR_AEN, ...)` 写的是 A 路左轮，注释却标"B 路：右轮"。以 `MOTOR_AEN` / `MOTOR_BEN` 这两个名字为准，和第 11 课那次一样，注释不可靠。
+The two comments inside the function are swapped: `ledcWrite(MOTOR_AEN, ...)` drives channel A, the left wheel, yet the comment says "channel B: right wheel". Trust the names `MOTOR_AEN` / `MOTOR_BEN` instead — as in Lesson 11, the comments are not reliable.
 
-循迹模式用的是另一套：
+Line-tracking mode uses a different set:
 
 ```cpp
 void driveLine(int leftSpeed, int rightSpeed) {
@@ -907,53 +907,53 @@ void driveLine(int leftSpeed, int rightSpeed) {
   }
 ```
 
-参数带符号，函数自己判正负、自己拉方向脚——这是第 7 课的写法。
+The arguments are signed, and the function reads the sign and drives the direction pins itself — the approach from Lesson 7.
 
-两套并存不是没整理干净，是需求不同：循迹要"一侧反转原地拧"（`driveLine(-INNER_SPEED, SPIN_SPEED)`），必须能收负数；手动模式只有四个固定方向，用 `setMotor` 配 `forward` 那几个包装更直白。
+Keeping both sets is not leftover mess but a difference in needs: line tracking needs "reverse one side to spin in place" (`driveLine(-INNER_SPEED, SPIN_SPEED)`), so it must accept negative numbers; manual mode has only four fixed directions, where `setMotor` plus the `forward`-style wrappers is more straightforward.
 
-代价是参数顺序容易混：两套都是左轮在前，但 `setMotor` 只认正数、`driveLine` 认符号。改代码时先看清调的是哪一个。
+The cost is that the argument order is easy to mix up: both sets put the left wheel first, but `setMotor` accepts only positive values while `driveLine` reads the sign. Check which one you are calling before editing.
 
-#### **8. 运行现象：**
+#### **8. What You Will See:**
 
-串口打印：
+Serial output:
 
 ```text
-正在连接 你的WiFi名字
+Connecting to Your WiFi name
 .....
-WiFi 已连接
-板子的 IP：192.168.1.23
-网页服务已启动，默认手动模式
+WiFi connected
+Board IP: 192.168.1.23
+Web server started, default manual mode
 ```
 
-手机页面顶部是四个模式按钮，下面是方向键、云台、夹爪按钮。
+The phone page has four mode buttons at the top, with direction keys and pan-tilt and gripper controls below.
 
-| 模式 | 点阵 | 行为 |
+| Mode | Dot matrix | Behavior |
 | --- | --- | --- |
-| 手动 | 笑脸 | 按方向键走，松手 1.5 s 后停 |
-| 循迹 | 关屏 | 自己沿线走，网页仍可切模式 |
-| 避障 | 感叹号 | 遇障停下，左右张望后绕开 |
-| 跟随 | 爱心 | 手在前方 30～50 cm 跟着走 |
+| Manual | Smiley | Drive with the direction keys; stops 1.5 s after release |
+| Line tracking | Screen off | Follows the line on its own; the page can still switch modes |
+| Obstacle avoidance | Exclamation mark | Stops at obstacles, looks left and right, then steers around |
+| Following | Heart | Follows your hand 30–50 cm in front |
 
-四种模式都能随时切换，切换瞬间车会先停一下（`setMode()` 里的 `stopMotor()`），云台回中，然后进入新模式。
+All four modes can be switched at any time; at the moment of switching the car stops briefly (the `stopMotor()` in `setMode()`), the pan-tilt recenters, and then it enters the new mode.
 
-> 【图片待补】手机页面切换四种模式时的四张截图拼图。
+> [Image to be added] A collage of four screenshots showing the phone page switching among the four modes.
 
-#### **9. 常见问题解决：**
+#### **9. Troubleshooting:**
 
-**Wi-Fi 连不上、网页打不开，按这个顺序查：**
+**If Wi-Fi will not connect or the page will not open, check in this order:**
 
-(1) **账号密码换了没有**：代码开头的 `WIFI_SSID`、`WIFI_PASS` 还是占位符就烧进去，一定连不上，改成自己路由器的名称和密码。
+(1) **Did you change the credentials?** If `WIFI_SSID` and `WIFI_PASS` at the top of the code are still placeholders when you upload, the connection is guaranteed to fail. Replace them with your router's name and password.
 
-(2) **串口一行字都没有**：按一下板子上的 RESET 键再试，可能是上一版程序卡住了。
+(2) **Nothing at all in the Serial Monitor**: press the board's RESET button and try again; the previous sketch may be stuck.
 
 ![](media/RESET.png){width=340px}
 
-(3) **串口一直冒点、拿不到 IP**：Wi-Fi 连接失败。路由器必须是 **2.4 GHz**，5 GHz 板子不支持；没有 2.4 G 就开手机热点（热点默认 2.4 G）。
+(3) **Dots keep printing but no IP appears**: Wi-Fi connection failed. The router must be **2.4 GHz** — the board does not support 5 GHz. If you have no 2.4 GHz band, use a phone hotspot (hotspots default to 2.4 GHz).
 
-(4) **拿到 IP 但页面打不开**：地址要带 `http://`，IP 以串口打印的为准；手机必须连同一个 Wi-Fi，两边 IP 前三段要一样。
+(4) **You have an IP but the page will not open**: include `http://` in the address and use the IP printed in the Serial Monitor; the phone must be on the same Wi-Fi, and the first three octets of both IPs must match.
 
-(5) **网段对、还是打不开**：进路由器后台把**AP 隔离**关掉，开了它同一 Wi-Fi 下的设备互相访问不了。
+(5) **Subnet matches but still no page**: log in to the router and turn off **AP isolation**; with it enabled, devices on the same Wi-Fi cannot reach each other.
 
-(6) 切到循迹后点阵不亮是正常的——那是为了把 IO8 / IO9 让给传感器，是有意关的，不是坏了。切回手动它会自己亮回来。
+(6) A blank dot matrix in line-tracking mode is normal — it is switched off on purpose to free IO8 / IO9 for the sensor, not a fault. Switch back to manual and it lights up again by itself.
 
-(7) 如果切到循迹后车不动、串口也没有报错，先确认循迹 4P 头插紧了没，再确认车是不是压在线外（五路全 0 且没有历史方向时，代码会停车）。
+(7) If the car does not move in line-tracking mode and there is no serial error, first check that the 4-pin tracking connector is seated firmly, then check that the car is not sitting off the line (with all five sensors at 0 and no direction history, the code stops the car).

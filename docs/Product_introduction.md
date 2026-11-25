@@ -1,148 +1,146 @@
-# 1. 产品介绍
+# 1. Product Introduction
 
 ![](media/FKS0009-A.jpg)
 
-## 1.1 引言
+## 1.1 Introduction
 
-这套教程围绕一台迷你履带坦克机器人展开（FKS0009 Mini Tracked Tank Robot V4.0）。它能循迹、避障、跟随、用 Wi-Fi 遥控，还多了一个前置夹爪和一颗 AI 视觉模块，抓取、颜色追踪、摄像头巡线、人脸跟随和二维码读取交给它们。从装车到编程，用 Arduino 和 MicroPython 两条线各 20 课，由浅入深。学完能把几个功能拼起来，做出避障车、循迹车、遥控车或者足球机器人。
+This tutorial centers on a mini tracked tank robot (FKS0009 Mini Tracked Tank Robot V4.0). It can follow lines, avoid obstacles, follow objects, and be controlled over Wi-Fi, and it adds a front gripper and an AI vision module for object grabbing, color tracking, camera-based line following, face following, and QR code reading. From assembly to programming, the Arduino and MicroPython tracks each run 20 lessons, going from basic to advanced. Once you finish, you can combine several functions into an obstacle-avoiding car, a line-tracking car, a remote-control car, or a soccer robot.
 
-机器人的主控是乐鑫 ESP32-S3，底盘是左右两条履带，能原地转向，过坎爬坡比轮式稳。车头一块 8×16 点阵屏显示表情和状态，程序跑到哪一步不连电脑也看得出来；电机驱动板提供 3A 电流输出，带动两只履带电机和云台、夹爪上的舵机不成问题，外接其他模块也有余量。
+The robot uses an Espressif ESP32-S3 as its main controller and a chassis with two tracks on the left and right. It can turn in place and handles obstacles and slopes more steadily than wheeled robots. An 8×16 dot matrix display on the front shows expressions and status, so you can tell which step the program is running without connecting to a computer. The motor driver board delivers 3A of current, plenty for the two track motors plus the servos on the pan-tilt and gripper, with headroom for extra modules.
 
-安装很简单，大部分组件用螺丝和铜柱固定，扩展板直接叠插在主控排针上，全程不用焊接。照着几个步骤装完，循迹、避障、超声波测距、电机驱动和无线遥控这些基本概念也就走了一遍。前 16 课把整车功能逐项做完，后 4 课接上 AI 视觉模块。
+Assembly is simple: most parts are fixed with screws and standoffs, and the expansion board plugs directly onto the main controller's header pins, so no soldering is needed. Following a few steps, you also walk through the basic concepts of line tracking, obstacle avoidance, ultrasonic ranging, motor driving, and wireless remote control. The first 16 lessons build up the robot's functions one by one, and the last 4 connect the AI vision module.
 
-下图是各模块与主控的连接关系：
+The figure below shows how each module connects to the main controller:
 
-![](media/system_block.png)
+![](media/system_block.svg)
 
+## 1.2 Features
 
-## 1.2 特点
+1. **Wireless main controller**: The ESP32-S3 runs the control logic and has built-in Wi-Fi and BLE. Programs are uploaded and debugged over serial with a single USB cable, so no separate programmer is needed.
+2. **Tracked chassis**: Each track is driven by its own motor, allowing in-place turning. It handles obstacles and slopes more steadily than wheeled designs, has a low center of gravity, and is less likely to tip over.
+3. **Visible status**: The 8×16 dot matrix display shows expressions and direction icons directly, so you can tell which step the program is on without opening the serial monitor on a computer.
+4. **Sufficient sensing**: Ultrasonic ranging and infrared line tracking form the base; the AI vision module is added for advanced work, so the robot acts on whatever it detects.
+5. **Hands-on capable**: The pan-tilt servo turns the ultrasonic sensor and camera to scan, and the front gripper picks up objects, handling tasks such as color sorting and target transport.
+6. **Phone control**: Connect the phone and the car to the same Wi-Fi network, then open a browser and enter the IP address to control it—no extra app or module required.
+7. **Two languages**: The same hardware comes with two tutorial tracks, Arduino (C/C++) and MicroPython; just pick the language you are more familiar with.
 
-1. **主控带无线**：ESP32-S3 跑控制逻辑，板载 Wi-Fi 和 BLE，程序用一根 USB 线下载并做串口调试，不用另配烧录器。
-2. **履带底盘**：左右履带各由一只电机驱动，能原地转向；过坎、爬坡比轮式稳，重心低，不容易侧翻。
-3. **状态看得见**：8×16 点阵屏直接显示表情和方向图标，程序跑到哪一步不用连电脑看串口也能知道。
-4. **感知够用**：超声波测距、红外循迹打底，进阶再加 AI 视觉模块，测到什么就让车做什么。
-5. **能动手**：云台舵机带着超声波和摄像头转头扫描，前置夹爪抓取物件，颜色分拣、目标搬运这类任务都做得下来。
-6. **手机遥控**：手机和小车连上同一个Wi-Fi，用浏览器输入IP地址打开网页就能遥控，不用再装 App 或加模块。
-7. **两种语言**：同一套硬件配 Arduino（C/C++）和 MicroPython 两条教程线，按自己熟悉的语言选就行。
+## 1.3 Parameters
 
-## 1.3 参数
+- Main controller chip: ESP32-S3
+- Operating voltage: 3.3–5V
+- Input voltage: 7–9V
+- Maximum output current: 3A
+- Logic level: 3.3V
+- Motor driving method: Dual H-bridge driver (DRV8835)
+- Ultrasonic detection range: 2 cm – 300 cm
+- Infrared remote control range: 5 m
 
-- 主控芯片：ESP32-S3
-- 工作电压：3.3-5V
-- 输入电压：7-9V
-- 最大输出电流：3A
-- 逻辑电平：3.3V
-- 电机驱动方式：双H桥驱动（DRV8835）
-- 超声波检测距离：2厘米-300厘米
-- 红外遥控距离：5米
+> [Image to be added] A close-up side view of the main controller stacked with the expansion board, to show the whole system's power and signal connections.
 
-## 1.4 套件清单
+## 1.4 Kit Parts List
 
-
-
-| 序号 | 名称 | 数量 | 图片 |
+| No. | Name | Qty | Image |
 | :---: | --- | :---: | :---: |
-| 1 | 6mm 单头开口扳手 | 1 | ![](media/kit_01.png) |
-| 2 | 履带底盘总成（履带 + 电机 + 循迹传感器 + 轮子） | 1 | ![](media/kit_02.png) |
-| 3 | Keyestudio ESP32 S3 PRO开发板 | 1 | ![](media/kit_03.png) |
-| 4 | Keyestudio ESP32S3 DRV8835电机扩展版 | 1 | ![](media/kit_04.png) |
-| 5 | 超声波模块（带外壳） | 1 | ![](media/kit_05.png) |
-| 6 | keyestudio 8x16 LED灯板 | 1 | ![](media/kit_06.png) |
-| 7 | 机械夹发射套（左、右各一） | 1 | ![](media/kit_07.png) |
-| 8 | 大型机械夹（半成品） | 1 | ![](media/kit_08.png) |
-| 9 | TinyVision AI 视觉摄像头 | 1 | ![](media/kit_09.jpg) |
-| 10 | 8×16 点阵固定折弯亚克力板（茶色半透明，T=3mm） | 1 | ![](media/kit_10.png) |
-| 11 | 顶部亚克力板（带超声波固定孔，黑色，T=4mm） | 1 | ![](media/kit_11.png) |
-| 12 | 17 键红外遥控器 | 1 | ![](media/kit_12.png) |
-| 13 | 舵机 | 1 | ![](media/kit_13.png) |
-| 14 | 缠绕管| 1 | ![](media/kit_14.png) |
-| 15 | 6 节 5 号电池盒 | 1 | ![](media/kit_15.png) |
-| 16 | 18650 双节电池盒 + 线材 | 1 | ![](media/kit_16.png) |
-| 17 | 十字螺丝刀 | 1 | ![](media/kit_17.png) |
-| 18 | 扎带 | 5 | ![](media/kit_18.png) |
-| 19 | USB Type-C 数据线 | 1 | ![](media/kit_19.jpg) |
-| 20 | M2+M3 小扳手 | 1 | ![](media/kit_20.png) |
-| 21 | 4P 双头 XH2.54 连接线 | 2 | ![](media/kit_21.png) |
-| 22 | 4P 双头 HX-2.54 连接线 | 1 | ![](media/kit_22.png) |
-| 23 | 乐高 5×7 框架孔臂 | 1 | ![](media/kit_23.png) |
-| 24 | 乐高摩擦栓 黑色 | 4 | ![](media/kit_24.png) |
-| 25 | MX1.25 转杜邦母线 | 1 | ![](media/kit_25.png) |
-| 26 | 魔术贴| 3  | ![](media/kit_26.png) |
-| 27 | 3D 打印足球| 1 | ![](media/kit_27.png) |
-| 28 | 寻迹跑道| 1 | ![](media/kit_28.png) |
-| 29 | M2 螺母 | 8 | ![](media/kit_29.png) |
-| 30 | M2×8mm 圆头十字螺钉 | 8 | ![](media/kit_30.png) |
-| 31 | M1.2×5mm 圆头自攻螺钉 | 6 | ![](media/kit_31.png) |
-| 32 | M3×6mm 圆头十字螺钉 | 19 | ![](media/kit_32.png) |
-| 33 | M3×10mm 圆头十字螺钉 | 3 | ![](media/kit_33.png) |
-| 34 | M3×10mm 平头十字螺钉 | 3 | ![](media/kit_34.png) |
-| 35 | M3 螺母 | 3 | ![](media/kit_35.png) |
-| 36 | M3×10mm 六角铜柱（双通） | 4 | ![](media/kit_36.png) |
-| 37 | M3×45mm 六角铜柱（双通） | 4 | ![](media/kit_37.png) |
+| 1 | 6mm single-head open-end wrench | 1 | ![](media/kit_01.png) |
+| 2 | Tracked chassis assembly (tracks + motors + line-tracking sensors + wheels) | 1 | ![](media/kit_02.png) |
+| 3 | Keyestudio ESP32 S3 PRO development board | 1 | ![](media/kit_03.png) |
+| 4 | Keyestudio ESP32S3 DRV8835 motor expansion board | 1 | ![](media/kit_04.png) |
+| 5 | Ultrasonic module (with housing) | 1 | ![](media/kit_05.png) |
+| 6 | keyestudio 8x16 LED board | 1 | ![](media/kit_06.png) |
+| 7 | Gripper launch sleeve (one left, one right) | 1 | ![](media/kit_07.png) |
+| 8 | Large mechanical gripper (partly assembled) | 1 | ![](media/kit_08.png) |
+| 9 | TinyVision AI vision camera | 1 | ![](media/kit_09.jpg) |
+| 10 | 8×16 dot matrix mounting bent acrylic plate (tea-colored translucent, T=3mm) | 1 | ![](media/kit_10.png) |
+| 11 | Top acrylic plate (with ultrasonic mounting holes, black, T=4mm) | 1 | ![](media/kit_11.png) |
+| 12 | 17-key infrared remote control | 1 | ![](media/kit_12.png) |
+| 13 | Servo | 1 | ![](media/kit_13.png) |
+| 14 | Cable sleeve | 1 | ![](media/kit_14.png) |
+| 15 | 6-cell AA battery holder | 1 | ![](media/kit_15.png) |
+| 16 | Dual-cell 18650 battery holder + wires | 1 | ![](media/kit_16.png) |
+| 17 | Phillips screwdriver | 1 | ![](media/kit_17.png) |
+| 18 | Cable ties | 5 | ![](media/kit_18.png) |
+| 19 | USB Type-C cable | 1 | ![](media/kit_19.jpg) |
+| 20 | M2+M3 small wrench | 1 | ![](media/kit_20.png) |
+| 21 | 4P double-ended XH2.54 cable | 2 | ![](media/kit_21.png) |
+| 22 | 4P double-ended HX-2.54 cable | 1 | ![](media/kit_22.png) |
+| 23 | LEGO 5×7 frame hole arm | 1 | ![](media/kit_23.png) |
+| 24 | LEGO friction pin, black | 4 | ![](media/kit_24.png) |
+| 25 | MX1.25 to Dupont female cable | 1 | ![](media/kit_25.png) |
+| 26 | Hook-and-loop tape | 3 | ![](media/kit_26.png) |
+| 27 | 3D-printed soccer ball | 1 | ![](media/kit_27.png) |
+| 28 | Line-following track | 1 | ![](media/kit_28.png) |
+| 29 | M2 nuts | 8 | ![](media/kit_29.png) |
+| 30 | M2×8mm round-head Phillips screws | 8 | ![](media/kit_30.png) |
+| 31 | M1.2×5mm round-head self-tapping screws | 6 | ![](media/kit_31.png) |
+| 32 | M3×6mm round-head Phillips screws | 19 | ![](media/kit_32.png) |
+| 33 | M3×10mm round-head Phillips screws | 3 | ![](media/kit_33.png) |
+| 34 | M3×10mm flat-head Phillips screws | 3 | ![](media/kit_34.png) |
+| 35 | M3 nuts | 3 | ![](media/kit_35.png) |
+| 36 | M3×10mm hex standoffs (through-hole) | 4 | ![](media/kit_36.png) |
+| 37 | M3×45mm hex standoffs (through-hole) | 4 | ![](media/kit_37.png) |
 
-## 1.5 主控板介绍（ESP32-S3）
+## 1.5 Main Controller Board (ESP32-S3)
 
-主控板使用的是ESP32-S3，板子中间贴着的是 ESP32-S3-WROOM-1 模组，主频 240 MHz，16 MB Flash。写程序时它主要做三件事：读传感器、算下一步怎么做、把电平送到电机和舵机上。下载程序用板上的 USB 口，同一根线还能打开串口监视器看打印信息，不用额外准备下载器。
+The main controller board uses the ESP32-S3, with an ESP32-S3-WROOM-1 module in the center, running at 240 MHz with 16 MB of Flash. When writing programs, it mainly does three things: read sensors, work out the next action, and send levels to the motors and servos. Programs are uploaded through the board's USB port, and the same cable opens the serial monitor to view print output, so no extra programmer is needed.
 
 ![](media/ks5034_board.jpg)
 
-板上的接口，按接线时会用到的顺序过一遍：
+Let's go over the board's interfaces in the order you'll use them when wiring:
 
-- **两个 USB-C 口**：丝印 `USB PROG` 那个用来下载程序和看串口；另一个标 `OTG`，做 USB 主机用，本套件用不到。下载口旁边那颗芯片是 CH340，负责 USB 转串口，第 3 章装的驱动就是给它的。
-- **DC 电源座**（旁边丝印 `DC 7-12V`）：外接电源从这里进，套件配的 6 节 5 号电池盒就接这个口。
-- **RESET / BOOT 按键**：RESET 复位重启；BOOT 配合复位进下载模式，正常烧录不用按。
-- **两侧排针**：数字口、模拟口、I2C、串口都单独引出，板上用 `DIGITAL` / `ANALOG` / `POWER` / `I2C BUS` 分区丝印标好了，编号看下面那张引脚图。
+- **Two USB-C ports**: The one labeled `USB PROG` is for uploading programs and viewing the serial port; the other, labeled `OTG`, is for USB host mode and is not used in this kit. The chip next to the programming port is the CH340, which handles USB-to-serial conversion; the driver installed in Chapter 3 is for it.
+- **DC power jack** (silkscreen `DC 7-12V` nearby): External power enters here; the 6-cell AA battery holder included in the kit connects to this port.
+- **RESET / BOOT buttons**: RESET restarts the board; BOOT combined with reset enters download mode, and you don't need to press it for normal programming.
+- **Header pins on both sides**: Digital, analog, I2C, and serial pins are all broken out separately, marked on the board with `DIGITAL` / `ANALOG` / `POWER` / `I2C BUS` silkscreen groups; see the pin diagram below for numbering.
 
-供电有两条路：DC 座吃 7-12V，USB 口吃 5V。套件走的是 6 节 5 号电池盒（碱性约 9V、镍氢约 7.2V），所以 1.3 表里写 7-9V；板子本身能吃到 12V，是套件没配那么高的电源。空载电流约 80mA，不跑程序也在耗电，长时间不用把电池取下来。
+There are two power paths: the DC jack takes 7–12V, and the USB port takes 5V. The kit uses the 6-cell AA holder (about 9V alkaline, about 7.2V Ni-MH), so the table in 1.3 lists 7–9V; the board itself accepts up to 12V, but the kit doesn't include a supply that high. The no-load current is about 80mA, so it draws power even without running a program—remove the batteries when not in use for long periods.
 
-引脚定义看这张图，2.3 节每一张接线表都能在上面找到对应的丝印：
+See this diagram for the pin definitions; every wiring table in section 2.3 has a corresponding silkscreen label on it:
 
 ![](media/ks5034_pin_diagram.jpg)
 
-这里挑本套件经常用到的几组说清楚：
+Here are the groups most often used in this kit, explained clearly:
 
-| 图上标注 | 引脚 | 本套件接什么 |
+| Label in diagram | Pin | What it connects in this kit |
 | --- | --- | --- |
-| 数字口 `io38` `io21` | IO38 / IO21 | 左电机（经扩展板 A 路） |
-| 数字口 `io40` `io41` | IO40 / IO41 | 右电机（经扩展板 B 路） |
-| 数字口 `io12` `io13` | IO12 / IO13 | 超声波 Echo / Trig |
-| 数字口 `io42` | IO42 | 云台舵机信号 |
-| 数字口 `io11` | IO11 | 夹爪舵机信号 |
-| 模拟口 `io8/SDA` `io9/SCL` | IO8 / IO9 | 点阵屏 DIN / CLK，循迹 I2C 也走这两根 |
-| 串口 `TX` `RX` | IO17 / IO18 | AI 视觉模块 |
-| I2C `SCL` `SDA` `V` `G` | IO9 / IO8 | 循迹传感器（PCF8574，地址 0x20），座子在扩展板上 |
+| Digital `io38` `io21` | IO38 / IO21 | Left motor (via expansion board channel A) |
+| Digital `io40` `io41` | IO40 / IO41 | Right motor (via expansion board channel B) |
+| Digital `io12` `io13` | IO12 / IO13 | Ultrasonic Echo / Trig |
+| Digital `io42` | IO42 | Pan-tilt servo signal |
+| Digital `io11` | IO11 | Gripper servo signal |
+| Analog `io8/SDA` `io9/SCL` | IO8 / IO9 | Dot matrix DIN / CLK; line tracking also uses these two for I2C |
+| Serial `TX` `RX` | IO17 / IO18 | AI vision module |
+| I2C `SCL` `SDA` `V` `G` | IO9 / IO8 | Line-tracking sensor (PCF8574, address 0x20), socket on the expansion board |
 
-## 1.6 扩展板介绍（DRV8835）
+## 1.6 Expansion Board (DRV8835)
 
-扩展板叠插在主控板上。它干三件事：把电机的大电流接过去、把主控上密密麻麻的排针变成能插线的座子、把电池的电分给电机和舵机。
+The expansion board stacks onto the main controller. It does three things: carries the motors' high current, turns the controller's dense header pins into pluggable sockets, and distributes battery power to the motors and servos.
 
 ![](media/ks5039_board.png)
 
-驱动芯片是 DRV8835，两路 H 桥，一路管一只履带电机的方向和转速。电机电流从扩展板走、不从主控 GPIO 走，堵转时不会把主控拖复位。
+The driver chip is the DRV8835, with two H-bridges, one controlling the direction and speed of each track motor. Motor current flows through the expansion board, not through the controller's GPIO, so a stalled motor won't reset the controller.
 
-板上每个接口都印了丝印，对着这张标注图看：
+Every connector on the board has a silkscreen label; follow this annotated diagram:
 
 ![](media/ks5039_pin_diagram.png)
 
-对照表：
+Reference table:
 
-| 位置 | 板上丝印 | 干什么用 |
+| Location | Board silkscreen | Function |
 | --- | --- | --- |
-| 底部四组电机座 | `B` `B1` `A1` `A` | 两路 H 桥各引出两个并联口，这台坦克只占 `A`、`B` |
-| 电机控制脚 | `AIN:38` `BIN:40` `AEN:21` `BEN:41` | 对应主控 IO38 / IO40 和 IO21 / IO41 |
-| 左下红色端子 | `BAT:6-9V` `+` `-` | 电池从这里进，整机总电源 |
-| 左侧拨动开关 | `ON` | 整板通断，长时间不用拨到断开 |
-| 顶部 4P 座 | `G` `IO12` `IO13` `V` | 超声波专口，四根线照这个顺序插|
-| 顶部三组 3P 座 | `P1` `P2` `P3`，每组 `G` `V` 加一路空闲 IO（`IO47`、`IO14`） | XH2.54 扩展口，套件里空着 |
-| 左上红外接收头 | `IR: IO48` | 板载，配红外遥控器用 |
-| 左侧蜂鸣器 | `Buzzer: IO10` | 板载无源蜂鸣器，教程里没用到，想加提示音自己调 |
-| 右侧双排针 | `UART I2C`：`5V` `G` `IO18RX` `IO17TX` / `G` `V` `SDA` `SCL` | 串口（含 5V、G）和 I2C 各引一份出来，备用 |
-| 右侧两个 4P 座 | `I2C`：`SCL` `SDA` `V` `G`（`SDA:IO8` `SCL:IO9`） | 循迹传感器的四芯线插这里 |
+| Four motor socket groups at the bottom | `B` `B1` `A1` `A` | Each H-bridge has two parallel ports; this tank uses only `A` and `B` |
+| Motor control pins | `AIN:38` `BIN:40` `AEN:21` `BEN:41` | Correspond to controller IO38 / IO40 and IO21 / IO41 |
+| Red terminal at lower left | `BAT:6-9V` `+` `-` | Battery input here; main power for the whole robot |
+| Toggle switch at lower left | `ON` | Master on/off for the board; switch off when unused for long periods |
+| 4P socket at the top | `G` `IO12` `IO13` `V` | Dedicated ultrasonic port; plug the four wires in this order |
+| Three 3P socket groups at the top | `P1` `P2` `P3`, each with `G` `V` plus a free IO (`IO47`, `IO14`) | XH2.54 expansion ports, left empty in this kit |
+| IR receiver at upper left | `IR: IO48` | On-board, for use with the infrared remote |
+| Buzzer at lower left | `Buzzer: IO10` | On-board passive buzzer, unused in the tutorials; add a tone yourself if you like |
+| Double header row at right | `UART I2C`: `5V` `G` `IO18RX` `IO17TX` / `G` `V` `SDA` `SCL` | Serial (including 5V, G) and I2C each broken out once, as spares |
+| Two 4P sockets at right | `I2C`: `SCL` `SDA` `V` `G` (`SDA:IO8` `SCL:IO9`) | Plug the line-tracking sensor's four-wire cable here |
 
+The program uses a signed number to represent speed: a positive value runs forward, a negative value runs backward, and 0 stops; the direction pin decides which way to turn, and the PWM pin decides how fast.
 
-程序里用一个带符号的数表示速度：正数正转、负数反转、0 停车，方向脚决定往哪边转，PWM 脚决定转多快。
-
-**主控板和拓展板组装效果图：**
+**Main controller and expansion board assembly photos:**
 
 ![](media/IMG_9164.JPG)
 
@@ -152,25 +150,29 @@
 
 ![](media/IMG_9177.JPG)
 
-## 1.7 AI 视觉模块介绍
+## 1.7 AI Vision Module
 
-AI 视觉模块是 52×54 mm 的方形盒子，正面中间是摄像头，背面一块小 LCD。
+The AI vision module is a 52×54 mm square box, with the camera in the center of the front and a small LCD on the back.
 
 ![](media/kt0382_module.jpg)
 
-摄像头采集和识别都在模块里做完，它只把结果按一帧文本从串口发给主控，主控读到什么再决定车怎么动。主控这边不跑图像算法，接一根串口线就能用。
+Image capture and recognition are both done inside the module; it only sends the result to the controller as one frame of text over the serial port, and the controller decides how the robot moves based on what it reads. The controller runs no image algorithms itself—just connect one serial cable to use it.
 
-侧面的接口对一遍（图里的英文是板厂原图）：
+Let's go over the side connectors (the English text in the figure is from the board maker's original image):
 
-| 侧面丝印 | 干什么用 |
+| Side silkscreen | Function |
 | --- | --- |
-| `UART` | 4P 座，和主控通信用，本套件接这根 |
-| `I2C` | 4P 座，本套件没接，主控和模块之间只走串口 |
-| `USB` | 给模块自己烧固件用，本套件不接 |
-| `SD Card` | TF 卡槽，套件里没配卡 |
-| `RESET` `BOOT` | 复位、下载模式 |
-| `Lego holes` | 一排乐高孔，用乐高销固定 |
+| `UART` | 4P socket for communication with the controller; this kit uses this one |
+| `I2C` | 4P socket, not connected in this kit; only serial is used between controller and module |
+| `USB` | For flashing firmware to the module itself, not connected in this kit |
+| `SD Card` | TF card slot, no card included in the kit |
+| `RESET` `BOOT` | Reset and download mode |
+| `Lego holes` | A row of LEGO holes for fixing with LEGO pins |
 
-背面是一块 1.54 英寸的 LCD。
+On the back is a 1.54-inch LCD.
 
-接线走硬件串口 2，9600 8N1，交叉接：主控 RX 接模块 TX（IO18）、主控 TX 接模块 RX（IO17）。
+Wiring uses hardware serial 2, 9600 8N1, crossed: controller RX to module TX (IO18), controller TX to module RX (IO17).
+
+There are two ways to mount the lens; both mount on the pan-tilt and rotate with the servo: method A points the lens at the ground, good for line following; method B points it straight ahead, good for color tracking, face following, and QR code tasks. It is an optional part, not used in lessons 1–16, so you can leave it off at first; install it using one of the two methods when you reach lesson 17—see section 2.2.9 for the steps and section 2.3.8 for wiring. The last 4 lessons use it for color tracking and grabbing, camera-based line following, face following, and QR code task cards.
+
+> [Image to be added] A comparison of the two mounting methods for the vision module: one side view with the lens pointing at the ground (method A) and one with the lens pointing straight ahead (method B).

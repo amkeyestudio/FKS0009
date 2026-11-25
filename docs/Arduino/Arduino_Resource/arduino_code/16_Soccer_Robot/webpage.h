@@ -1,13 +1,13 @@
 #ifndef WEBPAGE_H
 #define WEBPAGE_H
 
-// 网页内容单独存放
+// Web page content is stored separately
 
 const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE html><html><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>迷你履带坦克 V4.0 - 足球车</title>
+<title>Mini Tracked Tank V4.0 - Soccer Robot</title>
 <style>
 body{font-family:-apple-system,"Microsoft YaHei",sans-serif;text-align:center;background:#f2f3f5;margin:0;padding:14px}
 .card{background:#fff;border-radius:14px;padding:14px;max-width:420px;margin:0 auto 12px}
@@ -24,13 +24,13 @@ p{font-size:13px;color:#888;margin:8px 0 0}
 </style></head><body>
 
 <div class="card">
-<h2>比分</h2>
+<h2>Score</h2>
 <div class="score" id="sc">0</div>
-<p id="st">按住方向键开车</p>
+<p id="st">Hold a direction button to drive</p>
 </div>
 
 <div class="card">
-<h2>开车</h2>
+<h2>Drive</h2>
 <div class="grid">
 <div class="blank"></div>
 <button class="f" onpointerdown="go('f')" onpointerup="go('s')" onpointerleave="go('s')" onpointercancel="go('s')">↑</button>
@@ -45,16 +45,16 @@ p{font-size:13px;color:#888;margin:8px 0 0}
 </div>
 
 <div class="card">
-<h2>夹爪</h2>
+<h2>Gripper</h2>
 <div class="grid" style="grid-template-columns:repeat(2,1fr)">
-<button class="g" onclick="go('carry')">带球</button>
-<button class="w" onclick="go('shoot')">射门</button>
+<button class="g" onclick="go('carry')">Dribble</button>
+<button class="w" onclick="go('shoot')">Shoot</button>
 </div>
 <div class="grid" style="grid-template-columns:repeat(2,1fr);margin-top:9px">
-<button class="k" onclick="go('goal')">记一球</button>
-<button class="k" onclick="go('reset')">比分清零</button>
+<button class="k" onclick="go('goal')">Add a Goal</button>
+<button class="k" onclick="go('reset')">Reset Score</button>
 </div>
-<p>按「带球」夹爪张开，球兜在爪子里面，这时按方向键就能带着球跑；按「射门」夹爪闭合，把球挤出去</p>
+<p>Tap "Dribble" to open the gripper and hold the ball, then use the direction buttons to dribble; tap "Shoot" to close the gripper and push the ball out</p>
 </div>
 
 <script>

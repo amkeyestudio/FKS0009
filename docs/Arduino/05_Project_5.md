@@ -1,104 +1,104 @@
-### 项目 5：超声波跟随
+### Project 5: Ultrasonic Following
 
-#### **1. 简介：**
+#### **1. Introduction:**
 
-![跟随行人的配送机器人](media/intro_05.jpg){width=520px}
+![A delivery robot following a person](media/intro_05.jpg){width=520px}
 
-第 4 课的车遇到障碍会绕开走，这一课反过来，让它主动跟着人走：手伸到车头前 40 厘米，车跟上来；手往后退，它往前追；贴近到 10 厘米以内，它反而往后缩；手一拿走，它停住，点阵上跳出一个问号。
+The car in Lesson 4 goes around an obstacle; this lesson flips that and makes it actively follow a person. Hold your hand 40 cm in front of its nose and it comes after you; pull your hand back and it keeps coming; bring it to within 10 cm and it backs away instead; take the hand away and it stops with a question mark popping up on the dot matrix.
 
-眼睛还是云台上那只超声波模块，每 100 毫秒往前打一发，用回声算出距离，再把这一个数字分成四段：30 到 50 厘米跟着走，10 到 30 厘米等着，10 厘米以内后退，超过 50 厘米或者读不到就当目标丢了。
+The eye is still the ultrasonic module on the pan-tilt, firing a pulse forward every 100 ms and computing the distance from the echo. That one number is then split into four bands: 30 to 50 cm, follow; 10 to 30 cm, wait; under 10 cm, back up; beyond 50 cm or no valid reading, treat the target as lost.
 
-四段各对应一个动作和一张表情——爱心、笑脸、下箭头、问号。没有遥控器，也没有循迹线，车只凭这一个数字决定进退；手掌在车前推近再拉远，能看到它在这四段之间来回切。
+Each band maps to one action and one expression — heart, smiley, down arrow, question mark. With no remote control and no line on the floor, the car decides whether to advance or retreat from this single number; push your hand toward the car and pull it back again, and you can watch it switch back and forth between the four bands.
 
-#### **2. 所需清单：**
+#### **2. Required Parts:**
 
-本课用到的器件：
+Parts used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
-| ![](../media/kit_05.png){width=170px}<br><span style="font-size:0.85em">超声波模块（带外壳） ×1</span> | ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED 点阵屏 ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 电机扩展板 ×1</span> |
-| ![](../media/kit_02.png){width=170px}<br><span style="font-size:0.85em">履带底盘总成（履带 + 电机 + 轮子） ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 开发板 ×1</span> |  |
-> ⚠️ **这些器件在第 2 章已经装好在车上，本表只作对照，不用拆下来重装；下面的接线说明只标清接线方式，供对照，不必拆装。完整物料见 1.4 套件清单。**
-#### **3. 参数：**
+| ![](../media/kit_05.png){width=170px}<br><span style="font-size:0.85em">Ultrasonic module (with casing) ×1</span> | ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor driver expansion board ×1</span> |
+| ![](../media/kit_02.png){width=170px}<br><span style="font-size:0.85em">Tracked chassis assembly (tracks + motors + wheels) ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |  |
+> ⚠️ **These parts were already installed on the robot in Chapter 2. This table is for reference only — do not remove and reinstall them. The wiring notes below only show how the connections are made, for reference; no disassembly is needed. For the full parts list, see 1.4 Kit List.**
+#### **3. Parameters:**
 
-| 项目 | 参数 |
+| Item | Parameter |
 | --- | --- |
-| 跟随区间 | 30～50 cm，前进 |
-| 停止区间 | 10～30 cm，停车显示笑脸 |
-| 后退区间 | 小于 10 cm，后退 |
-| 目标丢失 | 大于 50 cm 或读数无效，停车显示问号 |
-| 测距周期 | 100 ms |
-| 前进速度 | 左右轮各 150 |
-| 后退速度 | 左轮 105、右轮 150（后退时车身略偏） |
-| 串口波特率 | 115200 |
-| 点阵图标 | 爱心=跟随，笑脸=停止，下箭头=后退，问号=丢失 |
+| Following range | 30–50 cm, move forward |
+| Stop range | 10–30 cm, stop and show a smiling face |
+| Back-up range | Less than 10 cm, back up |
+| Target lost | Greater than 50 cm or invalid reading, stop and show a question mark |
+| Distance measurement period | 100 ms |
+| Forward speed | 150 for each wheel |
+| Back-up speed | Left wheel 105, right wheel 150 (the robot drifts slightly when backing up) |
+| Serial baud rate | 115200 |
+| Dot matrix icons | Heart = following, smiling face = stop, down arrow = back up, question mark = lost |
 
-#### **4. 接线说明：**
+#### **4. Wiring:**
 
-| 模块 | 引脚 | 主控 GPIO |
+| Module | Pin | Controller GPIO |
 | --- | --- | :---: |
-| 超声波 | Trig | IO13 |
-| 超声波 | Echo | IO12 |
-| 点阵 | CLK | IO9 |
-| 点阵 | DIN | IO8 |
-| 左轮电机 | AIN（方向） | IO38 |
-| 左轮电机 | AEN（调速） | IO21 |
-| 右轮电机 | BIN（方向） | IO40 |
-| 右轮电机 | BEN（调速） | IO41 |
+| Ultrasonic | Trig | IO13 |
+| Ultrasonic | Echo | IO12 |
+| Dot matrix | CLK | IO9 |
+| Dot matrix | DIN | IO8 |
+| Left motor | AIN (direction) | IO38 |
+| Left motor | AEN (speed) | IO21 |
+| Right motor | BIN (direction) | IO40 |
+| Right motor | BEN (speed) | IO41 |
 
-> **注意**：接线图中的元器件只用于说明接线关系，实际接线时不需要把清单中带外壳的元器件拆开。
+> **Note**: The components in the wiring diagram are shown only to illustrate the connections. When wiring the robot, you do not need to remove the casings of the components listed above.
 
 ![](media/PRO5.png)
 
-#### **5. 流程图：**
+#### **5. Flowchart:**
 
-主循环只有一条判断链，四个区间各对应一组动作：
+The main loop is a single chain of decisions, with one set of actions for each range:
 
 ![](media/follow_flow.png)
 
-#### **6. 测试代码：**
+#### **6. Test Code:**
 
 ```cpp
-// ===== 点阵屏引脚 =====
-#define CLK_Pin 9   // 时钟，接点阵 CLK
-#define DIN_Pin 8   // 数据，接点阵 DIN
+// ===== Dot matrix display pins =====
+#define CLK_Pin 9   // Clock, connect to dot matrix CLK
+#define DIN_Pin 8   // Data, connect to dot matrix DIN
 
-// ===== 超声波引脚 =====
-const int trigPin = 13;  // 触发脚，接 IO13
-const int echoPin = 12;  // 回响脚，接 IO12
+// ===== Ultrasonic pins =====
+const int trigPin = 13;  // Trigger pin, connected to IO13
+const int echoPin = 12;  // Echo pin, connected to IO12
 
-// ===== 距离档位（cm）=====
-// 跟随按三个阈值分档
-const long safeDistance = 30;   // 30~50：跟随
-const long closeDistance = 10;  // 小于 10：后退
-const long maxDistance = 50;    // 大于 50：目标丢失
+// ===== Distance ranges (cm) =====
+// Following is divided into ranges by three thresholds
+const long safeDistance = 30;   // 30-50: following
+const long closeDistance = 10;  // Less than 10: back up
+const long maxDistance = 50;    // Greater than 50: target lost
 
-// ===== 电机引脚 =====
-#define MOTOR_AIN 38  // 左电机方向
-#define MOTOR_AEN 21  // 左电机调速
-#define MOTOR_BIN 40  // 右电机方向
-#define MOTOR_BEN 41  // 右电机调速
+// ===== Motor pins =====
+#define MOTOR_AIN 38  // Left motor direction
+#define MOTOR_AEN 21  // Left motor speed
+#define MOTOR_BIN 40  // Right motor direction
+#define MOTOR_BEN 41  // Right motor speed
 
-// ===== 字模（16 列 × 8 行）=====
-// 爱心：跟随前进
+// ===== Font bitmaps (16 columns x 8 rows) =====
+// Heart: follow forward
 unsigned char heart[] = {
   0x00, 0x00, 0x00, 0x00, 0x08, 0x1c, 0x3e, 0x7c,
   0x7c, 0x3e, 0x1c, 0x08, 0x00, 0x00, 0x00, 0x00
 };
 
-// 笑脸：距离合适，停止
+// Smiling face: distance OK, stop
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
 };
 
-// 向下箭头：太近后退
+// Down arrow: too close, back up
 unsigned char arrow_down[] = {
   0x00, 0x00, 0x00, 0x00, 0x10, 0x30, 0x7e, 0xfe,
   0xfe, 0x7e, 0x30, 0x10, 0x00, 0x00, 0x00, 0x00
 };
 
-// 问号：目标丢失
+// Question mark: target lost
 unsigned char question_mark[] = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x02, 0x51,
   0x59, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
@@ -106,9 +106,9 @@ unsigned char question_mark[] = {
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("超声波跟随启动");
+  Serial.println("Ultrasonic following started");
 
-  // 点阵引脚初始化并清屏
+  // Initialize dot matrix pins and clear the display
   pinMode(CLK_Pin, OUTPUT);
   pinMode(DIN_Pin, OUTPUT);
   digitalWrite(CLK_Pin, HIGH);
@@ -116,75 +116,75 @@ void setup() {
   unsigned char clear_data[16] = {0};
   matrix_display(clear_data);
 
-  pinMode(trigPin, OUTPUT);  // Trig 输出
-  pinMode(echoPin, INPUT);   // Echo 输入
+  pinMode(trigPin, OUTPUT);  // Trig output
+  pinMode(echoPin, INPUT);   // Echo input
 
-  // 方向脚输出
+  // Direction pin output
   pinMode(MOTOR_BIN, OUTPUT);
   pinMode(MOTOR_AIN, OUTPUT);
 
-  // 调速脚 PWM：1 kHz，8 位
+  // Speed pin PWM: 1 kHz, 8-bit
   ledcAttach(MOTOR_BEN, 1000, 8);
   ledcAttach(MOTOR_AEN, 1000, 8);
 
-  // 上电停车并显示笑脸
+  // Stop and show smiling face on power on
   stopMotor();
   matrix_display(smile);
 }
 
 void loop() {
-  // 测前方距离
+  // Measure the distance ahead
   long distance = getDistance();
 
-  Serial.print("当前距离：");
+  Serial.print("Current distance: ");
   Serial.print(distance);
   Serial.println(" cm");
 
   if (distance > safeDistance && distance <= maxDistance) {
-    // 30~50 cm：跟随前进
+    // 30-50 cm: follow forward
     forward(150, 150);
 
   } else if (distance >= closeDistance && distance <= safeDistance) {
-    // 10~30 cm：停止
+    // 10-30 cm: stop
     stopMotor();
     matrix_display(smile);
 
   } else if (distance < closeDistance && distance > 0) {
-    // 小于 10 cm：后退
-    // 左右差速，后退时车身略偏
+    // Less than 10 cm: back up
+    // Differential left/right speed; the car drifts slightly when backing up
     back(105, 150);
 
   } else {
-    // 大于 50 cm 或读数无效：停车显示问号
+    // Greater than 50 cm or invalid reading: stop and show a question mark
     stopMotor();
     matrix_display(question_mark);
   }
 
-  // 100 ms 测一次
+  // Measure once every 100 ms
   delay(100);
 }
 
-// 测距，返回厘米
+// Measure distance, return centimeters
 int getDistance() {
-  long duration;  // 往返时间（µs）
-  int distance;   // 距离（cm）
+  long duration;  // Round-trip time (µs)
+  int distance;   // Distance (cm)
 
-  // 先拉低，保证起始电平干净
+  // Pull low first for a clean start level
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
 
-  // 10 µs 高脉冲触发发波
+  // 10 µs HIGH pulse triggers the wave
   digitalWrite(trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
 
-  // Echo 高电平宽度即往返时间
+  // Echo HIGH width is the round-trip time
   duration = pulseIn(echoPin, HIGH);
 
-  // 声速 0.034 cm/µs，除以 2 去掉回程
+  // Speed of sound 0.034 cm/µs, divide by 2 to remove the return trip
   distance = duration * 0.034 / 2;
 
-  // 超出 2~300 cm 置 0
+  // Out of 2-300 cm range, set to 0
   if (distance < 2 || distance > 300) {
     distance = 0;
   }
@@ -192,15 +192,15 @@ int getDistance() {
   return distance;
 }
 
-// ===== 电机控制 =====
+// ===== Motor control =====
 
-// 直接写左右轮 PWM（0~255）
+// Directly write left/right wheel PWM (0-255)
 void setMotor(int rightSpeed, int leftSpeed) {
   ledcWrite(MOTOR_BEN, rightSpeed);
   ledcWrite(MOTOR_AEN, leftSpeed);
 }
 
-// 前进：方向脚拉高并显示爱心
+// Forward: direction pin HIGH and show heart
 void forward(int rightSpeed, int leftSpeed) {
   matrix_display(heart);
   digitalWrite(MOTOR_BIN, HIGH);
@@ -208,7 +208,7 @@ void forward(int rightSpeed, int leftSpeed) {
   setMotor(rightSpeed, leftSpeed);
 }
 
-// 后退：方向脚拉低并显示向下箭头
+// Backward: direction pin LOW and show down arrow
 void back(int rightSpeed, int leftSpeed) {
   matrix_display(arrow_down);
   digitalWrite(MOTOR_BIN, LOW);
@@ -216,37 +216,37 @@ void back(int rightSpeed, int leftSpeed) {
   setMotor(rightSpeed, leftSpeed);
 }
 
-// 停止：速度置 0
+// Stop: set speed to 0
 void stopMotor() {
   setMotor(0, 0);
 }
 
-// ===== 点阵驱动（软件模拟 I2C）=====
+// ===== Dot matrix driver (software-simulated I2C) =====
 
-// 将 16 字节字模写入点阵屏显存
+// Write the 16-byte font bitmap into the dot matrix display buffer
 void matrix_display(unsigned char matrix_value[]) {
-  // 0x40：写数据模式，地址自增
+  // 0x40: write data mode, auto-increment address
   IIC_start();
   IIC_send(0x40);
   IIC_end();
 
-  // 0xC0：显存起始地址 0
+  // 0xC0: display buffer start address 0
   IIC_start();
   IIC_send(0xC0);
 
-  // 连写 16 列
+  // Write 16 columns consecutively
   for (int i = 0; i < 16; i++) {
     IIC_send(matrix_value[i]);
   }
   IIC_end();
 
-  // 0x8A：开显示，亮度最大
+  // 0x8A: display on, maximum brightness
   IIC_start();
   IIC_send(0x8A);
   IIC_end();
 }
 
-// 起始条件：CLK 高电平期间 DIN 下降沿
+// Start condition: falling edge of DIN while CLK is HIGH
 void IIC_start() {
   digitalWrite(CLK_Pin, HIGH);
   delayMicroseconds(3);
@@ -256,7 +256,7 @@ void IIC_start() {
   delayMicroseconds(3);
 }
 
-// 发送 1 字节，低位在前：CLK 低时置数据，上升沿采样
+// Send one byte, LSB first: set data while CLK is LOW, sample on rising edge
 void IIC_send(unsigned char send_data) {
   for (int i = 0; i < 8; i++) {
     digitalWrite(CLK_Pin, LOW);
@@ -276,7 +276,7 @@ void IIC_send(unsigned char send_data) {
   }
 }
 
-// 停止条件：CLK 高电平期间 DIN 上升沿
+// Stop condition: rising edge of DIN while CLK is HIGH
 void IIC_end() {
   digitalWrite(CLK_Pin, LOW);
   delayMicroseconds(3);
@@ -289,56 +289,58 @@ void IIC_end() {
 }
 ```
 
-#### **7. 代码解释：**
+#### **7. Code Explanation:**
 
-**(1) 三个阈值划出四段**
-
-```cpp
-const long safeDistance = 30;   // 30~50：跟随
-const long closeDistance = 10;  // 小于 10：后退
-const long maxDistance = 50;    // 大于 50：目标丢失
-```
-
-三个数把距离切成四段：小于 10 后退、10～30 停、30～50 跟随前进、大于 50 视为目标丢失。数值之间的顺序是这套逻辑的全部，改一个就要重新想清楚相邻两段还接不接得上。
-
-**(2) 测距直接复用第 3 课的写法**
+**(1) Three thresholds define four ranges**
 
 ```cpp
-long distance = getDistance();
+const long safeDistance = 30;   // 30-50: following
+const long closeDistance = 10;  // Less than 10: back up
+const long maxDistance = 50;    // Greater than 50: target lost
 ```
 
-这一句在 `loop()` 开头，每轮循环都跑一次。`getDistance()` 内部与第 3 课逐字一致：拉低 → 10 µs 脉冲 → `pulseIn()` → ×0.034÷2 → 超量程置 0。返回 0 的含义也一样——要么没回波，要么太近，都不可信。
+Three numbers cut distance into four ranges: less than 10 backs up, 10–30 stops, 30–50 follows forward, and above 50 counts as target lost. The order of those numbers is the entire logic; change one and you have to rethink whether the neighbouring ranges still meet cleanly.
 
-**(3) 四条 `if` 从上往下比，只走一条**
+**(2) Distance measurement reuses the Lesson 3 approach**
+
+```cpp
+  // Measure the distance ahead
+  long distance = getDistance();
+```
+
+This line sits at the top of `loop()` and runs once per cycle. Inside, `getDistance()` is word-for-word the same as in Lesson 3: pull low → 10 µs pulse → `pulseIn()` → ×0.034÷2 → out of range set to 0. A return of 0 means the same thing — either no echo or too close — and is equally untrustworthy.
+
+**(3) Four `if` checks are tested top to bottom; only one runs**
 
 ```cpp
   if (distance > safeDistance && distance <= maxDistance) {
-    // 30~50 cm：跟随前进
+    // 30~50 cm: follow forward
     forward(150, 150);
 
   } else if (distance >= closeDistance && distance <= safeDistance) {
-    // 10~30 cm：停止
+    // 10~30 cm: stop
     stopMotor();
     matrix_display(smile);
 
   } else if (distance < closeDistance && distance > 0) {
-    // 小于 10 cm：后退
+    // Less than 10 cm: back away
+    // Different left/right speeds make the car drift slightly when backing
     back(105, 150);
 
   } else {
-    // 大于 50 cm 或读数无效：停车显示问号
+    // Greater than 50 cm or invalid reading: stop and show question mark
     stopMotor();
     matrix_display(question_mark);
   }
 ```
 
-四个判断靠 `else if` 串成一条链，前面的条件一旦成立，后面的就不再看。所以**顺序不能换**：把"小于 10"提到最前面，30～50 那段就会被它先截走一部分。
+The four checks are linked into a chain by `else if`: as soon as an earlier condition is true, nothing below it is examined. So **the order cannot be changed** — move "less than 10" to the top and it will swallow part of the 30–50 range before that range ever gets a turn.
 
-每个条件的上下界都写全了（`> 30` 配 `<= 50`，不是只写上限），所以 30 这个点只会落进第二档，不会两档都进。
+Every condition states both bounds (`> 30` paired with `<= 50`, not just an upper limit), so the value 30 falls only into the second range and never into two at once.
 
-最后一档 `else` 兜的是两种情况：距离大于 50 cm，或者**读数等于 0**。注意第三条特意加了 `distance > 0`——没这个判断，0 cm 会满足 `distance < closeDistance`，车会把"前方空旷没回波"当成"贴脸障碍"然后猛退。加了 `> 0` 之后，0 就掉到 `else`，显示问号、原地不动，这是对"数据不可信"最保守的处理。
+The final `else` catches two cases: a distance above 50 cm, or **a reading of 0**. Note the deliberate `distance > 0` in the third check — without it, 0 cm satisfies `distance < closeDistance`, and the robot would treat "open space with no echo" as "an obstacle right in its face" and jerk backwards. With `> 0` in place, 0 falls through to `else`, which shows the question mark and stays put — the most conservative way to handle untrustworthy data.
 
-**(4) `setMotor()` 只写 PWM，不碰方向**
+**(4) `setMotor()` only writes PWM; it never touches direction**
 
 ```cpp
 void setMotor(int rightSpeed, int leftSpeed) {
@@ -347,11 +349,11 @@ void setMotor(int rightSpeed, int leftSpeed) {
 }
 ```
 
-这是底层，只干一件事：把两个绝对值写进 PWM。方向脚它一根都不碰，所以两个参数必须是正数——`ledcWrite()` 收负数会溢出成一个很大的值。
+This is the low-level layer with one job: write two absolute values to PWM. It never touches a direction pin, so both arguments must be positive — `ledcWrite()` given a negative number overflows into a very large value.
 
-和第 2 课的 `driveMotors()` 比，这里**不做符号判断**。方向交给上层：`forward()` 把两根方向脚拉高，`back()` 把它们拉低。
+Compared with `driveMotors()` in Lesson 2, there is **no sign check** here. Direction is left to the higher level: `forward()` pulls both direction pins HIGH, `back()` pulls them LOW.
 
-**(5) 方向脚在 `forward()` / `back()` 里定**
+**(5) Direction pins are set inside `forward()` / `back()`**
 
 ```cpp
 void forward(int rightSpeed, int leftSpeed) {
@@ -369,60 +371,60 @@ void back(int rightSpeed, int leftSpeed) {
 }
 ```
 
-顺序是"先定方向、再给速度、顺手换图"。两根方向脚一起动，所以只能直着走或直着退，这课不需要转弯。
+The order is "set direction first, then speed, and swap the icon along the way." Both direction pins move together, so the robot can only go straight forward or straight back — this lesson has no turning.
 
-只调 `setMotor()` 而方向脚还停在上一轮的值，车会按上一次的方向跑——这是调试时最常踩的坑。
+If you call only `setMotor()` while the direction pins still hold their previous values, the robot runs in last cycle's direction — the most common trap when debugging.
 
-**(6) 后退时左右给得不一样**
+**(6) Left and right get different values when backing up**
 
 ```cpp
     back(105, 150);
 ```
 
-差速不是写错了。直线后退时车会一路退到彻底看不见障碍，然后猛地停住；右边给 150、左边给 105，让它退的同时车头往一侧偏，退出来就带着一个角度，下一轮更容易看到空档。
+The differential isn't a typo. With equal speeds the robot backs straight until the obstacle is completely out of sight, then stops abruptly. Giving 150 to the right and 105 to the left makes the nose drift to one side while it retreats, so it comes away at an angle and is more likely to see a clear path on the next reading.
 
-第 4 课的避障是"停下来左看右看"，这课是"边退边偏"，两种思路都对。
+Lesson 4's obstacle avoidance was "stop, look left, look right"; this lesson is "back away while veering." Both approaches are valid.
 
-**(7) 100 ms 的节拍**
+**(7) The 100 ms beat**
 
 ```cpp
   delay(100);
 ```
 
-一个循环 100 ms，每秒测 10 次。目标以 1 m/s 靠近时，两轮之间只移动 10 cm，小于最窄的那一档（10 cm），不会整档跳过去。把 `delay` 改大到 300 ms 以上，快速靠近的物体会直接从"跟随"跳进"贴脸"，中间那档停不住。
+One cycle takes 100 ms, ten measurements per second. If a target approaches at 1 m/s, it moves only 10 cm between readings — smaller than the narrowest range (10 cm) — so it cannot skip a whole range. Push `delay` beyond 300 ms and a fast-approaching object jumps straight from "following" to "in your face", never stopping in the middle range.
 
-#### **8. 运行现象：**
+#### **8. What You'll See:**
 
-上电后点阵先亮笑脸，串口每 100 ms 打印一行：
+After power-on the dot matrix shows a smiling face first, and the Serial Monitor prints a line every 100 ms:
 
 ```text
-超声波跟随启动
-当前距离：42 cm
-当前距离：41 cm
-当前距离：18 cm
-当前距离：7 cm
-当前距离：0 cm
+Ultrasonic following started
+Current distance: 42 cm
+Current distance: 41 cm
+Current distance: 18 cm
+Current distance: 7 cm
+Current distance: 0 cm
 ```
 
-对着车头做四个动作，能看到四种反馈：
+Make four moves in front of the robot and you'll see four different responses:
 
-| 手的动作 | 距离读数 | 车的行为 | 点阵 |
+| Hand movement | Distance reading | Robot behaviour | Dot matrix |
 | --- | --- | --- | --- |
-| 停在 30～50 cm | 30～50 | 向前跟 | 爱心 |
-| 停在 10～30 cm | 10～30 | 停住 | 笑脸 |
-| 贴到 10 cm 以内 | 小于 10 | 往后退 | 向下箭头 |
-| 手掌拿开 | 0 或大于 50 | 停住 | 问号 |
+| Held at 30–50 cm | 30–50 | Follows forward | Heart |
+| Held at 10–30 cm | 10–30 | Stops | Smiling face |
+| Brought within 10 cm | Less than 10 | Backs up | Down arrow |
+| Hand removed | 0 or above 50 | Stops | Question mark |
 
-> 【图片待补】串口监视器里四段距离读数的截图，能看出跟随、停止、后退三种状态切换。
+> [Image to be added] A screenshot of the four distance readings in the Serial Monitor, showing the switch between following, stopping and backing up.
 
-如果车在你靠近时反而往前冲，先查超声波两根线有没有插反：Trig 和 Echo 对调后读数会一直是 0。
+If the robot lunges forward as you approach, first check that the two ultrasonic signal wires aren't reversed: swap Trig and Echo and the reading stays at 0.
 
-#### **9. 常见问题解决：**
+#### **9. Troubleshooting:**
 
-(1) 手越靠近车反而往前冲：Trig 和 Echo 接反了，读数一直是 0。按接线表把 4P 头的两根信号线换回来。
+(1) The closer your hand gets, the more the robot lunges forward: Trig and Echo are reversed, so the reading is always 0. Swap the two signal wires in the 4P connector according to the wiring table.
 
-(2) 手在 30 cm 附近晃，车在前进和停车之间来回抽：三档阈值贴得太紧，`safeDistance` 和 `maxDistance` 之间留够余量。
+(2) Your hand hovers around 30 cm and the robot jerks between forward and stop: the thresholds are packed too tightly. Leave enough margin between `safeDistance` and `maxDistance`.
 
-(3) 车一直显示问号不动：串口里的距离是 0 或者大于 50 cm，两种情况都落进最后的 `else`。手放到 10～50 cm 之间再试；想跟得更远，把 `maxDistance` 加到 60。
+(3) The robot keeps showing a question mark and won't move: the distance in the Serial Monitor is 0 or above 50 cm, and both fall into the final `else`. Put your hand between 10 and 50 cm and try again; to follow from further away, raise `maxDistance` to 60.
 
-(4) 后退时车总是往一侧偏：`back(105, 150)` 左右差速是故意的，让它退出来带个角度，不是故障。
+(4) The robot always veers to one side when backing up: the left/right difference in `back(105, 150)` is deliberate, giving it an angle as it retreats. It's not a fault.

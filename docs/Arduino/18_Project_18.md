@@ -1,57 +1,57 @@
-### 项目 18：AI 视觉模块：摄像头巡线
+### Project 18: AI Vision Module: Camera Line Tracking
 
-#### **1. 简介：**
+#### **1. Introduction:**
 
-![路上的自动驾驶车](media/intro_18.jpg){width=520px}
+![A self-driving car on the road](media/intro_18.jpg){width=520px}
 
-第 7 课用五只贴地的红外探头循迹，这里把眼睛抬起来——改用摄像头看线。镜头朝地面，能看到车头前方十几厘米的线，比贴地探头看得远，可以提前打方向。
+In Lesson 7 the car followed a line with five infrared sensors pressed to the floor. Now lift the eyes: a camera aimed at the ground sees the line further ahead than a ground-hugging probe can, so the car can start steering before it is already on top of the line.
 
-模块回传的不是图像，是三个数：偏差、角度、有效位。偏差说线偏出画面中心多少，角度说线歪了多少，有效位等于 5 就表示这一帧真的看到了线。有这两个量，就能算左右轮该差多少速。
+The module still sends no picture — it sends three numbers: how far the line sits from the center of the frame, how tilted it is, and a validity flag. Those two measurements are enough to work out how much the left and right wheels should differ in speed.
 
-修正用的是比例加微分：偏差大就多打方向，偏差小就轻轻修；再加一项看偏差变得快不快，提前收住，车身才不会冲过中线再来回摆。直行基础速度 130，修正量最多 ±90。
+PD control is the answer here. The proportional term alone will overshoot and weave; only the derivative term, watching how fast the error is changing, can settle the steering before the car crosses the centerline and starts swinging back. And when the line leaves the frame entirely, the car must search in the direction it last saw the line — spin at random and you will never find it.
 
-上电后点阵先是一双眼睛，等线进入视野才变笑脸、开始沿线走；线跑出画面时它按记忆的方向原地找，找回来接着走，找不回来就停下、换一张苦脸。
+At power-on the dot matrix shows a pair of eyes; it changes to a smiley only when the line enters view and tracking begins. Lose the line and it searches on the spot using its memory; find it again and it carries on, but if the search times out it stops and shows a frown.
 
-#### **2. 所需清单：**
+#### **2. Parts List:**
 
-本课用到的器件：
+Parts used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
-| ![](../media/kit_09.jpg){width=170px}<br><span style="font-size:0.85em">TinyVision AI 视觉摄像头 ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 电机扩展板 ×1</span> | ![](../media/kit_02.png){width=170px}<br><span style="font-size:0.85em">履带底盘总成 ×1</span> |
-| ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED 点阵屏 ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 开发板 ×1</span> |  |
-#### **3. 参数：**
+| ![](../media/kit_09.jpg){width=170px}<br><span style="font-size:0.85em">TinyVision AI vision camera ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_02.png){width=170px}<br><span style="font-size:0.85em">Tracked chassis assembly ×1</span> |
+| ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |  |
+#### **3. Parameters:**
 
-| 项目 | 参数 |
+| Item | Parameter |
 | --- | --- |
-| 识别模式 | `line` |
-| 回传格式 | `LINE:偏差,角度,有效位` |
-| 有效标志 | 5 = 识别到线 |
-| 直行基础速度 | 130 |
-| 比例系数 KP | 0.4 |
-| 微分系数 KD | 0.6 |
-| 修正上限 | ±90 |
-| 微分限幅 | ±50 |
-| 找线速度 | 90 |
-| 找线死区 | 15 |
-| 找线超时 | 600 ms |
-| 控制周期 | 5 ms |
+| Recognition mode | `line` |
+| Report format | `LINE:offset,angle,valid` |
+| Valid flag | 5 = line recognized |
+| Base straight speed | 130 |
+| Proportional coefficient KP | 0.4 |
+| Derivative coefficient KD | 0.6 |
+| Correction limit | ±90 |
+| Derivative limit | ±50 |
+| Search speed | 90 |
+| Search dead zone | 15 |
+| Search timeout | 600 ms |
+| Control period | 5 ms |
 
-#### **4. 接线说明：**
+#### **4. Wiring:**
 
-| 视觉模块 | 主控 | 说明 |
+| Vision module | Controller | Description |
 | --- | :---: | --- |
-| TX | IO18 | 回传偏差数据 |
-| RX | IO17 | 下发模式指令 |
-| VCC / GND | 5V / GND | 供电与共地 |
+| TX | IO18 | Reports offset data |
+| RX | IO17 | Sends mode commands |
+| VCC / GND | 5V / GND | Power and common ground |
 
-| 信号 | 主控 GPIO |
+| Signal | Controller GPIO |
 | --- | :---: |
-| 左轮 AIN / AEN | IO38 / IO21 |
-| 右轮 BIN / BEN | IO40 / IO41 |
+| Left wheel AIN / AEN | IO38 / IO21 |
+| Right wheel BIN / BEN | IO40 / IO41 |
 
 
-**装法A：**
+**Mounting A:**
 
 ![](media/A-1.png)
 
@@ -66,212 +66,212 @@
 ![](media/A-6.png)
 
 
-#### **5. 流程图：**
+#### **5. Flowchart:**
 
-有线和没线是两条完全不同的路径，先进哪条由**有效位**决定：
+Having a line and not having one are two completely different paths; which one you enter is decided by the **valid flag**:
 
 ![](media/camera_line_flow.png)
 
-#### **6. 测试代码：**
+#### **6. Test Code:**
 
-> **本课工程有三个文件**：`18_Camera_Line_Tracking.ino`、`AiCam.h`、`AiCam.cpp`。视觉模块的串口收发和字符串解析都在 `AiCam.cpp` 里，三个文件放在同一个文件夹，少一个编译不过。
+> **This lesson's project has three files**: `18_Camera_Line_Tracking.ino`, `AiCam.h`, and `AiCam.cpp`. All serial traffic and string parsing for the vision module live in `AiCam.cpp`; put all three files in the same folder — compilation fails if any is missing.
 
 ```cpp
-#include "AiCam.h"  // 视觉模块驱动
+#include "AiCam.h"  // Vision module driver
 
-// ===== 电机引脚 =====
-#define MOTOR_AIN 38  // A 路方向：左轮
-#define MOTOR_AEN 21  // A 路调速：左轮
-#define MOTOR_BIN 40  // B 路方向：右轮
-#define MOTOR_BEN 41  // B 路调速：右轮
+// ===== Motor pins =====
+#define MOTOR_AIN 38  // Channel A direction: left wheel
+#define MOTOR_AEN 21  // Channel A speed: left wheel
+#define MOTOR_BIN 40  // Channel B direction: right wheel
+#define MOTOR_BEN 41  // Channel B speed: right wheel
 
-// ===== 视觉模块串口 =====
-// 主控 RX←模块 TX，主控 TX→模块 RX，需共地
-// 按实际接线修改
-#define CAM_RX 18  // 主控接收脚
-#define CAM_TX 17  // 主控发送脚
+// ===== Vision module serial port =====
+// Controller RX <- module TX, controller TX -> module RX, common ground required
+// Modify according to actual wiring
+#define CAM_RX 18  // Controller RX pin
+#define CAM_TX 17  // Controller TX pin
 
-// ===== 点阵引脚 =====
-#define CLK_Pin 9  // 时钟，接模块 CLK
-#define DIN_Pin 8  // 数据，接模块 DIN
+// ===== Dot matrix pins =====
+#define CLK_Pin 9  // Clock, connect to module CLK
+#define DIN_Pin 8  // Data, connect to module DIN
 
-// ===== 循线参数 =====
-#define BASE_SPEED   130  // 直行基础速度
-#define KP           0.4  // 比例系数
-#define KD           0.6  // 微分系数，抑制超调
-#define TURN_MAX      90  // 单侧修正上限
-#define D_MAX         50  // 微分项限幅
+// ===== Line-following parameters =====
+#define BASE_SPEED   130  // Base straight-line speed
+#define KP           0.4  // Proportional coefficient
+#define KD           0.6  // Derivative coefficient, suppresses overshoot
+#define TURN_MAX      90  // Maximum one-side correction
+#define D_MAX         50  // Derivative term limit
 
-// ===== 丢线找线 =====
-#define SEARCH_SPEED  90  // 找线转速
-#define SEARCH_DEAD   15  // 找线死区
-#define LOST_TIMEOUT 600  // 找线超时（ms）
+// ===== Line loss and search =====
+#define SEARCH_SPEED  90  // Line-search rotation speed
+#define SEARCH_DEAD   15  // Line-search dead zone
+#define LOST_TIMEOUT 600  // Line-search timeout (ms)
 
-// ===== 有效标志 =====
-#define LINE_OK 5  // 模块第三字段为 5 表示识别到线
+// ===== Valid flag =====
+#define LINE_OK 5  // The module's third field being 5 means a line is detected
 
-// ===== 表情编号 =====
-#define FACE_EYES     0  // 待机：眼睛
-#define FACE_SMILE    1  // 跟线：笑脸
-#define FACE_SURPRISE 2  // 找线：瞪眼
-#define FACE_SAD      3  // 超时：苦脸
+// ===== Expression numbers =====
+#define FACE_EYES     0  // Standby: eyes
+#define FACE_SMILE    1  // Following line: smiling face
+#define FACE_SURPRISE 2  // Searching for line: wide eyes
+#define FACE_SAD      3  // Timeout: sad face
 
-// 16 字节对应 16 列，每字节 8 位对应一列 8 行
+// 16 bytes correspond to 16 columns, each byte's 8 bits correspond to 8 rows in one column
 
-// 待机：两只方眼
+// Standby: two square eyes
 unsigned char eyes[] = {
   0x00, 0x00, 0x00, 0x00, 0x1C, 0x1C, 0x00, 0x00,
   0x00, 0x00, 0x1C, 0x1C, 0x00, 0x00, 0x00, 0x00
 };
 
-// 笑脸：跟线稳定
+// Smiling face: stable on the line
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
 };
 
-// 瞪眼：正在找线
+// Wide eyes: searching for the line
 unsigned char surprise[] = {
   0x00, 0x00, 0x00, 0x00, 0x3E, 0x3E, 0x00, 0xC0,
   0xC0, 0x00, 0x3E, 0x3E, 0x00, 0x00, 0x00, 0x00
 };
 
-// 苦脸：找线超时
+// Sad face: line search timeout
 unsigned char sad[] = {
   0x00, 0x00, 0x00, 0x00, 0x08, 0x08, 0x80, 0x40,
   0x40, 0x80, 0x08, 0x08, 0x00, 0x00, 0x00, 0x00
 };
 
-AiCam aiCam(CAM_RX, CAM_TX);  // 视觉模块实例
+AiCam aiCam(CAM_RX, CAM_TX);  // Vision module instance
 
-int lastError = 0;            // 上次偏差，丢线时决定找线方向
-bool hasLast = false;         // 是否已有上次偏差
-unsigned long lostStart = 0;  // 丢线起始时刻，0 表示未丢线
-int curFace = -1;             // 当前表情，-1 未显示
+int lastError = 0;            // Last error, determines search direction when line is lost
+bool hasLast = false;         // Whether a previous error exists
+unsigned long lostStart = 0;  // Time when line was lost, 0 means not lost
+int curFace = -1;             // Current expression, -1 means not shown
 
 void setup() {
-  // 两线拉高，总线置空闲
+  // Pull both lines HIGH to set the bus idle
   pinMode(CLK_Pin, OUTPUT);
   pinMode(DIN_Pin, OUTPUT);
   digitalWrite(CLK_Pin, HIGH);
   digitalWrite(DIN_Pin, HIGH);
 
-  // 电机引脚
+  // Motor pins
   pinMode(MOTOR_BIN, OUTPUT);
   pinMode(MOTOR_AIN, OUTPUT);
-  ledcAttach(MOTOR_BEN, 1000, 8);  // 1 kHz，8 位
+  ledcAttach(MOTOR_BEN, 1000, 8);  // 1 kHz, 8-bit
   ledcAttach(MOTOR_AEN, 1000, 8);
-  stopCar();                       // 上电停车
+  stopCar();                       // Stop on power on
 
-  // 显示待机表情
+  // Show standby expression
   showFace(FACE_EYES);
 
-  // 启动视觉模块，循线模式
+  // Start the vision module in line-following mode
   aiCam.begin();
   aiCam.setMode("line");
 
-  delay(1000);  // 等模式切换完成
+  delay(1000);  // Wait for the mode switch to complete
 }
 
 void loop() {
-  aiCam.readSerial();  // 每轮读取串口
+  aiCam.readSerial();  // Read the serial port each cycle
 
-  int offset = aiCam.getLineOffset();  // 偏差：负偏左，正偏右
-  int valid  = aiCam.getLineValid();   // 有效标志，5 为识别到线
+  int offset = aiCam.getLineOffset();  // Error: negative means left, positive means right
+  int valid  = aiCam.getLineValid();   // Valid flag, 5 means line detected
 
   if (valid == LINE_OK) {
-    // 识别到线：PD 换算差速
-    lostStart = 0;         // 清丢线计时
-    showFace(FACE_SMILE);  // 显示笑脸
+    // Line detected: PD calculation for differential speed
+    lostStart = 0;         // Clear line-lost timer
+    showFace(FACE_SMILE);  // Show smiling face
 
-    int error = offset;  // 当前偏差
+    int error = offset;  // Current error
 
-    // 微分项：偏差变化量，抑制超调
+    // Derivative term: change in error, suppresses overshoot
     int dError = 0;
     if (hasLast) {
       dError = error - lastError;
-      dError = constrain(dError, -D_MAX, D_MAX);  // 限幅
+      dError = constrain(dError, -D_MAX, D_MAX);  // Limit range
     }
 
-    // 差速 = P×偏差 + D×偏差变化
+    // Differential = P x error + D x change in error
     int correction = (int)(error * KP + dError * KD);
 
-    // 修正量限幅
+    // Limit the correction
     correction = constrain(correction, -TURN_MAX, TURN_MAX);
 
-    // 修正为正（偏右）时左快右慢，车头右偏
-    // 修正为负时相反
+    // When correction is positive (to the right), left fast and right slow, nose turns right
+    // Opposite when correction is negative
     driveMotors(BASE_SPEED + correction, BASE_SPEED - correction);
 
-    lastError = error;  // 保存本次偏差
+    lastError = error;  // Save the current error
     hasLast = true;
   } else {
-    // 未识别到线：按上次偏差方向找线
-    if (lostStart == 0) {    // 刚丢线
-      lostStart = millis();  // 开始计时
+    // No line detected: search in the direction of the last error
+    if (lostStart == 0) {    // Line just lost
+      lostStart = millis();  // Start timing
     }
 
     if (millis() - lostStart < LOST_TIMEOUT) {
-      showFace(FACE_SURPRISE);  // 找线中
+      showFace(FACE_SURPRISE);  // Searching for line
 
-      // 死区内方向不明，停车
+      // Direction unknown within dead zone, stop
       if (lastError > SEARCH_DEAD) {
-        driveMotors(SEARCH_SPEED, -SEARCH_SPEED);   // 线原在右：向右找
+        driveMotors(SEARCH_SPEED, -SEARCH_SPEED);   // Line was on the right: search right
       } else if (lastError < -SEARCH_DEAD) {
-        driveMotors(-SEARCH_SPEED, SEARCH_SPEED);   // 线原在左：向左找
+        driveMotors(-SEARCH_SPEED, SEARCH_SPEED);   // Line was on the left: search left
       } else {
-        stopCar();                                  // 方向不明，停车
+        stopCar();                                  // Direction unknown, stop
       }
     } else {
-      showFace(FACE_SAD);  // 找线超时
-      stopCar();           // 脱线停车
+      showFace(FACE_SAD);  // Line-search timeout
+      stopCar();           // Stop after losing the line
     }
   }
 
-  delay(5);  // 5 ms 一轮
+  delay(5);  // 5 ms per cycle
 }
 
-// ===== 点阵显示 =====
-// 仅表情变化时写屏
+// ===== Dot matrix display =====
+// Only refresh the display when the expression changes
 void showFace(int face) {
-  if (face == curFace) return;  // 表情未变
+  if (face == curFace) return;  // Expression unchanged
   curFace = face;
 
   if (face == FACE_EYES) {
-    matrix_display(eyes);       // 待机
+    matrix_display(eyes);       // Standby
   } else if (face == FACE_SMILE) {
-    matrix_display(smile);      // 笑脸
+    matrix_display(smile);      // Smiling face
   } else if (face == FACE_SURPRISE) {
-    matrix_display(surprise);   // 瞪眼
+    matrix_display(surprise);   // Wide eyes
   } else {
-    matrix_display(sad);        // 苦脸
+    matrix_display(sad);        // Sad face
   }
 }
 
-// 将 16 字节字模写入点阵屏显存
+// Write the 16-byte font bitmap into the dot matrix display buffer
 void matrix_display(unsigned char matrix_value[]) {
-  // 0x40：写数据模式，地址自增
+  // 0x40: write data mode, auto-increment address
   IIC_start();
   IIC_send(0x40);
   IIC_end();
 
-  // 0xC0：显存起始地址 0
+  // 0xC0: display buffer start address 0
   IIC_start();
   IIC_send(0xC0);
 
-  // 连写 16 列
+  // Write 16 columns consecutively
   for (int i = 0; i < 16; i++) {
     IIC_send(matrix_value[i]);
   }
   IIC_end();
 
-  // 0x8A：开显示，亮度最大
+  // 0x8A: display on, maximum brightness
   IIC_start();
   IIC_send(0x8A);
   IIC_end();
 }
 
-// 起始条件：CLK 高电平期间 DIN 下降沿
+// Start condition: falling edge of DIN while CLK is HIGH
 void IIC_start() {
   digitalWrite(CLK_Pin, HIGH);
   delayMicroseconds(3);
@@ -281,13 +281,13 @@ void IIC_start() {
   delayMicroseconds(3);
 }
 
-// 发送 1 字节，低位在前：CLK 低时置数据，上升沿采样
+// Send one byte, LSB first: set data while CLK is LOW, sample on rising edge
 void IIC_send(unsigned char send_data) {
   for (int i = 0; i < 8; i++) {
-    digitalWrite(CLK_Pin, LOW);  // 拉低时钟，准备数据
+    digitalWrite(CLK_Pin, LOW);  // Pull clock LOW to prepare data
     delayMicroseconds(3);
 
-    // 从 bit0 起逐位发送
+    // Send bit by bit starting from bit0
     if (send_data & 0x01) {
       digitalWrite(DIN_Pin, HIGH);
     } else {
@@ -295,14 +295,14 @@ void IIC_send(unsigned char send_data) {
     }
     delayMicroseconds(3);
 
-    digitalWrite(CLK_Pin, HIGH); // 拉高时钟，模块采样
+    digitalWrite(CLK_Pin, HIGH); // Pull clock HIGH for the module to sample
     delayMicroseconds(3);
 
-    send_data = send_data >> 1;  // 右移，取出下一位
+    send_data = send_data >> 1;  // Shift right to get the next bit
   }
 }
 
-// 停止条件：CLK 高电平期间 DIN 上升沿
+// Stop condition: rising edge of DIN while CLK is HIGH
 void IIC_end() {
   digitalWrite(CLK_Pin, LOW);
   delayMicroseconds(3);
@@ -314,211 +314,211 @@ void IIC_end() {
   delayMicroseconds(3);
 }
 
-// ===== 电机驱动 =====
-// A 路(38/21)接左轮、B 路(40/41)接右轮
-// leftSpeed 写 A 路、rightSpeed 写 B 路；先限幅 ±255，再取绝对值给占空比
+// ===== Motor driver =====
+// Channel A (38/21) drives the left wheel, channel B (40/41) the right wheel
+// leftSpeed goes to channel A, rightSpeed to channel B; first limit to ±255, then take absolute value for duty cycle
 void driveMotors(int leftSpeed, int rightSpeed) {
-  leftSpeed  = constrain(leftSpeed,  -255, 255);  // 左轮限幅
-  rightSpeed = constrain(rightSpeed, -255, 255);  // 右轮限幅
+  leftSpeed  = constrain(leftSpeed,  -255, 255);  // Left wheel limit
+  rightSpeed = constrain(rightSpeed, -255, 255);  // Right wheel limit
 
-  // A 路：左轮
+  // Channel A: left wheel
   if (leftSpeed >= 0) {
-    digitalWrite(MOTOR_AIN, HIGH);    // 拉高：正转
-    ledcWrite(MOTOR_AEN, leftSpeed);  // 占空比 = 速度
+    digitalWrite(MOTOR_AIN, HIGH);    // Pull HIGH: forward rotation
+    ledcWrite(MOTOR_AEN, leftSpeed);  // Duty cycle = speed
   } else {
-    digitalWrite(MOTOR_AIN, LOW);     // 拉低：反转
-    ledcWrite(MOTOR_AEN, -leftSpeed); // 取绝对值
+    digitalWrite(MOTOR_AIN, LOW);     // Pull LOW: reverse rotation
+    ledcWrite(MOTOR_AEN, -leftSpeed); // Take absolute value
   }
 
-  // B 路：右轮
+  // Channel B: right wheel
   if (rightSpeed >= 0) {
-    digitalWrite(MOTOR_BIN, HIGH);     // 拉高：正转
-    ledcWrite(MOTOR_BEN, rightSpeed);  // 占空比 = 速度
+    digitalWrite(MOTOR_BIN, HIGH);     // Pull HIGH: forward rotation
+    ledcWrite(MOTOR_BEN, rightSpeed);  // Duty cycle = speed
   } else {
-    digitalWrite(MOTOR_BIN, LOW);      // 拉低：反转
-    ledcWrite(MOTOR_BEN, -rightSpeed); // 取绝对值
+    digitalWrite(MOTOR_BIN, LOW);      // Pull LOW: reverse rotation
+    ledcWrite(MOTOR_BEN, -rightSpeed); // Take absolute value
   }
 }
 
-// 基本动作
-void goForward(int speed)  { driveMotors(speed, speed); }    // 前进：左右同速正转
-void goBackward(int speed) { driveMotors(-speed, -speed); }  // 后退：左右同速反转
-void spinLeft(int speed)   { driveMotors(-speed, speed); }   // 左转：左后退右前进
-void spinRight(int speed)  { driveMotors(speed, -speed); }   // 右转：左前进右后退
-void stopCar()             { driveMotors(0, 0); }            // 停止：占空比归零
+// Basic actions
+void goForward(int speed)  { driveMotors(speed, speed); }    // Forward: both wheels forward at the same speed
+void goBackward(int speed) { driveMotors(-speed, -speed); }  // Backward: both wheels reverse at the same speed
+void spinLeft(int speed)   { driveMotors(-speed, speed); }   // Turn left: left wheel back, right wheel forward
+void spinRight(int speed)  { driveMotors(speed, -speed); }   // Turn right: left wheel forward, right wheel back
+void stopCar()             { driveMotors(0, 0); }            // Stop: duty cycle to zero
 ```
 
-#### **7. 代码解释：**
+#### **7. Code Explanation:**
 
-**(1) 八个参数决定车的性格**
+**(1) Eight parameters define the car's character**
 
 ```cpp
-#define BASE_SPEED   130  // 直行基础速度
-#define KP           0.4  // 比例系数
-#define KD           0.6  // 微分系数，抑制超调
-#define TURN_MAX      90  // 单侧修正上限
-#define D_MAX         50  // 微分项限幅
+#define BASE_SPEED   130  // Base straight-line speed
+#define KP           0.4  // Proportional coefficient
+#define KD           0.6  // Derivative coefficient, suppresses overshoot
+#define TURN_MAX      90  // Maximum one-side correction
+#define D_MAX         50  // Derivative term limit
 
-#define SEARCH_SPEED  90  // 找线转速
-#define SEARCH_DEAD   15  // 找线死区
-#define LOST_TIMEOUT 600  // 找线超时（ms）
+#define SEARCH_SPEED  90  // Line-search rotation speed
+#define SEARCH_DEAD   15  // Line-search dead zone
+#define LOST_TIMEOUT 600  // Line-search timeout (ms)
 ```
 
-`BASE_SPEED 130` 是直行基线，左右轮在这个基础上加/减修正量。`KP 0.4` 负责"偏多少修多少"，`KD 0.6` 负责"正在往回走就少修一点"。后三个是限幅和保护，后面几节逐个讲。
+`BASE_SPEED 130` is the straight-ahead baseline, to which the left and right wheels add or subtract a correction. `KP 0.4` handles "how much to fix for how much error", and `KD 0.6` handles "ease off when the error is already shrinking". The last three are limits and safeguards, explained one by one below.
 
-**(2) 四个全局状态**
+**(2) Four global states**
 
 ```cpp
-int lastError = 0;            // 上次偏差，丢线时决定找线方向
-bool hasLast = false;         // 是否已有上次偏差
-unsigned long lostStart = 0;  // 丢线起始时刻，0 表示未丢线
-int curFace = -1;             // 当前表情，-1 未显示
+int lastError = 0;            // Last error, determines search direction when line is lost
+bool hasLast = false;         // Whether a previous error exists
+unsigned long lostStart = 0;  // Time when line was lost, 0 means not lost
+int curFace = -1;             // Current expression, -1 means not shown
 ```
 
-`lastError` 有两个用途：算微分要用它，丢线时也靠它判断该往哪边找。`hasLast` 是给它配的开关，下一节算微分时会用到。`lostStart = 0` 专门表示"现在没丢线"，所以判断用的是"是否等于 0"而不是时间差。
+`lastError` has two jobs: it feeds the derivative calculation and tells the car which way to search when the line is lost. `hasLast` is its companion switch, used in the next section when computing the derivative. `lostStart = 0` specifically means "the line is not lost right now", so the test uses "is it equal to 0" rather than a time difference.
 
-**(3) `loop()` 开头：取两个数**
+**(3) At the top of `loop()`: fetch two numbers**
 
 ```cpp
-  aiCam.readSerial();  // 每轮读取串口
+  aiCam.readSerial();  // Read the serial port each cycle
 
-  int offset = aiCam.getLineOffset();  // 偏差：负偏左，正偏右
-  int valid  = aiCam.getLineValid();   // 有效标志，5 为识别到线
+  int offset = aiCam.getLineOffset();  // Error: negative means left, positive means right
+  int valid  = aiCam.getLineValid();   // Valid flag, 5 means line detected
 ```
 
-`offset` 是线在画面里偏离中心多少，负偏左、正偏右，单位是像素。`valid` 是模块给的置信标志，`LINE_OK`（等于 5）表示这一帧确实看到了线。
+`offset` is how far the line sits from the center of the frame, negative for left and positive for right, in pixels. `valid` is the module's confidence flag; `LINE_OK` (equal to 5) means the line really was seen in this frame.
 
-两个数要分开取：`offset` 有值不代表可信，模块在没看到线时也会给一个数（通常是上一次的残留或 0），所以判断必须用 `valid`。
+The two must be fetched separately: having an `offset` value does not make it trustworthy — when the module sees no line it still returns a number (usually the previous residual or 0) — so the decision must use `valid`.
 
-**(4) 识别到线：先清丢线计时**
+**(4) Line recognized: clear the lost-line timer first**
 
 ```cpp
   if (valid == LINE_OK) {
-    // 识别到线：PD 换算差速
-    lostStart = 0;         // 清丢线计时
-    showFace(FACE_SMILE);  // 显示笑脸
+    // Line detected: PD calculation for differential speed
+    lostStart = 0;         // Clear line-lost timer
+    showFace(FACE_SMILE);  // Show smiling face
 
-    int error = offset;  // 当前偏差
+    int error = offset;  // Current error
 ```
 
-`lostStart = 0` 必须在这里清，不然上一轮丢线留下的时间戳会一直累加，车刚找回线又立刻被判成超时。
+`lostStart = 0` must be cleared here, or the timestamp left by a previous lost-line round keeps accumulating and the car is judged as timed out the moment it finds the line again.
 
-**(5) 微分项：`hasLast` 挡的是第一帧**
+**(5) The derivative term: `hasLast` guards the first frame**
 
 ```cpp
     int dError = 0;
     if (hasLast) {
       dError = error - lastError;
-      dError = constrain(dError, -D_MAX, D_MAX);  // 限幅
+      dError = constrain(dError, -D_MAX, D_MAX);  // Limit range
     }
 ```
 
-`lastError` 初值是 0。如果第一帧直接算 `error - lastError`，而车正好偏在 −37，就得到一个 −37 的微分——这不是"变化量"，是凭空造出来的冲击，车会猛地甩一下。`hasLast` 让第一帧跳过微分，从第二帧起才算。
+`lastError` starts at 0. If the first frame computed `error - lastError` directly and the car happened to be off by −37, you would get a derivative of −37 — not a "rate of change" but a manufactured jolt, and the car would snap sideways. `hasLast` makes the first frame skip the derivative and starts counting from the second.
 
-`constrain(dError, -D_MAX, D_MAX)` 是第一重限幅：摄像头偶尔会吐出一帧跳变的偏移（比如从 −10 跳到 +40），不限的话微分项会瞬间冲到几百，把修正量整个带飞。
+`constrain(dError, -D_MAX, D_MAX)` is the first limit: the camera occasionally spits out a frame with a jumping offset (say from −10 to +40), and without this clamp the derivative would spike into the hundreds and blow the whole correction out of the water.
 
-**(6) 算修正量，再做两重限幅**
+**(6) Compute the correction, then apply two limits**
 
 ```cpp
-    // 差速 = P×偏差 + D×偏差变化
+    // Differential = P x error + D x change in error
     int correction = (int)(error * KP + dError * KD);
 
-    // 修正量限幅
+    // Limit the correction
     correction = constrain(correction, -TURN_MAX, TURN_MAX);
 ```
 
-`error * KP` 是比例项，`dError * KD` 是微分项，两项相加才是这一次要给多少修正。`(int)` 是因为 `KP`、`KD` 是小数，乘出来是浮点数，写进 PWM 前要转回整数。
+`error * KP` is the proportional term and `dError * KD` the derivative term; only their sum is the correction for this round. The `(int)` cast is needed because `KP` and `KD` are decimals, so the product is a float that must be converted back to an integer before writing to PWM.
 
-`TURN_MAX 90` 是第二重限幅：`BASE_SPEED` 是 130，修正量超过 130 就会出现负速度——一侧轮子反转。调头时这是好事，但循迹时突然反转会把车拧停。限制在 ±90，单侧最高 130 + 90 = 220、最低 130 − 90 = 40，保证两侧始终同向转。
+`TURN_MAX 90` is the second limit: `BASE_SPEED` is 130, so a correction above 130 would produce a negative speed — one wheel reversing. That is fine for a spin-in-place but a sudden reversal while tracking twists the car to a stop. Limiting to ±90 keeps one side between 130 + 90 = 220 and 130 − 90 = 40, so both wheels always turn the same way.
 
-**(7) 修正的符号：左快右慢往右偏**
+**(7) Sign of the correction: left faster, right slower, curves right**
 
 ```cpp
     driveMotors(BASE_SPEED + correction, BASE_SPEED - correction);
 
-    lastError = error;  // 保存本次偏差
+    lastError = error;  // Save the current error
     hasLast = true;
 ```
 
-`driveMotors` 的第一个参数是左轮，第二个是右轮。`offset` 偏右为正，说明线在画面右边、车头偏左，要往右打——左轮加速、右轮减速，车头就向右摆回来了。修正量为正正好是这个方向。
+The first argument to `driveMotors` is the left wheel, the second the right. A positive `offset` means the line is on the right of the frame and the nose is pointing left, so you steer right — speed up the left wheel and slow the right, and the nose swings back to the right. A positive correction is exactly that direction.
 
-最后两行是给下一轮用的：`lastError` 存下本次偏差，`hasLast` 置真，下一轮就能算微分了。
+The last two lines are for the next round: `lastError` stores this error and `hasLast` is set true, so the derivative can be computed next time.
 
-**(8) 丢线：按最后一次偏差的方向找**
+**(8) Line lost: search in the direction of the last error**
 
 ```cpp
-    // 未识别到线：按上次偏差方向找线
-    if (lostStart == 0) {    // 刚丢线
-      lostStart = millis();  // 开始计时
+    // No line detected: search in the direction of the last error
+    if (lostStart == 0) {    // Line just lost
+      lostStart = millis();  // Start timing
     }
 
     if (millis() - lostStart < LOST_TIMEOUT) {
-      showFace(FACE_SURPRISE);  // 找线中
+      showFace(FACE_SURPRISE);  // Searching for line
 ```
 
-`lostStart == 0` 这个判断保证时间戳只记一次——第一次丢线时记下时刻，后面每轮都进来，但不会重新记。
+The `lostStart == 0` test makes sure the timestamp is recorded only once — the first time the line is lost; later rounds still enter but do not re-stamp it.
 
-用的是"最后一次看到线时偏哪边"，不是"现在偏哪边"——现在什么都没看到，没有偏差可言。刚才线在右边，就往右转着找。
+It uses "which side the line was on the last time it was seen", not "which side it is on now" — right now nothing is visible, so there is no error to speak of. If the line was on the right, turn right to look for it.
 
-**(9) 死区和超时**
+**(9) Dead zone and timeout**
 
 ```cpp
-      // 死区内方向不明，停车
+      // Direction unknown within dead zone, stop
       if (lastError > SEARCH_DEAD) {
-        driveMotors(SEARCH_SPEED, -SEARCH_SPEED);   // 线原在右：向右找
+        driveMotors(SEARCH_SPEED, -SEARCH_SPEED);   // Line was on the right: search right
       } else if (lastError < -SEARCH_DEAD) {
-        driveMotors(-SEARCH_SPEED, SEARCH_SPEED);   // 线原在左：向左找
+        driveMotors(-SEARCH_SPEED, SEARCH_SPEED);   // Line was on the left: search left
       } else {
-        stopCar();                                  // 方向不明，停车
+        stopCar();                                  // Direction unknown, stop
       }
     } else {
-      showFace(FACE_SAD);  // 找线超时
-      stopCar();           // 脱线停车
+      showFace(FACE_SAD);  // Line-search timeout
+      stopCar();           // Stop after losing the line
     }
 ```
 
-`SEARCH_DEAD = 15` 是死区：上次偏差在 ±15 以内说明车本来是直的，往哪边找都是瞎猜，干脆停下等人来摆。
+`SEARCH_DEAD = 15` is the dead zone: if the last error was within ±15 the car was already straight, and searching either way is only a guess, so it stops and waits for someone to reposition it.
 
-超过 `LOST_TIMEOUT 600` ms 还没找到就认输。这个数比第 7 课的 1500 ms 短得多，因为摄像头看得远：五路开关要等车头压到线上才知道，摄像头在 30 cm 外就能看见，真丢线时车已经在线头外面了，多转无益。
+If the line is still not found after `LOST_TIMEOUT 600` ms, give up. That is much shorter than the 1500 ms in Lesson 7 because the camera sees further: five ground sensors must wait until the nose is over the line to know, while the camera spots it from a distance, so by the time the line is truly lost the car is already beyond the end of it and more turning is useless.
 
-**(10) `delay(5)` 定的是控制周期**
+**(10) `delay(5)` sets the control period**
 
 ```cpp
-  delay(5);  // 5 ms 一轮
+  delay(5);  // 5 ms per cycle
 }
 ```
 
-一轮 5 ms，等于 200 Hz。`KP`、`KD` 都是按这个周期整定出来的——把 `delay(5)` 改成 `delay(20)`，同样的系数会显得"迟钝"，因为微分项的两次采样间隔变了四倍。改周期就得重调系数。
+One round is 5 ms, or 200 Hz. Both `KP` and `KD` are tuned around this period — change `delay(5)` to `delay(20)` and the same coefficients will feel "sluggish" because the sampling interval of the derivative has quadrupled. Change the period and you must retune the coefficients.
 
-调系数本身也有顺序：先只留 `KP`，从 0.2 往上加，加到车能跟上弯道但开始左右摆；这时再加 `KD`，从 0.1 往上加，摆幅明显减小就停。反过来先加 `KD`，车会变得又慢又钝，看不出问题出在哪个系数。
+Tuning the coefficients has an order too: start with `KP` alone, raising it from 0.2 until the car can follow bends but begins to weave; then add `KD` from 0.1 upward and stop when the oscillation visibly shrinks. Adding `KD` first makes the car slow and dull, hiding which coefficient is at fault.
 
-#### **8. 运行现象：**
+#### **8. What You Will See:**
 
-串口在 `setup()` 打印 `aiCam` 的启动信息，跑起来后不输出（`loop()` 里没有打印语句）。
+In `setup()` the Serial Monitor prints the `aiCam` startup message; once running nothing else is printed (there are no print statements in `loop()`).
 
-| 状态 | 点阵 | 行为 |
+| State | Dot matrix | Behavior |
 | --- | --- | --- |
-| 待机（刚上电） | 眼睛 | 等待线进入视野 |
-| 识别到线 | 笑脸 | PD 循线，速度 130 |
-| 丢线找线中 | 瞪眼 | 按记忆方向原地转 |
-| 找线超时 | 苦脸 | 停车 |
+| Standby (just powered on) | Eyes | Waiting for the line to enter view |
+| Line recognized | Smiley | PD line tracking at speed 130 |
+| Searching for a lost line | Wide eyes | Spinning in place in the remembered direction |
+| Search timed out | Frown | Stopped |
 
-> 【图片待补】小车用摄像头循迹跑完整圈的实拍图（直道 + 弯道各一张）。
+> [Image to be added] Photos of the car following a full lap with the camera (one on a straight, one on a bend).
 
-调参按这个顺序：
+Tune in this order:
 
-1. **先调 KP**。把 KD 设为 0，从 0.2 开始往上加，直到车能跟线但过弯画龙。
-2. **再加 KD**。从 0.3 起加，观察画龙是否收敛。KD 太大车会抖——每轮修正过猛，像抽筋。
-3. **最后调速度**。`BASE_SPEED` 从 130 提到 150，如果弯道冲出去，说明速度超过了视野能覆盖的范围，退回来。
+1. **Tune KP first.** Set KD to 0 and raise KP from 0.2 until the car follows the line but weaves through bends.
+2. **Then add KD.** Raise it from 0.3 and watch whether the weaving settles. Too much KD makes the car shake — each correction is too violent, like a twitch.
+3. **Tune speed last.** Raise `BASE_SPEED` from 130 to 150; if the car runs off at bends, the speed has exceeded what the field of view can cover — back it off.
 
-摄像头循迹对光线比红外敏感得多。地面反光、阴影边缘都可能被认成线。测试时用均匀的白炽灯或自然光，别在窗边有强反光的地方跑。
+Camera line tracking is far more sensitive to light than infrared. Floor reflections and shadow edges can both be mistaken for a line. Test under even incandescent light or natural daylight, not beside a window with strong glare.
 
-#### **9. 常见问题解决：**
+#### **9. Troubleshooting:**
 
-(1) 串口一行数据都没有：先查接线。视觉模块的 TX 接主控 IO18、RX 接 IO17，两根要交叉；波特率 9600，对不上就是一堆乱码或者什么都收不到。
+(1) Not a single line on the Serial Monitor: check the wiring first. The vision module's TX goes to controller IO18 and RX to IO17 — the two must cross; the baud rate is 9600, and a mismatch gives either garbage or nothing at all.
 
-(2) 车过弯画龙、左右摆：调 `KP` 和 `KD`。现在 `KP = 0.4`、`KD = 0.6`，先把 KD 固定、把 KP 往下压到车能跟住线，再加 KD 收敛摆动；KD 给太大车会发抖。
+(2) The car weaves through bends: tune `KP` and `KD`. Currently `KP = 0.4` and `KD = 0.6`; hold KD fixed and lower KP until the car can follow the line, then add KD to settle the oscillation. Too much KD makes the car shudder.
 
-(3) 老丢线、转半天找不回来：看 `SEARCH_DEAD = 15`、`SEARCH_SPEED = 90` 和 `LOST_TIMEOUT = 600`。死区太小会来回找，超时太短就直接停车。地面反光或阴影边缘也常被认成线，换均匀白光再测。
+(3) Losing the line constantly and searching forever: check `SEARCH_DEAD = 15`, `SEARCH_SPEED = 90`, and `LOST_TIMEOUT = 600`. Too small a dead zone makes it search back and forth; too short a timeout stops it outright. Floor reflections or shadow edges are also often read as a line — switch to even white light and test again.
 
-(4) 车一直朝一侧偏、怎么调都不正：摄像头装歪了，或者模块给的中心值和实际画面中心不一致。把车摆正、对着直线看一眼 `offset` 是不是接近 0，差得多就微调模块的安装角度。
+(4) The car always drifts to one side and nothing fixes it: the camera is mounted crooked, or the center value from the module does not match the actual frame center. Straighten the car, look at a straight line and check whether `offset` is close to 0; if it is far off, adjust the module's mounting angle slightly.
