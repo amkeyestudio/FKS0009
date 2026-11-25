@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'keyestudio WiKi'
+project = 'FKS0009 Keyestudio Mini Tracked Tank Robot V4.0'
 copyright = 'Shenzhen keyestudio Technology Co., Ltd'
 author = 'keyestudio WiKi'
 
