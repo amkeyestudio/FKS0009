@@ -2,6 +2,16 @@
 4. Arduino Tutorial
 =============================
 
+Download code file
+--------------------
+.. raw:: html
+
+   <span style="color:red;font-size:24px;">
+   Note: All course code is available for download here. To avoid forgetting, we recommend downloading the code now for future tutorial learning.
+   </span>
+   
+:download:`Click to download <./Arduino_Resource.zip>`
+
 
 .. toctree::
     :maxdepth: 2

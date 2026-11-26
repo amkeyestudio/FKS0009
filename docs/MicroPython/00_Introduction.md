@@ -8,6 +8,8 @@ After extraction there are two folders:
 
 - `micropython_code/`: the sample programs for the 20 lessons, such as `01_LED_Dot_Matrix.py` and `02_Motor_Driving.py`.
 - `micropython_libraries/`: the board-level libraries; see Section 5.5 for the list and usage.
+![](media/P1.png)
+
 
 ## 5.2 Installing Thonny
 

@@ -131,9 +131,9 @@ That's why the comment at the top of the file warns that "codes may differ by ba
 
 ```cpp
   Serial.begin(115200);
-  delay(1000);  // Wait for the serial port to stabilize
+  delay(1000);  // Wait for serial to stabilize
 
-  Serial.println("IR reception experiment started; point the remote control at the front of the car");
+  Serial.println("IR receiver experiment started, point the remote at the car");
   IrReceiver.begin(IR_RECEIVE_PIN, DISABLE_LED_FEEDBACK);
 ```
 

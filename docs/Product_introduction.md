@@ -10,10 +10,6 @@ The robot uses an Espressif ESP32-S3 as its main controller and a chassis with t
 
 Assembly is simple: most parts are fixed with screws and standoffs, and the expansion board plugs directly onto the main controller's header pins, so no soldering is needed. Following a few steps, you also walk through the basic concepts of line tracking, obstacle avoidance, ultrasonic ranging, motor driving, and wireless remote control. The first 16 lessons build up the robot's functions one by one, and the last 4 connect the AI vision module.
 
-The figure below shows how each module connects to the main controller:
-
-![](media/system_block.png)
-
 ## 1.2 Features
 
 1. **Wireless main controller**: The ESP32-S3 runs the control logic and has built-in Wi-Fi and BLE. Programs are uploaded and debugged over serial with a single USB cable, so no separate programmer is needed.

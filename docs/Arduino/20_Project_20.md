@@ -482,16 +482,16 @@ The card content must also be English. The vision module outputs ASCII strings; 
 **(9) Four cards, two kinds of turn**
 
 ```cpp
-  bool known = true;  // Whether this is a known card
+  bool known = true;  // Whether it is a known card
 
   if (key == "FORWARD") {
     goForward(SPEED_MOVE);                        // Both wheels forward at the same speed
   } else if (key == "BACKWARD") {
     goBackward(SPEED_MOVE);                       // Both wheels reverse at the same speed
   } else if (key == "LEFT") {
-    driveMotors(SPEED_TURN_IN, SPEED_TURN_OUT);   // Left slow, right fast, arcs left
+    driveMotors(SPEED_TURN_IN, SPEED_TURN_OUT);   // Left slow, right fast, arc to the left
   } else if (key == "RIGHT") {
-    driveMotors(SPEED_TURN_OUT, SPEED_TURN_IN);   // Left fast, right slow, arcs right
+    driveMotors(SPEED_TURN_OUT, SPEED_TURN_IN);   // Left fast, right slow, arc to the right
   } else {
     known = false;  // Not one of the four cards, no action
   }

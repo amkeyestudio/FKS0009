@@ -319,7 +319,7 @@ One frame is 18 bytes in all (1 + 1 + 16), or 18 × 8 = 144 clock ticks. Each bi
 
 Change `0x8A` to `0x8F` and the panel gets noticeably brighter, though the current draw rises as well; `0x88` is the dimmest setting, comfortable to look at at night.
 
-##### Drawing your own pattern: an online font bitmap tool
+#### 8.Drawing your own pattern: an online font bitmap tool
 
 The 16 bytes in `heart[]` and `smile[]` were not calculated — they were clicked together in an online tool at [dotmatrixtool.com](http://dotmatrixtool.com/).
 
@@ -348,7 +348,7 @@ Two spots that commonly trip people up:
 
 > The output generated in the third figure is exactly where `smile[]` in the code came from — use it to check your answer.
 
-#### **8. Expected Behavior:**
+#### **9. Expected Behavior:**
 
 After power-on the panel clears first, then loops through the following rhythm:
 
@@ -360,7 +360,7 @@ If the heart and smiley light up clearly and the scrolling is continuous with no
 
 > [Image to be added] Photos of the running display: one of the heart, one of the smiley and one of the scrolling effect, with the lit dots clearly visible.
 
-#### **9. Troubleshooting:**
+#### **10. Troubleshooting:**
 
 (1) The whole panel stays dark: first check whether CLK and DIN are reversed. In the code `CLK_Pin` is IO9 and `DIN_Pin` is IO8; swap the two and the panel will not light up.
 

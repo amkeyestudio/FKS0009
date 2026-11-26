@@ -2,6 +2,15 @@
 5. MicroPython Tutorial
 =============================
 
+Download code file
+--------------------
+.. raw:: html
+
+   <span style="color:red;font-size:24px;">
+   Note: All course code is available for download here. Download links will not be provided later. To avoid forgetting, we recommend downloading the code now for future tutorial learning.
+   </span>
+   
+:download:`Click to download <./MicroPython_Resource.zip>`
 
 .. toctree::
     :maxdepth: 2

@@ -205,7 +205,7 @@ smile = bytes([
 
 Same format as Lesson 1: 16 bytes for 16 columns, the 8 bits of each byte covering the 8 rows of one column, with `bit0` at the top. `eyes` is the standby face when nobody is in view, `smile` is the smiley once a face is locked.
 
-**(3) Initializing the pan-tilt and the vision module**
+**(3) Initialization and the five global states**
 
 ```python
 car = MiniTrackedTankRobot()
@@ -227,7 +227,7 @@ cali_count = 0
 last_seen = 0
 ```
 
-The pan-tilt is fixed at 90° straight ahead and does not turn with the person — following is done by steering the body with a speed difference. The initial `-1` of `center_x` doubles as the "not calibrated yet" flag, which is why the test below is `center_x < 0` rather than a comparison against some concrete coordinate. `sum_x` and `cali_count` are only used while calibrating and nobody looks at them once it is done. `last_seen` is the starting point of the loss grace timer and `cur_face` deduplicates the expressions, `-1` meaning nothing has been shown yet.
+The initial `-1` of `center_x` doubles as the "not calibrated yet" flag, which is why the test below is `center_x < 0` rather than a comparison against some concrete coordinate. `sum_x` and `cali_count` are only used while calibrating and nobody looks at them once it is done. `last_seen` is the starting point of the loss grace timer and `cur_face` deduplicates the expressions, `-1` meaning nothing has been shown yet.
 
 After the pan-tilt is set to 90° the program waits `time.sleep_ms(500)` before entering the main loop (that line is in the next snippet): the servo takes a while to swing over from wherever it was, and without waiting the first few frames would be of the lens still moving.
 

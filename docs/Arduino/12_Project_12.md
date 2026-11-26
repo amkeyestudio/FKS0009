@@ -386,16 +386,16 @@ Once connected, `WiFi.localIP()` is the address the phone needs to visit.
   server.on("/msg", []() {
     String t = server.arg("t");
     t.trim();
-    t.toUpperCase();                       // The font only contains uppercase letters
+    t.toUpperCase();                       // Font contains uppercase only
     if (t.length() > MAX_CHARS) {
       t = t.substring(0, MAX_CHARS);       // Truncate if too long
     }
     if (t.length() > 0) {
       msg = t;
-      scrollPos = 0;            // Start scrolling in from the far right column
-      needRedraw = true;        // Mark as needing a redraw
+      scrollPos = 0;            // Start scrolling in from the rightmost column
+      needRedraw = true;        // Mark as needing redraw
     }
-    server.sendHeader("Location", "/");     // Return to the home page
+    server.sendHeader("Location", "/");     // Back to home page
     server.send(302, "text/plain", "");
   });
 
@@ -504,10 +504,10 @@ Both functions end with `matrix_display(cols)` — send 16 bytes and that frame 
 uint8_t getColumn(int idx) {
   if (idx < 0) return 0;                    // Not yet on screen
 
-  int charIdx = idx / 6;                    // Character index (6 columns per character: 5 font columns + 1 spacing column)
+  int charIdx = idx / 6;                    // Character index (6 columns per character: 5 font bitmap columns + 1 spacing column)
   int colIdx  = idx % 6;                    // Column index within the character
 
-  if (charIdx >= (int)msg.length()) return 0;  // Past the end of the text
+  if (charIdx >= (int)msg.length()) return 0;  // Beyond the end of the text
   if (colIdx >= 5) return 0;                   // Spacing column
 
   int fi = charToIndex(msg[charIdx]);
@@ -525,7 +525,7 @@ Each scrolling frame needs only 16 columns, so there's no reason to assemble the
 
 ```cpp
 int charToIndex(char c) {
-  if (c >= 'A' && c <= 'Z') return c - 'A';        // A~Z → 0~25
+  if (c >= 'A' && c <= 'Z') return c - 'A';       // A~Z → 0~25
   if (c >= '0' && c <= '9') return 26 + (c - '0'); // 0~9 → 26~35
   return 36;                                       // Treat other characters as space
 }

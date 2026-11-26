@@ -310,21 +310,21 @@ This line sits at the top of `loop()` and runs once per cycle. Inside, `getDista
 
 ```cpp
   if (distance > safeDistance && distance <= maxDistance) {
-    // 30~50 cm: follow forward
+    // 30-50 cm: follow forward
     forward(150, 150);
 
   } else if (distance >= closeDistance && distance <= safeDistance) {
-    // 10~30 cm: stop
+    // 10-30 cm: stop
     stopMotor();
     matrix_display(smile);
 
   } else if (distance < closeDistance && distance > 0) {
-    // Less than 10 cm: back away
-    // Different left/right speeds make the car drift slightly when backing
+    // Less than 10 cm: back up
+    // Differential left/right speed; the car drifts slightly when backing up
     back(105, 150);
 
   } else {
-    // Greater than 50 cm or invalid reading: stop and show question mark
+    // Greater than 50 cm or invalid reading: stop and show a question mark
     stopMotor();
     matrix_display(question_mark);
   }

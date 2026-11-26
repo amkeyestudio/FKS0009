@@ -415,10 +415,10 @@ void stopCar()             { driveMotors(0, 0); }            // Stop: duty cycle
 #define CLAW_SERVO_PIN 11  // Gripper servo, Lesson 9
 #define PAN_SERVO_PIN  42  // Pan-tilt servo, Lesson 8
 
-// ===== Vision module serial =====
+// ===== Vision module serial port =====
 // Controller RX <- module TX, controller TX -> module RX, common ground required
-#define CAM_RX 18  // Controller receive pin
-#define CAM_TX 17  // Controller transmit pin
+#define CAM_RX 18  // Controller RX pin
+#define CAM_TX 17  // Controller TX pin
 ```
 
 Pins 18 and 17 are the controller side of the link: the controller receives on 18 (from the module's TX) and sends on 17 (to the module's RX).
@@ -435,12 +435,12 @@ This module runs at 9600 baud and **cannot transmit images** — it processes th
 
 // ===== Angles =====
 #define CLAW_OPEN   140  // Open
-#define CLAW_CLOSE   90  // Close
+#define CLAW_CLOSE   90  // Closed
 #define PAN_CENTER   90  // Pan-tilt centered
 
 // ===== Action durations (ms, fine-tune for field and voltage) =====
 #define T_APPROACH 350  // Approach duration
-#define T_TURN     600  // Duration of a 90-degree spot turn
+#define T_TURN     600  // Duration for a 90-degree spot turn
 #define T_DELIVER  800  // Delivery duration
 ```
 

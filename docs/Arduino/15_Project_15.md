@@ -737,7 +737,7 @@ void showModeIcon() {
 
 Blanking the display itself needs the dot matrix's software timing, so I2C is stopped first; the moment that is done, `Wire.begin()` hands the pins back to line tracking, the bus is reset to 400 kHz and the PCF8574 re-initialized, and then the function `return`s — line-tracking mode shows no pattern at all.
 
-`0x88` is the "display off" command (in `matrix_off()`): the content stays in the display buffer, it is simply not lit. Switch back to another mode and `0x8A` turns it on again immediately.
+`0x88` is the "display off" command (in `matrix_off()`): the content stays in the display buffer, it is simply not lit. Switch back to another mode and `0x8F` turns it on again immediately.
 
 **(4) `setMode()`: clear leftovers before changing mode**
 

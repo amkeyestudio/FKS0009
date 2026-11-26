@@ -3,8 +3,8 @@ import time
 from mini_tracked_tank_robot import MiniTrackedTankRobot
 from mini_tracked_tank_robot_web import WebServer
 
-WIFI_SSID = 'your_wifi_ssid'
-WIFI_PASS = 'your_wifi_password'
+WIFI_SSID = 'Lance'
+WIFI_PASS = 'MZW123456'
 
 SPEED_RUN = 180
 SPEED_TURN = 180

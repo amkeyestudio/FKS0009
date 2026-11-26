@@ -368,20 +368,20 @@ void stopCar()             { driveMotors(0, 0); }            // Stop: duty cycle
 ```cpp
 // ===== Motor pins =====
 #define MOTOR_AIN 38  // Channel A direction: left wheel
-#define MOTOR_AEN 21  // Channel A speed control: left wheel
+#define MOTOR_AEN 21  // Channel A speed: left wheel
 #define MOTOR_BIN 40  // Channel B direction: right wheel
-#define MOTOR_BEN 41  // Channel B speed control: right wheel
+#define MOTOR_BEN 41  // Channel B speed: right wheel
 
 // ===== Gripper servo =====
 #define CLAW_SERVO_PIN 11  // Gripper servo, same as Lesson 9
 
 // ===== Dot matrix pins =====
-#define CLK_Pin 9  // Clock, connected to the module's CLK
-#define DIN_Pin 8  // Data, connected to the module's DIN
+#define CLK_Pin 9  // Clock, connect to module CLK
+#define DIN_Pin 8  // Data, connect to module DIN
 
 // ===== Speed =====
 #define SPEED_RUN   180  // Driving speed
-#define SPEED_TURN  180  // Spin-in-place speed
+#define SPEED_TURN  180  // Spot-turn speed
 
 // ===== Gripper angles =====
 #define CLAW_OPEN   140  // Open

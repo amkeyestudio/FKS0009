@@ -419,7 +419,7 @@ Why can't this step be skipped? The camera sits on the pan-tilt, and 90° is not
 **(7) Dead zone: once aligned, stop correcting**
 
 ```cpp
-  // Following
+  // Follow
   int err = x - centerX;  // Error: positive means right, negative means left
 
   if (abs(err) <= DEAD_ZONE) {
@@ -466,6 +466,10 @@ The skeleton of this lesson is almost the same as Lesson 18's line tracking: `re
 Lesson 18 has to "search" when the line is lost because the line does not move; Lesson 19 has to "stop" when the person is lost because you cannot catch someone who has walked away — chasing them would be dangerous.
 
 #### **8. Expected Behavior:**
+
+> The tests for this project used an AI face image
+
+![](media/face.jpg)
 
 With `DEBUG_OUT` enabled, the Serial Monitor prints:
 
