@@ -12,16 +12,14 @@ Once it reaches the target it locks there; try to turn the horn by hand and you 
 
 At power-on the servo gives a click and turns to 0° (facing right), then sweeps steadily to the other end, pauses half a second at the top and sweeps back, over and over; the serial port prints one startup line.
 
-#### **2. Required Parts:**
-
+#### **2. Parts List:**
 Parts used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
 | ![](../media/kit_13.png){width=170px}<br><span style="font-size:0.85em">9G servo (180°, with cross horn) ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
-> ⚠️ **The servo was already centred at 90° and installed in Chapter 2. This table is for reference only — do not remove it. The wiring notes below only show how the connections are made, for reference; no disassembly is needed. For the full parts list, see 1.4 Kit List.**
+> ⚠️ **The servo was already centered at 90° and installed in Chapter 2. This table is for reference only — do not remove it. The wiring notes below only show how the connections are made, for reference; no disassembly is needed. For the full parts list, see 1.4 Kit List.**
 #### **3. Parameters:**
-
 | Item | Parameter |
 | --- | --- |
 | Model | 9G micro servo, 180° travel |
@@ -34,7 +32,7 @@ Parts used in this lesson:
 
 #### **4. Wiring:**
 
-| Servo wire | Colour (typical) | Connected to |
+| Servo wire | Color (typical) | Connected to |
 | --- | --- | --- |
 | Signal | Orange / yellow | IO42 |
 | Power | Red | 5V |
@@ -44,7 +42,6 @@ Parts used in this lesson:
 
 ![](media/PRO8.png)
 
-
 #### **5. Flowchart:**
 
 A servo's **angle** isn't a number sent over the wire — it's the width of a HIGH pulse. One pulse arrives every 20 ms, staying HIGH for 0.5–2.5 ms, and the servo reads that duration as the target angle:
@@ -52,7 +49,6 @@ A servo's **angle** isn't a number sent over the wire — it's the width of a HI
 ![](media/servo_pwm.png)
 
 #### **6. Test Code:**
-
 ```cpp
 #include <ESP32Servo.h>
 
@@ -98,7 +94,6 @@ void loop() {
 ```
 
 #### **7. Code Explanation:**
-
 **(1) Two constants and a servo object**
 
 ```cpp
@@ -144,7 +139,7 @@ Those two numbers depend on the servo model. With a 9G servo, 500/2500 sometimes
 
 Note that `write()` gives a target, it doesn't wait for arrival — it returns immediately while the servo moves there on its own. So after every large jump you have to add a `delay()`, or the next command will overwrite a move that hasn't finished.
 
-One more thing: `write(90)` only moves the servo to the pulse-width midpoint. Whether that is "straight ahead" on the robot depends on how the horn was fitted. If the assembly is off, re-centre it as described in Chapter 2 instead of fudging the angle in code — otherwise the left and right distances measured in Lesson 4 will stay biased.
+One more thing: `write(90)` only moves the servo to the pulse-width midpoint. Whether that is "straight ahead" on the car depends on how the horn was fitted. If the assembly is off, re-center it as described in Chapter 2 instead of fudging the angle in code — otherwise the left and right distances measured in Lesson 4 will stay biased.
 
 **(5) 0° → 180°: sweeping one degree at a time**
 
@@ -178,7 +173,7 @@ The return is exactly symmetrical with the outbound sweep, only reversed. Togeth
 
 Half a second at each end lets the servo finish its last step and lets the ultrasonic module stop swinging. One cycle = 2.7 + 0.5 + 2.7 + 0.5 ≈ 6.4 seconds.
 
-#### **8. What You'll See:**
+#### **8. Expected Behavior:**
 
 At power-on the servo gives a **click** as it snaps to 0°, then begins its steady sweep toward 180°, and the Serial Monitor prints:
 
@@ -186,7 +181,7 @@ At power-on the servo gives a **click** as it snaps to 0°, then begins its stea
 Pan-tilt servo started, sweeping back and forth between 0 and 180 degrees...
 ```
 
-| Stage | What happens |
+| Stage | Behavior |
 | --- | --- |
 | At power-on | Snaps to 0° (facing right), settles after a slight jitter |
 | 0° → 180° | Sweeps in about 2.7 s, the ultrasonic sensor moving from right to left |
@@ -196,9 +191,9 @@ Pan-tilt servo started, sweeping back and forth between 0 and 180 degrees...
 
 > [Image to be added] One photo of the servo at each end of its travel.
 
-**Note**: If the servo keeps buzzing at either end, cut the power immediately. Stall current can exceed 700 mA, dragging down the whole robot's 5V rail and resetting the controller. Change the 500/2500 in `attach()` to 600/2400 and try again.
+**Note**: If the servo keeps buzzing at either end, cut the power immediately. Stall current can exceed 700 mA, dragging down the whole car's 5V rail and resetting the controller. Change the 500/2500 in `attach()` to 600/2400 and try again.
 
-See section 2.1 for how to re-centre it (needed before mounting or after replacing the servo); you can use `Servo_return_to_center_90.ino` or the corresponding `.py` to hold it at 90°.
+See section 2.1 for how to re-center it (needed before mounting or after replacing the servo); you can use `Servo_return_to_center_90.ino` or the corresponding `.py` to hold it at 90°.
 
 #### **9. Troubleshooting:**
 
@@ -208,4 +203,4 @@ See section 2.1 for how to re-centre it (needed before mounting or after replaci
 
 (3) It turns back after only half the sweep: a loop condition is wrong. If the 180 in `for (int pos = 0; pos <= 180; pos += 1)` was changed to 90, you only get half a sweep.
 
-(4) It buzzes continuously at either end: it's stalled against a mechanical stop. Current can exceed 700 mA and drag down the whole robot's 5V. Change the 500/2500 in `attach()` to 600/2400 and try again.
+(4) It buzzes continuously at either end: it's stalled against a mechanical stop. Current can exceed 700 mA and drag down the whole car's 5V. Change the 500/2500 in `attach()` to 600/2400 and try again.

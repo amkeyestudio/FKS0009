@@ -2,7 +2,7 @@
 
 #### **1. Introduction:**
 
-![Controlling a robot with a phone](media/intro_14.jpg){width=520px}
+![Controlling a car with a phone](media/intro_14.jpg){width=520px}
 
 Use the phone as a remote — this time to drive the car. A direction pad on the page: hold a key and the car goes, release and it stops. Unlike an IR remote, Wi-Fi has no directionality — it works through a wall or from behind the car, as long as everything is on the same LAN.
 
@@ -12,8 +12,7 @@ The buttons behave differently too. An IR remote sends one frame per press; a we
 
 Hold up and both tracks run at the same speed forward; press left and the two sides run in opposite directions to spin left in place; release and the car stops at once. Turn off the phone's Wi-Fi and the car will stop by itself 1.5 s later.
 
-#### **2. Parts Needed:**
-
+#### **2. Parts List:**
 Parts used in this lesson:
 
 |     |     |
@@ -22,11 +21,11 @@ Parts used in this lesson:
 | ![](../media/kit_03.png){width=200px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | <span style="font-size:0.85em">2.4 GHz wireless router or phone hotspot ×1</span> |
 > ⚠️ **All parts were installed back in Chapter 2; this table is for reference only — there is nothing to take apart. The wiring notes below only show how the connections are made, for reference; no assembly or disassembly is required. For the complete parts list, see 1.4 Kit Parts List.**
 #### **3. Parameters:**
-
-| Item | Value |
+| Item | Parameter |
 | --- | --- |
 | Web page port | 80 |
 | Straight travel speed | 180 |
+| Spot turn speed | 180 |
 | Left wheel AIN / AEN | IO38 / IO21 |
 | Right wheel BIN / BEN | IO40 / IO41 |
 
@@ -50,10 +49,9 @@ Between a finger touching the screen and the wheels turning, the signal passes t
 ![](media/wifi_car_flow.png)
 
 #### **6. Test Code:**
-
 > **Before uploading, change one thing**: replace `WIFI_SSID` and `WIFI_PASS` below with your own Wi-Fi name and password — otherwise it won't connect.
 >
-> Two more conditions must hold at the same time: the Wi-Fi must be **2.4 GHz** (the board doesn't support 5 GHz), and the phone and the robot must be on the **same LAN** — otherwise the browser can't open the board's IP.
+> Two more conditions must hold at the same time: the Wi-Fi must be **2.4 GHz** (the board doesn't support 5 GHz), and the phone and the car must be on the **same LAN** — otherwise the browser can't open the board's IP.
 
 > **This project has two files**: `14_WiFi_Car_Control.ino` and `webpage.h`. All the page HTML lives in `webpage.h`; the `.ino` keeps only the Arduino logic. Put both files in the same folder — if one is missing, compilation fails.
 
@@ -66,7 +64,6 @@ Between a finger touching the screen and the wheels turning, the signal passes t
 // Only supports 2.4 GHz
 const char* WIFI_SSID = "Your WiFi name";
 const char* WIFI_PASS = "Your WiFi password";
-
 
 // ===== Pins =====
 #define MOTOR_AIN 38  // Channel A direction
@@ -188,7 +185,6 @@ void stopCar()             { driveMotors(0, 0); }
 ```
 
 #### **7. Code Explanation:**
-
 **(1) One endpoint for five actions**
 
 ```cpp
@@ -211,7 +207,7 @@ function go(d){
 }
 ```
 
-`fetch` sends a GET request with the parameters appended directly to the URL. `.catch(e=>{})` swallows all errors — if the phone loses its connection or the board reboots the request fails; without the catch the console turns red, but the robot keeps doing whatever it was doing.
+`fetch` sends a GET request with the parameters appended directly to the URL. `.catch(e=>{})` swallows all errors — if the phone loses its connection or the board reboots the request fails; without the catch the console turns red, but the car keeps doing whatever it was doing.
 
 The request is asynchronous (`fetch` doesn't wait for the response), so holding a button doesn't stutter while waiting for the previous one to come back.
 
@@ -226,7 +222,7 @@ void runCmd(String d) {
   if (d == "f") {
 ```
 
-Notice this line sits before the first `if`, not inside each branch. Putting it up front means **any** `d` counts as "the robot is still reachable", including stop and those undefined letters.
+Notice this line sits before the first `if`, not inside each branch. Putting it up front means **any** `d` counts as "the car is still reachable", including stop and those undefined letters.
 
 Put it inside a branch and you get a problem: sending `s` to stop wouldn't refresh the timer, so 1.5 seconds later the timeout would call `stopCar()` again — the result is the same, but the meaning gets muddled.
 
@@ -279,15 +275,15 @@ void loop() {
 
 The first handles network requests, the second checks the timeout; the two `if`s are siblings. `STOP_AFTER` is also 1500 ms, just like in the IR lesson.
 
-The timeout matters more here than with IR: when the phone walks out of Wi-Fi coverage, locks its screen or switches the browser to the background, `fetch` stops being sent — but the robot has no idea. All it sees is "no more `/cmd` requests coming in". When 1.5 seconds are up it stops, so it doesn't keep driving into a wall.
+The timeout matters more here than with IR: when the phone walks out of Wi-Fi coverage, locks its screen or switches the browser to the background, `fetch` stops being sent — but the car has no idea. All it sees is "no more `/cmd` requests coming in". When 1.5 seconds are up it stops, so it doesn't keep driving into a wall.
 
-At most 1.5 seconds pass between releasing the button and actually stopping; during that window the robot is still moving, a prime moment for a rear-end collision, so keep a hand near the power while testing.
+At most 1.5 seconds pass between releasing the button and actually stopping; during that window the car is still moving, a prime moment for a rear-end collision, so keep a hand near the power while testing.
 
 On a phone, long-pressing a button brings up the browser's default "select text / copy" menu and is also treated as a page-scroll gesture. `touch-action:none` disables those defaults so `onpointerdown` can reliably keep the command active.
 
 The two `user-select:none` rules serve the same purpose: prevent text selection, otherwise a long press would select the label on the button.
 
-#### **8. What You'll See:**
+#### **8. Expected Behavior:**
 
 The serial port prints:
 
@@ -299,9 +295,9 @@ Board IP: 192.168.1.23
 Remote control car ready
 ```
 
-The phone page shows a direction pad; hold a button and the robot keeps moving, release and it stops immediately.
+The phone page shows a direction pad; hold a button and the car keeps moving, release and it stops immediately.
 
-| Action | Serial | Robot |
+| Action | Serial | Car |
 | --- | --- | --- |
 | Press ↑ | Forward | Both wheels rotate forward |
 | Press ↓ | Backward | Both wheels rotate in reverse |
@@ -310,7 +306,7 @@ The phone page shows a direction pad; hold a button and the robot keeps moving, 
 | Release / press stop | Stop | Stops immediately |
 | Force the phone's Wi-Fi off | No output | Stops by itself after 1.5 s |
 
-> [Image to be added] A photo of the direction-pad page on the phone alongside the robot actually driving.
+> [Image to be added] A photo of the direction-pad page on the phone alongside the car actually driving.
 
 #### **9. Troubleshooting:**
 
@@ -328,4 +324,4 @@ The phone page shows a direction pad; hold a button and the robot keeps moving, 
 
 (5) **Same subnet but still won't open?** Log in to the router settings and turn off **AP isolation**; when it's enabled, devices on the same Wi-Fi can't reach one another.
 
-(6) The robot moves in jerks, usually because the router signal is weak or the 2.4 G channel is crowded. Move the phone and robot closer together, or log in to the router and switch channels (1, 6 and 11 don't overlap). If one wheel is noticeably slower when turning, check the battery voltage first — the Wi-Fi transmitter can draw 300 mA in bursts, and a low battery sags under that load, dragging the PWM output down with it.
+(6) The car moves in jerks, usually because the router signal is weak or the 2.4 G channel is crowded. Move the phone and car closer together, or log in to the router and switch channels (1, 6 and 11 don't overlap). If one wheel is noticeably slower when turning, check the battery voltage first — the Wi-Fi transmitter can draw 300 mA in bursts, and a low battery sags under that load, dragging the PWM output down with it.

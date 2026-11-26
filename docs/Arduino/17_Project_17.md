@@ -13,7 +13,6 @@ The sequence is therefore eight fixed-length steps: approach at low speed for 35
 Put a red block 20 cm in front of the car and it walks through all eight steps on its own; swap in a yellow one and the third step becomes a right turn, with everything else the same. When it is done, the dot matrix returns to a smiley and waits for the next block.
 
 #### **2. Parts List:**
-
 Parts used in this lesson:
 
 |     |     |     |
@@ -22,7 +21,6 @@ Parts used in this lesson:
 | ![](../media/kit_05.png){width=170px}<br><span style="font-size:0.85em">Ultrasonic module ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> |
 | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |  |  |
 #### **3. Parameters:**
-
 | Item | Parameter |
 | --- | --- |
 | Module | TinyVision AI camera |
@@ -30,7 +28,6 @@ Parts used in this lesson:
 | Controller RX / TX | IO18 / IO17 |
 | Recognition mode | `color` |
 | Report format | `COLOR:RED` / `COLOR:YELLOW` / `COLOR:NONE` |
-| Supported colors | Red, yellow (built into the module) |
 | Approach speed | 150 |
 | Turning / transport speed | 180 |
 | Approach duration | 350 ms |
@@ -43,13 +40,20 @@ For the last four lessons the modules all sit on the pan-tilt and turn with the 
 
 > **Note**: The components in the wiring diagram are only there to show the connections; you do not need to take the cased parts from the parts list apart when wiring.
 
-
 | Vision module | Controller | Description |
 | --- | :---: | --- |
 | TX | IO18 | Module sends, controller receives |
 | RX | IO17 | Controller sends, module receives |
 | VCC | 5V | Module power |
 | GND | GND | Must share a common ground |
+
+| Signal | Controller GPIO |
+| --- | :---: |
+| Left wheel AIN / AEN | IO38 / IO21 |
+| Right wheel BIN / BEN | IO40 / IO41 |
+| Matrix CLK / DIN | IO9 / IO8 |
+| Pan servo | IO42 |
+| Claw servo | IO11 |
 
 **Mounting A:**
 
@@ -74,7 +78,6 @@ The eight actions after a color is recognized run in order, five on the outbound
 ![](media/color_pick_flow.png)
 
 #### **6. Test Code:**
-
 > **This lesson's project has three files**: `17_Color_Tracking.ino`, `AiCam.h`, and `AiCam.cpp`. All serial traffic and string parsing for the vision module live in `AiCam.cpp`; put all three files in the same folder — compilation fails if any is missing.
 
 ```cpp
@@ -117,7 +120,7 @@ The eight actions after a color is recognized run in order, five on the outbound
 
 // ===== Expression numbers =====
 #define FACE_EYES   0  // Eyes: standby
-#define FACE_SMILE  1  // Smiling face: target recognized or delivery complete
+#define FACE_SMILE  1  // Smiley: target recognized or delivery complete
 #define FACE_HEART  2  // Heart: gripped
 
 // Standby: two square eyes, columns 4/5 and 10/11 lit on rows 2-4
@@ -126,13 +129,13 @@ unsigned char eyes[] = {
   0x00, 0x00, 0x1C, 0x1C, 0x00, 0x00, 0x00, 0x00
 };
 
-// Smiling face: 16 bytes correspond to 16 columns, each byte's 8 bits to 8 rows per column
+// Smiley: 16 bytes correspond to 16 columns, each byte's 8 bits to 8 rows per column
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
 };
 
-// Heart: same format as the smiling face
+// Heart: same format as the smiley
 unsigned char heart[] = {
   0x00, 0x00, 0x00, 0x00, 0x08, 0x1C, 0x3E, 0x7C,
   0x7C, 0x3E, 0x1C, 0x08, 0x00, 0x00, 0x00, 0x00
@@ -203,7 +206,7 @@ void loop() {
   Serial.print("Target recognized: ");
   Serial.println(color);
 
-  showFace(FACE_SMILE);  // Show smiling face
+  showFace(FACE_SMILE);  // Show smiley
   aiCam.clearColor();    // Clear buffer to avoid repeated triggering
 
   pickAndDeliver(color);  // Run the pick-and-deliver sequence
@@ -275,7 +278,7 @@ void pickAndDeliver(String color) {
   delay(T_APPROACH);
   stopCar();
 
-  showFace(FACE_SMILE);  // Show smiling face
+  showFace(FACE_SMILE);  // Show smiley
   Serial.println("Delivery complete, back at start");
 }
 
@@ -288,7 +291,7 @@ void showFace(int face) {
   if (face == FACE_EYES) {
     matrix_display(eyes);   // Standby
   } else if (face == FACE_SMILE) {
-    matrix_display(smile);  // Smiling face
+    matrix_display(smile);  // Smiley
   } else {
     matrix_display(heart);  // Heart
   }
@@ -396,7 +399,6 @@ void stopCar()             { driveMotors(0, 0); }            // Stop: duty cycle
 ```
 
 #### **7. Code Explanation:**
-
 **(1) The vision module sits on two serial pins**
 
 ```cpp
@@ -475,7 +477,7 @@ The `return` matters: with no target, end the round right there and touch none o
 **(5) Clear the buffer before starting an action**
 
 ```cpp
-  showFace(FACE_SMILE);  // Show smiling face
+  showFace(FACE_SMILE);  // Show smiley
   aiCam.clearColor();    // Clear buffer to avoid repeated triggering
 
   pickAndDeliver(color);  // Run the pick-and-deliver sequence
@@ -552,7 +554,7 @@ The 2-second cooldown is not for the car to rest but for the operator: after one
 
 This lesson uses `delay()` throughout; during those few seconds the web page, ultrasonic module, and remote control are all unresponsive. That is the clearest limitation of the lesson and the reason the next one switches to a state machine.
 
-#### **8. What You Will See:**
+#### **8. Expected Behavior:**
 
 At power-on the Serial Monitor prints:
 
@@ -564,7 +566,7 @@ Send -> MODE:COLOR
 Color-tracking car ready, place a red or yellow block in front
 ```
 
-Put a red block 20 cm in front of the car and it will:
+With a red block 20 cm in front of the car, the following sequence runs:
 
 | Step | Serial Monitor | Action |
 | --- | --- | --- |

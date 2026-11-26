@@ -4,7 +4,7 @@
 
 ![RC car clearing an obstacle](media/intro_11.jpg){width=520px}
 
-Give the robot a remote: press a direction key and it moves, release and it stops. But infrared is one-way — the car can't answer back — so how do you know it still hears you? Add a 1.5 s watchdog: every valid key restarts the timer, and if no new command arrives before it runs out, the car stops by itself.
+Give the car a remote: press a direction key and it moves, release and it stops. But infrared is one-way — the car can't answer back — so how do you know it still hears you? Add a 1.5 s watchdog: every valid key restarts the timer, and if no new command arrives before it runs out, the car stops by itself.
 
 Hold a key down and the remote doesn't send fresh commands. It sends short repeat markers that only say "still this key", with no hint of how long you've held it. The car uses those markers for one thing only — refreshing the timer — and never repeats the action.
 
@@ -12,8 +12,7 @@ The four direction keys map to four motions: up and down drive both tracks at th
 
 Press up and the car moves forward; let go and about 1.5 s later it stops on its own, and the serial output goes quiet too.
 
-#### **2. Parts Needed:**
-
+#### **2. Parts List:**
 Parts used in this lesson:
 
 |     |     |     |
@@ -22,8 +21,7 @@ Parts used in this lesson:
 | ![](../media/kit_03.png){width=200px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | ![](../media/kit_02.png){width=200px}<br><span style="font-size:0.85em">Mini tracked tank robot bottom assembly ×1</span> |  |
 > ⚠️ **All parts were installed back in Chapter 2; this table is for reference only — there is nothing to take apart. The wiring notes below only show how the connections are made, for reference; no assembly or disassembly is required. For the complete parts list, see 1.4 Kit Parts List.**
 #### **3. Parameters:**
-
-| Item | Value |
+| Item | Parameter |
 | --- | --- |
 | Receiver pin | IO48 |
 | Straight travel speed | 180 |
@@ -47,7 +45,6 @@ The main loop does two independent things: handle a signal if there is one, and 
 ![](media/ir_car_flow.png)
 
 #### **6. Test Code:**
-
 ```cpp
 #include <IRremote.hpp>  // Infrared (IR) decoding library
 
@@ -181,7 +178,6 @@ void stopCar()             { driveMotors(0, 0); }            // Stop: duty cycle
 ```
 
 #### **7. Code Explanation:**
-
 **(1) Pins, speed and key codes**
 
 ```cpp
@@ -302,9 +298,9 @@ IR is one-way communication: the remote sends and that's the end of it, so the c
 
 Holding a direction key works for the same reason: each frame restarts the timer, frames arrive every 108 ms so the counter can never reach 1500 ms; once you let go there are no more frames, the timer fills up and the car stops.
 
-#### **8. What You'll See:**
+#### **8. Expected Behavior:**
 
-After power on, the serial port prints the startup message for the IR remote control car. Press a direction key:
+After power-on the serial port prints the startup message for the IR remote control car. Pressing a direction key prints:
 
 | Key | Serial | Car |
 | --- | --- | --- |
@@ -317,10 +313,6 @@ After power on, the serial port prints the startup message for the IR remote con
 About 1.5 s after you release the key, the car stops by itself (nothing more is printed, because `stopCar()` is called silently in the timeout branch).
 
 > [Image to be added] Continuous screenshots of the serial output for the five key actions.
-
-If the actions don't match — press **Up** and the car goes backward — the left and right motor wires are reversed, or the two arguments of `driveMotors()` were swapped at the call site. Test the motors individually using the method from Project 2, confirm that channel A drives the left wheel, then come back here.
-
-If the range shrinks and the car occasionally misses a press, the receiver is likely partly hidden by the shell. It senses from the side and works best when facing the remote directly, so mounting it at the front edge of the chassis with a clear view forward is a good choice.
 
 #### **9. Troubleshooting:**
 

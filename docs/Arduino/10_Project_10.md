@@ -8,22 +8,20 @@ The remotes for the TV, the air conditioner and toys all use infrared. Press a k
 
 One press sends a whole frame: an address, a key value and a checksum. Hold the key down and the remote stops repeating the full frame — every so often it sends only a short repeat marker saying "still this key". A long press therefore leaves a completely different trace in the data than a single tap.
 
-This lesson drives nothing yet; it only teaches the robot to understand the remote. Point it at the front of the car, press a direction key, and the serial port prints the protocol name and key value. Up, down, left, right and OK correspond to 70, 21, 68, 67 and 64.
+This lesson drives nothing yet; it only teaches the car to understand the remote. Point it at the front of the car, press a direction key, and the serial port prints the protocol name and key value. Up, down, left, right and OK correspond to 70, 21, 68, 67 and 64.
 
 Those values are not universal — the set in the files is only the sample we had on hand. The number your own remote prints on serial is the answer for that remote.
 
-#### **2. Parts Needed:**
-
+#### **2. Parts List:**
 Parts used in this lesson:
 
-|     |     |     |
-| :---: | :---: | :---: |
-| ![](../media/kit_12.png){width=170px}<br><span style="font-size:0.85em">17-key IR remote control (JMFP-4) ×1</span> | ![](../media/ir_receiver.png){width=170px}<br><span style="font-size:0.85em">IR receiver ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
-| ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |  |  |
+|     |     |
+| :---: | :---: |
+| ![](../media/kit_12.png){width=170px}<br><span style="font-size:0.85em">17-key IR remote control (JMFP-4) ×1</span> | ![](../media/ir_receiver.png){width=170px}<br><span style="font-size:0.85em">IR receiver ×1</span> |
+| ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
 > ⚠️ **The IR receiver is already mounted on the expansion board; this table is for reference only — there is nothing to take apart. The wiring notes below only show how the connections are made, for reference; no assembly or disassembly is required. For the complete parts list, see 1.4 Kit Parts List.**
 #### **3. Parameters:**
-
-| Item | Value |
+| Item | Parameter |
 | --- | --- |
 | Receiver pin | IO48 |
 | Carrier frequency | 38 kHz |
@@ -48,7 +46,6 @@ Receiving and decoding are two different jobs: `IrReceiver.decode()` turns the l
 ![](media/ir_decode_flow.png)
 
 #### **6. Test Code:**
-
 ```cpp
 #include <IRremote.hpp>  // IR decoding library
 
@@ -114,7 +111,6 @@ const char* keyName(uint8_t cmd) {
 ```
 
 #### **7. Code Explanation:**
-
 **(1) Receiver pin and the five key-code macros**
 
 ```cpp
@@ -224,16 +220,16 @@ The return type is `const char*`; `return "Up"` returns the address of a string 
 
 A `switch` reads better than a chain of `if`s: one code maps to one name, and changing it touches only that line.
 
-#### **8. What You'll See:**
+#### **8. Expected Behavior:**
 
-After power on, the serial port prints:
+After power-on, the serial port prints:
 
 ```text
 IR receiver experiment started, point the remote at the car
 Waiting for a key...
 ```
 
-Point the remote at the front of the car and press a direction key:
+With the remote pointed at the front of the car, pressing a direction key prints:
 
 ```text
 Protocol: NEC   Key code: 70 (0x46)   Up
@@ -243,7 +239,7 @@ Protocol: NEC   Key code: 67 (0x43)   Right
 Protocol: NEC   Key code: 64 (0x40)   OK / Stop
 ```
 
-Hold **Up** down:
+Holding **Up** down prints:
 
 ```text
 Protocol: NEC   Key code: 70 (0x46)   Up

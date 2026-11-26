@@ -8,21 +8,19 @@ Giving each of those five sensors its own pin would eat up the controller board'
 
 Before letting the car run, just print the five channels to the serial port, one line every 200 ms. Put the car on white paper and all five read 0; cover one sensor with a finger or a strip of black tape and that bit becomes 1; lay the whole row across a black line and all five become 1.
 
-Those five 0s and 1s, laid out from left to right, are the robot's entire knowledge of the floor beneath it — and the next lesson will drive using nothing else.
+Those five 0s and 1s, laid out from left to right, are the car's entire knowledge of the floor beneath it — and the next lesson will drive using nothing else.
 
-#### **2. Required Parts:**
-
+#### **2. Parts List:**
 Parts used in this lesson:
 
-|   |   |   |
-| :---: | :---: | :---: |
-| ![](../media/kit_02.png){width=170px}<br><span style="font-size:0.85em">Mini tracked tank robot bottom assembly ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
-| ![](../media/kit_39.png){width=170px}<br><span style="font-size:0.85em">5-way IIC line-tracking sensor module ×1</span> |  |  |
+|     |     |
+| :---: | :---: |
+| ![](../media/kit_02.png){width=170px}<br><span style="font-size:0.85em">Mini tracked tank robot bottom assembly ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
+| ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | ![](../media/kit_39.png){width=170px}<br><span style="font-size:0.85em">5-way IIC line-tracking sensor module ×1</span> |
 
 > ⚠️ **This sensor was already fixed in place and wired when the chassis was assembled in Chapter 2. This table is for reference only — do not remove it. The wiring notes below only show how the connections are made, for reference; no disassembly is needed. For the full parts list, see 1.4 Kit List.**
 
 #### **3. Parameters:**
-
 | Item | Parameter |
 | --- | --- |
 | Expansion chip | PCF8574, I2C to 8-bit parallel |
@@ -51,7 +49,6 @@ The read takes only three steps, but bit order and inversion are the two easiest
 ![](media/track_read_flow.png)
 
 #### **6. Test Code:**
-
 ```cpp
 #include <Wire.h>
 #include <PCF8574.h>
@@ -95,7 +92,6 @@ void loop() {
 ```
 
 #### **7. Code Explanation:**
-
 **(1) Two header files and one chip object**
 
 ```cpp
@@ -183,7 +179,7 @@ When an infrared pair is over a black line the reflection is weak and the module
 
 Five lines per second make it easy to see which channel changes first as you draw a line. Remove the delay and the Serial Monitor scrolls too fast to read, which makes judgement harder, not easier.
 
-#### **8. What You'll See:**
+#### **8. Expected Behavior:**
 
 After power-on the Serial Monitor prints a line every 200 ms; the five numbers correspond to the five sensors from left to right:
 
@@ -194,14 +190,9 @@ A:0  B:1  C:0  D:1  E:0
 A:1  B:1  C:1  D:1  E:1
 ```
 
-Put the robot on white paper and all five are 0; cover one sensor with a finger or black tape and its position becomes 1; lay the whole row over a black line and all five become 1.
+With the car on white paper all five read 0; with a finger or a piece of black tape under one sensor that position reads 1; with the whole row over a black line all five read 1.
 
-> [Image to be added] A photo of the whole robot sitting on the black line-tracking tape with all five serial readings at 1 (including the Serial Monitor).
-
-Two common observations:
-
-- All five numbers stay at 0, even with a finger over a sensor — first check that the 4P plug is fully seated, then check whether SDA / SCL are reversed. Reversed I2C won't burn anything, but you won't read a single byte.
-- Readings occasionally jump — the sensors sit too high above the floor (normally 5–8 mm) or the ambient light is too strong. Line-tracking sensors work by reflected light, and direct noon sunlight makes them read white all the time.
+> [Image to be added] A photo of the whole car sitting on the black line-tracking tape with all five serial readings at 1 (including the Serial Monitor).
 
 #### **9. Troubleshooting:**
 

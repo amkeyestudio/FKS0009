@@ -13,7 +13,6 @@ The correction uses proportional plus derivative: a big error means a big steeri
 At power-on the dot matrix shows a pair of eyes; it changes to a smiley only when the line enters view and tracking begins. Lose the line and it searches on the spot using its memory; find it again and it carries on, but if the search times out it stops and shows a frown.
 
 #### **2. Parts List:**
-
 Parts used in this lesson:
 
 |     |     |     |
@@ -21,19 +20,12 @@ Parts used in this lesson:
 | ![](../media/kit_09.jpg){width=170px}<br><span style="font-size:0.85em">TinyVision AI vision camera ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_02.png){width=170px}<br><span style="font-size:0.85em">Mini tracked tank robot bottom assembly ×1</span> |
 | ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |  |
 #### **3. Parameters:**
-
 | Item | Parameter |
 | --- | --- |
 | Recognition mode | `line` |
 | Report format | `LINE:offset,angle,valid` |
 | Valid flag | 5 = line recognized |
 | Base straight speed | 130 |
-| Proportional coefficient KP | 0.4 |
-| Derivative coefficient KD | 0.6 |
-| Correction limit | ±90 |
-| Derivative limit | ±50 |
-| Search speed | 90 |
-| Search dead zone | 15 |
 | Search timeout | 600 ms |
 | Control period | 5 ms |
 
@@ -49,7 +41,7 @@ Parts used in this lesson:
 | --- | :---: |
 | Left wheel AIN / AEN | IO38 / IO21 |
 | Right wheel BIN / BEN | IO40 / IO41 |
-
+| Dot matrix CLK / DIN | IO9 / IO8 |
 
 **Mounting A:**
 
@@ -65,7 +57,6 @@ Parts used in this lesson:
 
 ![](media/A-6.png)
 
-
 #### **5. Flowchart:**
 
 Having a line and not having one are two completely different paths; which one you enter is decided by the **valid flag**:
@@ -73,7 +64,6 @@ Having a line and not having one are two completely different paths; which one y
 ![](media/camera_line_flow.png)
 
 #### **6. Test Code:**
-
 > **This lesson's project has three files**: `18_Camera_Line_Tracking.ino`, `AiCam.h`, and `AiCam.cpp`. All serial traffic and string parsing for the vision module live in `AiCam.cpp`; put all three files in the same folder — compilation fails if any is missing.
 
 ```cpp
@@ -112,7 +102,7 @@ Having a line and not having one are two completely different paths; which one y
 
 // ===== Expression numbers =====
 #define FACE_EYES     0  // Standby: eyes
-#define FACE_SMILE    1  // Following line: smiling face
+#define FACE_SMILE    1  // Following line: smiley
 #define FACE_SURPRISE 2  // Searching for line: wide eyes
 #define FACE_SAD      3  // Timeout: sad face
 
@@ -124,7 +114,7 @@ unsigned char eyes[] = {
   0x00, 0x00, 0x1C, 0x1C, 0x00, 0x00, 0x00, 0x00
 };
 
-// Smiling face: stable on the line
+// Smiley: stable on the line
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
@@ -182,7 +172,7 @@ void loop() {
   if (valid == LINE_OK) {
     // Line detected: PD calculation for differential speed
     lostStart = 0;         // Clear line-lost timer
-    showFace(FACE_SMILE);  // Show smiling face
+    showFace(FACE_SMILE);  // Show smiley
 
     int error = offset;  // Current error
 
@@ -240,7 +230,7 @@ void showFace(int face) {
   if (face == FACE_EYES) {
     matrix_display(eyes);       // Standby
   } else if (face == FACE_SMILE) {
-    matrix_display(smile);      // Smiling face
+    matrix_display(smile);      // Smiley
   } else if (face == FACE_SURPRISE) {
     matrix_display(surprise);   // Wide eyes
   } else {
@@ -349,7 +339,6 @@ void stopCar()             { driveMotors(0, 0); }            // Stop: duty cycle
 ```
 
 #### **7. Code Explanation:**
-
 **(1) Eight parameters define the car's character**
 
 ```cpp
@@ -396,7 +385,7 @@ The two must be fetched separately: having an `offset` value does not make it tr
   if (valid == LINE_OK) {
     // Line detected: PD calculation for differential speed
     lostStart = 0;         // Clear line-lost timer
-    showFace(FACE_SMILE);  // Show smiling face
+    showFace(FACE_SMILE);  // Show smiley
 
     int error = offset;  // Current error
 ```
@@ -492,7 +481,7 @@ One round is 5 ms, or 200 Hz. Both `KP` and `KD` are tuned around this period �
 
 Tuning the coefficients has an order too: start with `KP` alone, raising it from 0.2 until the car can follow bends but begins to weave; then add `KD` from 0.1 upward and stop when the oscillation visibly shrinks. Adding `KD` first makes the car slow and dull, hiding which coefficient is at fault.
 
-#### **8. What You Will See:**
+#### **8. Expected Behavior:**
 
 In `setup()` the Serial Monitor prints the `aiCam` startup message; once running nothing else is printed (there are no print statements in `loop()`).
 

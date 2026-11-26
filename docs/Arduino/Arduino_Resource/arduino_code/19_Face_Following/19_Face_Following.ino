@@ -34,7 +34,7 @@
 
 // ===== Expression numbers =====
 #define FACE_EYES  0  // No person: eyes
-#define FACE_SMILE 1  // Person seen: smiling face
+#define FACE_SMILE 1  // Person seen: smiley
 
 // 16 bytes correspond to 16 columns, each byte's 8 bits correspond to 8 rows in one column
 
@@ -44,7 +44,7 @@ unsigned char eyes[] = {
   0x00, 0x00, 0x1C, 0x1C, 0x00, 0x00, 0x00, 0x00
 };
 
-// Smiling face: person seen
+// Smiley: person seen
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
@@ -107,7 +107,7 @@ void loop() {
 
   // Person detected
   lastSeen = millis();   // Refresh detection time
-  showFace(FACE_SMILE);  // Show smiling face
+  showFace(FACE_SMILE);  // Show smiley
 
   int x = aiCam.getFaceX();  // Face center X
 
@@ -156,7 +156,7 @@ void showFace(int face) {
   if (face == FACE_EYES) {
     matrix_display(eyes);   // Standby
   } else {
-    matrix_display(smile);  // Smiling face
+    matrix_display(smile);  // Smiley
   }
 }
 

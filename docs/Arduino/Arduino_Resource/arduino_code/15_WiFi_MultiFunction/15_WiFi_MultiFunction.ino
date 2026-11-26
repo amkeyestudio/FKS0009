@@ -87,7 +87,7 @@ unsigned long avTime = 0;
 // ===== Dot matrix font bitmaps =====
 // 16 bytes correspond to 16 columns, each byte's 8 bits to 8 rows in a column, 1 = on, 0 = off
 
-// Smiling face: manual
+// Smiley: manual
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
@@ -213,7 +213,7 @@ void showModeIcon() {
   }
 
   // Other modes do not use I2C
-  if (carMode == "manual")     matrix_show(smile);       // Manual: smiling face
+  if (carMode == "manual")     matrix_show(smile);       // Manual: smiley
   else if (carMode == "avoid") matrix_show(alert_sign);  // Obstacle avoidance: exclamation mark
   else                         matrix_show(heart);       // Following: heart
 }

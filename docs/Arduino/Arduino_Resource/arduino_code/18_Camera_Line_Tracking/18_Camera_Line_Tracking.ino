@@ -33,7 +33,7 @@
 
 // ===== Expression numbers =====
 #define FACE_EYES     0  // Standby: eyes
-#define FACE_SMILE    1  // Following line: smiling face
+#define FACE_SMILE    1  // Following line: smiley
 #define FACE_SURPRISE 2  // Searching for line: wide eyes
 #define FACE_SAD      3  // Timeout: sad face
 
@@ -45,7 +45,7 @@ unsigned char eyes[] = {
   0x00, 0x00, 0x1C, 0x1C, 0x00, 0x00, 0x00, 0x00
 };
 
-// Smiling face: stable on the line
+// Smiley: stable on the line
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
@@ -103,7 +103,7 @@ void loop() {
   if (valid == LINE_OK) {
     // Line detected: PD calculation for differential speed
     lostStart = 0;         // Clear line-lost timer
-    showFace(FACE_SMILE);  // Show smiling face
+    showFace(FACE_SMILE);  // Show smiley
 
     int error = offset;  // Current error
 
@@ -161,7 +161,7 @@ void showFace(int face) {
   if (face == FACE_EYES) {
     matrix_display(eyes);       // Standby
   } else if (face == FACE_SMILE) {
-    matrix_display(smile);      // Smiling face
+    matrix_display(smile);      // Smiley
   } else if (face == FACE_SURPRISE) {
     matrix_display(surprise);   // Wide eyes
   } else {

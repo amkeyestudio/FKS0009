@@ -37,7 +37,7 @@
 
 // ===== Expression numbers =====
 #define FACE_EYES   0  // Eyes: standby
-#define FACE_SMILE  1  // Smiling face: target recognized or delivery complete
+#define FACE_SMILE  1  // Smiley: target recognized or delivery complete
 #define FACE_HEART  2  // Heart: gripped
 
 // Standby: two square eyes, columns 4/5 and 10/11 lit on rows 2-4
@@ -46,13 +46,13 @@ unsigned char eyes[] = {
   0x00, 0x00, 0x1C, 0x1C, 0x00, 0x00, 0x00, 0x00
 };
 
-// Smiling face: 16 bytes correspond to 16 columns, each byte's 8 bits to 8 rows per column
+// Smiley: 16 bytes correspond to 16 columns, each byte's 8 bits to 8 rows per column
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
 };
 
-// Heart: same format as the smiling face
+// Heart: same format as the smiley
 unsigned char heart[] = {
   0x00, 0x00, 0x00, 0x00, 0x08, 0x1C, 0x3E, 0x7C,
   0x7C, 0x3E, 0x1C, 0x08, 0x00, 0x00, 0x00, 0x00
@@ -123,7 +123,7 @@ void loop() {
   Serial.print("Target recognized: ");
   Serial.println(color);
 
-  showFace(FACE_SMILE);  // Show smiling face
+  showFace(FACE_SMILE);  // Show smiley
   aiCam.clearColor();    // Clear buffer to avoid repeated triggering
 
   pickAndDeliver(color);  // Run the pick-and-deliver sequence
@@ -195,7 +195,7 @@ void pickAndDeliver(String color) {
   delay(T_APPROACH);
   stopCar();
 
-  showFace(FACE_SMILE);  // Show smiling face
+  showFace(FACE_SMILE);  // Show smiley
   Serial.println("Delivery complete, back at start");
 }
 
@@ -208,7 +208,7 @@ void showFace(int face) {
   if (face == FACE_EYES) {
     matrix_display(eyes);   // Standby
   } else if (face == FACE_SMILE) {
-    matrix_display(smile);  // Smiling face
+    matrix_display(smile);  // Smiley
   } else {
     matrix_display(heart);  // Heart
   }

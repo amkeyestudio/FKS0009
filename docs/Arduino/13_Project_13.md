@@ -12,8 +12,7 @@ The mini tracked tank robot itself never moves in this lesson — only the pan-t
 
 Once the board joins the router, the serial port prints the address it obtained; open that address in a phone browser on the same Wi-Fi and the top half of the page shows the current pan-tilt angle while the bottom half shows the distance ahead. Tap left 180° and the sensor head turns to the left with the angle following to 180; tap center 90° and it returns to straight ahead; tap right 0° and it turns to the right; tap the measure button and `--` first turns into three dots, then shows a distance in centimetres.
 
-#### **2. Parts Needed:**
-
+#### **2. Parts List:**
 Parts used in this lesson:
 
 |     |     |     |
@@ -22,8 +21,7 @@ Parts used in this lesson:
 | ![](../media/kit_03.png){width=200px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | <span style="font-size:0.85em">2.4 GHz wireless router or phone hotspot ×1</span> |  |
 > ⚠️ **The pan-tilt and ultrasonic module were installed back in Chapter 2; this table is for reference only — there is nothing to take apart. The wiring notes below only show how the connections are made, for reference; no assembly or disassembly is required. For the complete parts list, see 1.4 Kit Parts List.**
 #### **3. Parameters:**
-
-| Item | Value |
+| Item | Parameter |
 | --- | --- |
 | Wi-Fi mode | Station (STA), 2.4 GHz only |
 | Web page port | 80 |
@@ -31,8 +29,6 @@ Parts used in this lesson:
 | Pan-tilt range | 0°–180° (0° points right, 180° points left) |
 | Ultrasonic Trig / Echo | IO13 / IO12 |
 | Distance-measurement timeout | 25 ms |
-| Command endpoints | `/pan?angle=N`, `/distance` |
-| Response format | `text/plain` |
 
 #### **4. Wiring:**
 
@@ -44,7 +40,7 @@ Parts used in this lesson:
 
 > **Note**: The components in the wiring diagram are for illustration only; you do not need to disassemble the housed components in the parts list when wiring.
 
-![](media/PRO13.PNG)
+![](media/PRO13.png)
 
 #### **5. Flowchart:**
 
@@ -53,10 +49,9 @@ When a web request comes in, `server.handleClient()` looks up the matching callb
 ![](media/wifi_web_flow.png)
 
 #### **6. Test Code:**
-
 > **Before uploading, change one thing**: replace `WIFI_SSID` and `WIFI_PASS` below with your own Wi-Fi name and password — otherwise it won't connect.
 >
-> Two more conditions must hold at the same time: the Wi-Fi must be **2.4 GHz** (the board doesn't support 5 GHz), and the phone and the robot must be on the **same LAN** — otherwise the browser can't open the board's IP.
+> Two more conditions must hold at the same time: the Wi-Fi must be **2.4 GHz** (the board doesn't support 5 GHz), and the phone and the car must be on the **same LAN** — otherwise the browser can't open the board's IP.
 
 > **This project has two files**: `13_WiFi_Connection.ino` and `webpage.h`. All the page HTML lives in `webpage.h`; the `.ino` keeps only the Arduino logic. Put both files in the same folder — if one is missing, compilation fails.
 
@@ -162,7 +157,6 @@ int getDistance() {
 ```
 
 #### **7. Code Explanation:**
-
 **(1) The three libraries**
 
 ```cpp
@@ -295,9 +289,9 @@ It listens on port 80, looks up the path of each incoming request in the route t
 
 This single line is also the foundation of Projects 14 and 15: those sketches insert motor control and a state machine around it, but `handleClient()` always stays at the very front.
 
-#### **8. What You'll See:**
+#### **8. Expected Behavior:**
 
-After power on, the serial port prints:
+After power-on, the serial port prints:
 
 ```text
 Connecting to Your WiFi name
@@ -307,7 +301,7 @@ Board IP: 192.168.1.23
 Web server started, open the above IP in a phone browser
 ```
 
-Open that address on the phone and you'll see the page:
+With that address opened on the phone, the page shows:
 
 | Action | Result |
 | --- | --- |
@@ -316,7 +310,7 @@ Open that address on the phone and you'll see the page:
 | Tap **Right 0°** | Pan-tilt turns right |
 | Tap **Measure distance** | The value changes from `--` to the current distance (cm) |
 
-> [Image to be added] A photo showing the phone page and the actual robot together, with the pan-tilt at both ends of its travel.
+> [Image to be added] A photo showing the phone page and the actual car together, with the pan-tilt at both ends of its travel.
 
 #### **9. Troubleshooting:**
 

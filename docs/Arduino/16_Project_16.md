@@ -2,7 +2,7 @@
 
 #### **1. Introduction:**
 
-![](media/IMG_9128.JPG)
+![](media/IMG_9128.jpg)
 
 One car, one 3D-printed ball and one goal make a match. If you and a friend each have a car, you can play it as a real competition — because what you build here is not a car that merely drives, but a car that plays: a score on the screen, a smiley on the dot matrix when you score, back to standby three seconds later, and a reset whenever you want to start over.
 
@@ -13,7 +13,6 @@ The score and the expression are both computed and stored on the car; the web pa
 Press Carry to open the gripper, bring the ball up to the goal line, press Shoot to close the gripper and push the ball out, then press Goal: the dot matrix turns into a smiley at once, goes back to two square eyes three seconds later, and the score on the page goes up by one.
 
 #### **2. Parts List:**
-
 Parts used in this lesson:
 
 |     |     |     |
@@ -24,7 +23,6 @@ Parts used in this lesson:
 > ⚠️ **All parts were assembled in Chapter 2; this table is only for reference and nothing needs to be taken apart. The wiring notes below only show how the connections are made, also for reference — no disassembly is needed. For the full parts list, see 1.4 Kit Contents.**
 
 #### **3. Parameters:**
-
 | Item | Parameter |
 | --- | --- |
 | Driving speed | 180 |
@@ -50,11 +48,11 @@ This lesson uses no ultrasonic module, no line tracking, and no pan-tilt — onl
 ![](media/PRO16.png)
 
 **Mechanical gripper installation steps**
-![](media/IMG_9130.JPG)
+![](media/IMG_9130.jpg)
 
-![](media/IMG_9130-2.JPG)
+![](media/IMG_9130-2.jpg)
 
-![](media/IMG_9130-3.JPG)
+![](media/IMG_9130-3.jpg)
 
 #### **5. Flowchart:**
 
@@ -63,7 +61,6 @@ The page sends a command, the board executes it, then reports the score and expr
 ![](media/soccer_flow.png)
 
 #### **6. Test Code:**
-
 > **Change one thing before uploading**: replace `WIFI_SSID` and `WIFI_PASS` below with your own Wi-Fi name and password, or the connection will fail.
 >
 > Two more conditions must both hold: the Wi-Fi must be **2.4 GHz** (the board does not support 5 GHz), and the phone and the car must be on the **same LAN** — otherwise the browser cannot open the board's IP address.
@@ -107,7 +104,7 @@ const char* WIFI_PASS = "Your WiFi password";
 
 // ===== Expression numbers =====
 #define FACE_EYES  0  // Standby: eyes
-#define FACE_SMILE 1  // Goal scored: smiling face
+#define FACE_SMILE 1  // Goal scored: smiley
 
 // 16 bytes correspond to 16 columns, each byte's 8 bits correspond to 8 rows in one column
 
@@ -117,7 +114,7 @@ unsigned char eyes[] = {
   0x00, 0x00, 0x1C, 0x1C, 0x00, 0x00, 0x00, 0x00
 };
 
-// Smiling face: goal scored
+// Smiley: goal scored
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
@@ -199,7 +196,7 @@ void loop() {
     stopCar();
   }
 
-  // Smiling face returns to standby after 3 s
+  // Smiley returns to standby after 3 s
   if (smileUntil != 0 && millis() > smileUntil) {
     smileUntil = 0;
     showFace(FACE_EYES);
@@ -242,7 +239,7 @@ String runCmd(String d) {
 
 // ===== Goal celebration =====
 void celebrate() {
-  showFace(FACE_SMILE);        // Switch to smiling face
+  showFace(FACE_SMILE);        // Switch to smiley
   smileUntil = millis() + 3000;  // Restore after 3 s
 }
 
@@ -261,7 +258,7 @@ void showFace(int face) {
   if (face == FACE_EYES) {
     matrix_display(eyes);   // Standby
   } else {
-    matrix_display(smile);  // Smiling face
+    matrix_display(smile);  // Smiley
   }
 }
 
@@ -366,7 +363,6 @@ void stopCar()             { driveMotors(0, 0); }            // Stop: duty cycle
 ```
 
 #### **7. Code Explanation:**
-
 **(1) Pins, speed, and gripper angles**
 
 ```cpp
@@ -400,7 +396,7 @@ The four motor pins are the same as in Lessons 2 and 11, and the gripper was ver
 
 ```cpp
 #define FACE_EYES  0  // Standby: eyes
-#define FACE_SMILE 1  // Goal scored: smiling face
+#define FACE_SMILE 1  // Goal scored: smiley
 ```
 
 ```cpp
@@ -529,7 +525,7 @@ Only the smiley is checked because the whole lesson has just two expressions. It
 
 ```cpp
 void celebrate() {
-  showFace(FACE_SMILE);        // Switch to smiling face
+  showFace(FACE_SMILE);        // Switch to smiley
   smileUntil = millis() + 3000;  // Restore after 3 s
 }
 ```
@@ -559,11 +555,11 @@ void loop() {
   }
 ```
 
-`STOP_AFTER 1500` follows the same rule as Lessons 11 and 14: stop if no command arrives within 1.5 seconds. Three tasks sit at the same level in `loop()` — handle requests, check the timeout, check the smile expiry — and none blocks another.
+`STOP_AFTER 1500` follows the same rule as Lessons 11 and 14: stop if no command arrives within 1.5 seconds. Three tasks sit at the same level in `loop()` — handle requests, check the timeout, check the smiley expiry — and none blocks another.
 
 That is also why there is no `delay()` anywhere in the lesson: a blocking call in any one place drags the other two tasks down with it.
 
-#### **8. What You Will See:**
+#### **8. Expected Behavior:**
 
 The Serial Monitor prints "Soccer car ready" and the dot matrix shows two square eyes (standby).
 

@@ -11,7 +11,6 @@ The second problem is waiting. Obstacle avoidance turns a servo, pauses for 300 
 Four mode buttons sit at the top of the phone page. Manual mode shows a smiley on the dot matrix, line tracking blanks the screen, obstacle avoidance shows an exclamation mark, and following shows a heart. The moment you switch, the car stops briefly and the pan-tilt returns to center before it starts moving in the new mode.
 
 #### **2. Parts List:**
-
 Parts used in this lesson:
 
 |     |     |     |
@@ -21,7 +20,6 @@ Parts used in this lesson:
 | ![](../media/kit_39.png){width=170px}<br><span style="font-size:0.85em">5-way IIC line-tracking sensor module ×1</span> | <span style="font-size:0.85em">2.4 GHz Wi-Fi router or phone hotspot ×1</span> |  |
 > ⚠️ **All parts were assembled in Chapter 2; this table is only for reference and nothing needs to be taken apart. The wiring notes below only show how the connections are made, also for reference — no disassembly is needed. For the full parts list, see 1.4 Kit Contents.**
 #### **3. Parameters:**
-
 | Item | Parameter |
 | --- | --- |
 | Operating mode | manual / line / avoid / follow |
@@ -60,7 +58,6 @@ The main loop dispatches by mode; `carMode` decides which of the four is running
 ![](media/multi_mode_flow.png)
 
 #### **6. Test Code:**
-
 > **Change one thing before uploading**: replace `ssid` and `password` below with your own Wi-Fi name and password, or the connection will fail.
 >
 > Two more conditions must both hold: the Wi-Fi must be **2.4 GHz** (the board does not support 5 GHz), and the phone and the car must be on the **same LAN** — otherwise the browser cannot open the board's IP address.
@@ -157,7 +154,7 @@ unsigned long avTime = 0;
 // ===== Dot matrix font bitmaps =====
 // 16 bytes correspond to 16 columns, each byte's 8 bits to 8 rows in a column, 1 = on, 0 = off
 
-// Smiling face: manual
+// Smiley: manual
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
@@ -283,7 +280,7 @@ void showModeIcon() {
   }
 
   // Other modes do not use I2C
-  if (carMode == "manual")     matrix_show(smile);       // Manual: smiling face
+  if (carMode == "manual")     matrix_show(smile);       // Manual: smiley
   else if (carMode == "avoid") matrix_show(alert_sign);  // Obstacle avoidance: exclamation mark
   else                         matrix_show(heart);       // Following: heart
 }
@@ -690,7 +687,6 @@ void loop() {
 ```
 
 #### **7. Code Explanation:**
-
 **(1) The trickiest part of the lesson: time-division multiplexing IO8 / IO9**
 
 The dot matrix runs a software-emulated I2C on IO8 (DIN) and IO9 (CLK); the line-tracking sensor uses hardware I2C on IO8 (SDA) and IO9 (SCL) as well. Two protocols, one pin pair — **they cannot both be active at once**.
@@ -911,7 +907,7 @@ Keeping both sets is not leftover mess but a difference in needs: line tracking 
 
 The cost is that the argument order is easy to mix up: both sets put the left wheel first, but `setMotor` accepts only positive values while `driveLine` reads the sign. Check which one you are calling before editing.
 
-#### **8. What You Will See:**
+#### **8. Expected Behavior:**
 
 Serial output:
 

@@ -34,7 +34,7 @@ const char* WIFI_PASS = "Your WiFi password";
 
 // ===== Expression numbers =====
 #define FACE_EYES  0  // Standby: eyes
-#define FACE_SMILE 1  // Goal scored: smiling face
+#define FACE_SMILE 1  // Goal scored: smiley
 
 // 16 bytes correspond to 16 columns, each byte's 8 bits correspond to 8 rows in one column
 
@@ -44,7 +44,7 @@ unsigned char eyes[] = {
   0x00, 0x00, 0x1C, 0x1C, 0x00, 0x00, 0x00, 0x00
 };
 
-// Smiling face: goal scored
+// Smiley: goal scored
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
@@ -126,7 +126,7 @@ void loop() {
     stopCar();
   }
 
-  // Smiling face returns to standby after 3 s
+  // Smiley returns to standby after 3 s
   if (smileUntil != 0 && millis() > smileUntil) {
     smileUntil = 0;
     showFace(FACE_EYES);
@@ -169,7 +169,7 @@ String runCmd(String d) {
 
 // ===== Goal celebration =====
 void celebrate() {
-  showFace(FACE_SMILE);        // Switch to smiling face
+  showFace(FACE_SMILE);        // Switch to smiley
   smileUntil = millis() + 3000;  // Restore after 3 s
 }
 
@@ -188,7 +188,7 @@ void showFace(int face) {
   if (face == FACE_EYES) {
     matrix_display(eyes);   // Standby
   } else {
-    matrix_display(smile);  // Smiling face
+    matrix_display(smile);  // Smiley
   }
 }
 

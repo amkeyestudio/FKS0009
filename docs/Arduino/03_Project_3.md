@@ -10,9 +10,7 @@ On the front of the module are two tubes: one does the shouting, the other the l
 
 The distance is then just one formula: time × speed of sound ÷ 2. The speed of sound is taken as 0.034 cm/µs, and you divide by 2 because the sound goes out and comes back. This lesson does no judging and no obstacle avoidance — it simply reads the distance steadily and prints a line to the serial port every second: bring your hand closer and the number falls, move it away and the number rises. With nothing straight ahead, it prints 0, meaning no distance was measured this round — not that the car's nose is against a wall.
 
-
-#### **2. Parts list:**
-
+#### **2. Parts List:**
 The parts used in this lesson:
 
 |     |     |     |
@@ -20,19 +18,16 @@ The parts used in this lesson:
 | ![](../media/kit_05.png){width=170px}<br><span style="font-size:0.85em">Ultrasonic module ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
 > ⚠️ **The ultrasonic module was already installed together with the pan-tilt in Chapter 2. This table is for reference only — nothing needs to be removed; the wiring notes below merely show how the connections are made, again for reference, so no assembly or disassembly is required. For the complete parts list, see the kit list in Section 1.4.**
 #### **3. Parameters:**
-
-| Item | Value |
+| Item | Parameter |
 | --- | --- |
 | Module | HC-SR04 ultrasonic distance measurement module |
 | Trig (trigger pin) | IO13 |
 | Echo (echo pin) | IO12 |
 | Trigger pulse width | 10 µs |
-| Speed of sound factor | 0.034 cm/µs |
 | Valid measuring range | 2–300 cm (out of range → 0) |
 | Measurement cycle | 1000 ms |
 | Debug serial | 115200 |
 
-> **Wiring**: plug the 4P double-ended cable supplied with the kit straight into the ultrasonic socket on top of the expansion board (silkscreen `G` `IO12` `IO13` `V`), rather than attaching individual jumper wires. See Section 2.3.5 for details.
 
 #### **4. Wiring:**
 
@@ -45,15 +40,13 @@ The parts used in this lesson:
 
 ![](media/HC-SR04.png)
 
-
 #### **5. Flowchart:**
 
 A single measurement is built from three timed stages, and the width of the Echo pulse is the **round-trip time of the sound**:
 
 ![](media/ultrasonic_flow.png)
 
-#### **6. Test code:**
-
+#### **6. Test Code:**
 ```cpp
 // Ultrasonic module pins
 const int trigPin = 13;  // Trigger, IO13
@@ -102,8 +95,7 @@ void loop() {
 }
 ```
 
-#### **7. Code walkthrough:**
-
+#### **7. Code Explanation:**
 **1. Trigger: a 10 µs HIGH pulse**
 
 ```cpp
@@ -166,12 +158,12 @@ The module is rated for 2–300 cm. Values outside that range — a bogus 170 cm
 | 2–300 | Valid | Normal range |
 | Jumping up and down | Interference | A slanted target surface, soft fabric absorbing the sound, or another ultrasonic module emitting nearby |
 
-#### **8. What you should see:**
+#### **8. Expected Behavior:**
 
-Open the Serial Monitor (baud rate 115200); a distance value is printed once per second in the form **Distance: XX cm**:
+With the Serial Monitor open (baud rate 115200), a distance value is printed once per second in the form **Distance: XX cm**:
 
 - With nothing ahead or a distance beyond 300 cm, it shows **Distance: 0 cm**;
-- Move a hand or a book in front of the car and the value follows the distance, falling as it comes closer and rising as it moves away.
+- With a hand or a book moved in front of the car, the value follows the distance, falling as the object comes closer and rising as it moves away.
 
 > [Image to be added] Screenshot of the Serial Monitor printing distance values, with several lines at different distances.
 

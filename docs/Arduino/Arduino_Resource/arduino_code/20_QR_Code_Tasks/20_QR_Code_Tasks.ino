@@ -39,7 +39,7 @@
 // ===== Expression numbers =====
 // Using numbers makes it easy for showFace() to detect expression changes and avoid redundant display writes
 #define FACE_EYES  0  // Standby: eyes
-#define FACE_SMILE 1  // Card recognized: smiling face
+#define FACE_SMILE 1  // Card recognized: smiley
 
 // 16 bytes correspond to 16 columns, each byte's 8 bits to 8 rows in a column, bit0 is the top row
 
@@ -49,7 +49,7 @@ unsigned char eyes[] = {
   0x00, 0x00, 0x1C, 0x1C, 0x00, 0x00, 0x00, 0x00
 };
 
-// Smiling face
+// Smiley
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
@@ -150,7 +150,7 @@ void loop() {
 //   LEFT     left 50 / right 150, arc to the left
 //   RIGHT    left 150 / right 50, arc to the right
 void doTask(String qr) {
-  showFace(FACE_SMILE);  // Show smiling face
+  showFace(FACE_SMILE);  // Show smiley
 
   // Convert to uppercase before comparing
   String key = qr;
@@ -188,7 +188,7 @@ void showFace(int face) {
   if (face == FACE_EYES) {
     matrix_display(eyes);   // Standby
   } else {
-    matrix_display(smile);  // Smiling face
+    matrix_display(smile);  // Smiley
   }
 }
 

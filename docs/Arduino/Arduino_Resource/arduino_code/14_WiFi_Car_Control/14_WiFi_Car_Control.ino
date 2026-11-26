@@ -7,7 +7,6 @@
 const char* WIFI_SSID = "Your WiFi name";
 const char* WIFI_PASS = "Your WiFi password";
 
-
 // ===== Pins =====
 #define MOTOR_AIN 38  // Channel A direction
 #define MOTOR_AEN 21  // Channel A speed control

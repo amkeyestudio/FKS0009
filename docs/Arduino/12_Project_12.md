@@ -4,26 +4,24 @@
 
 ![LED sign at a station](media/intro_12.jpg){width=520px}
 
-Back in Project 1 the dot matrix could only loop through a few patterns baked into the code. Now turn it into a real message board: connect your phone to the same Wi-Fi as the robot, open the board's address in a browser, type a sentence, tap send — and the words roll across the dots.
+Back in Project 1 the dot matrix could only loop through a few patterns baked into the code. Now turn it into a real message board: connect your phone to the same Wi-Fi as the car, open the board's address in a browser, type a sentence, tap send — and the words roll across the dots.
 
 The display is only 16 columns wide. One letter takes 5 columns plus 1 column of spacing, so 6 columns per character and at most two characters on screen at once — anything longer has to scroll, or you only see half of it. The scroll shifts one column every 120 ms, just about the pace the eye can follow.
 
 The font is the unsung hero behind the scenes: 26 letters plus 10 digits, each character 5 columns wide with one byte per column. Want a different letter shape? Change those bytes.
 
-On power-up the board prints its address on serial. Open that address on a phone on the same Wi-Fi and you get an input box and a send button. Send `HI` and it sits centered; send `LOVE` and it scrolls in from the right, leaving a gap of blank columns before starting over.
+On power-on the board prints its address on serial. Open that address on a phone on the same Wi-Fi and you get an input box and a send button. Send `HI` and it sits centered; send `LOVE` and it scrolls in from the right, leaving a gap of blank columns before starting over.
 
-#### **2. Parts Needed:**
-
+#### **2. Parts List:**
 Parts used in this lesson:
 
-|     |     |     |
-| :---: | :---: | :---: |
-| ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
-| <span style="font-size:0.85em">2.4 GHz wireless router or phone hotspot ×1</span> |  |  |
+|     |     |
+| :---: | :---: |
+| ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
+| ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | <span style="font-size:0.85em">2.4 GHz wireless router or phone hotspot ×1</span> |
 > ⚠️ **The dot matrix was installed back in Chapter 2; this table is for reference only — there is nothing to take apart. The wiring notes below only show how the connections are made, for reference; no assembly or disassembly is required. For the complete parts list, see 1.4 Kit Parts List.**
 #### **3. Parameters:**
-
-| Item | Value |
+| Item | Parameter |
 | --- | --- |
 | Wi-Fi mode | Station (STA), 2.4 GHz only |
 | Web page port | 80 |
@@ -53,10 +51,9 @@ From tapping **Send** on the phone to seeing the message light up on the dot mat
 ![](media/wifi_matrix_flow.png)
 
 #### **6. Test Code:**
-
 > **Before uploading, change one thing**: replace `WIFI_SSID` and `WIFI_PASS` below with your own Wi-Fi name and password — otherwise it won't connect.
 >
-> Two more conditions must hold at the same time: the Wi-Fi must be **2.4 GHz** (the board doesn't support 5 GHz), and the phone and the robot must be on the **same LAN** — otherwise the browser can't open the board's IP.
+> Two more conditions must hold at the same time: the Wi-Fi must be **2.4 GHz** (the board doesn't support 5 GHz), and the phone and the car must be on the **same LAN** — otherwise the browser can't open the board's IP.
 
 > **This project has two files**: `12_WiFi_DotMatrix.ino` and `webpage.h`. All the page HTML lives in `webpage.h`; the `.ino` keeps only the Arduino logic. Put both files in the same folder — if one is missing, compilation fails.
 
@@ -326,7 +323,6 @@ void IIC_end() {
 ```
 
 #### **7. Code Explanation:**
-
 **(1) Credentials, pins and two parameters**
 
 ```cpp
@@ -537,9 +533,9 @@ int charToIndex(char c) {
 
 `'A' - 'A' = 0` and `'Z' - 'A' = 25`, so letters use ASCII continuity to compute their index directly — no lookup table needed. Digits follow at 26–35, and entry 37 (index 36) is blank, catching everything the font doesn't contain — Chinese characters, punctuation and lowercase letters (already converted by `toUpperCase`) all land in that slot.
 
-#### **8. What You'll See:**
+#### **8. Expected Behavior:**
 
-After power on, the serial port prints:
+After power-on, the serial port prints:
 
 ```text
 Connecting Your WiFi name
@@ -547,7 +543,7 @@ Connecting Your WiFi name
 Dot matrix display ready, open on your phone: http://192.168.1.23
 ```
 
-Connect the phone to the same Wi-Fi, open that address in a browser, and a dark page appears: an input box, a **Send to Dot Matrix** button, and two lines of instructions below.
+With the phone on the same Wi-Fi and that address opened in a browser, a dark page appears: an input box, a **Send to Dot Matrix** button and two lines of instructions below.
 
 | Input | Dot matrix behavior |
 | --- | --- |

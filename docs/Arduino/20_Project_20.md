@@ -13,7 +13,6 @@ The instruction in the QR code is an English word with no spaces and no line bre
 On power-on the pan-tilt turns to 90° and the dot matrix shows a pair of eyes. Hold a card 10 to 25 cm in front of the car's nose: the dot matrix becomes a smiley and the car carries out that card's instruction for one second; take the card away and the eyes return, waiting for the next one.
 
 #### **2. Parts List:**
-
 Parts used in this lesson:
 
 |     |     |     |
@@ -21,7 +20,6 @@ Parts used in this lesson:
 | ![](../media/kit_09.jpg){width=170px}<br><span style="font-size:0.85em">TinyVision AI vision camera ×1</span> | ![](../media/kit_13.png){width=170px}<br><span style="font-size:0.85em">9G servo (180°) ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
 | ![](../media/kit_02.png){width=170px}<br><span style="font-size:0.85em">Mini tracked tank robot bottom assembly ×1</span> | ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
 #### **3. Parameters:**
-
 | Item | Parameter |
 | --- | --- |
 | Recognition mode | `qr` |
@@ -49,7 +47,7 @@ This lesson still uses mounting B: the module sits on the pan-tilt with the lens
 | Pan-tilt servo | IO42 |
 | Left wheel AIN / AEN | IO38 / IO21 |
 | Right wheel BIN / BEN | IO40 / IO41 |
-
+| Dot matrix CLK / DIN | IO9 / IO8 |
 
 **Mounting B:**
 
@@ -57,7 +55,7 @@ This lesson still uses mounting B: the module sits on the pan-tilt with the lens
 
 ![](media/B-2.png)
 
-![](media/IMG_9095.JPG)
+![](media/IMG_9095.jpg)
 
 ![](media/B-3.png)
 
@@ -70,7 +68,6 @@ Each round does only three things: read the card, decide whether it is a new one
 ![](media/qr_task_flow.png)
 
 #### **6. Test Code:**
-
 > **This lesson's project has three files**: `20_QR_Code_Tasks.ino`, `AiCam.h`, and `AiCam.cpp`. All serial traffic and string parsing for the vision module live in `AiCam.cpp`; put all three files in the same folder — compilation fails if any is missing.
 
 ```cpp
@@ -115,7 +112,7 @@ Each round does only three things: read the card, decide whether it is a new one
 // ===== Expression numbers =====
 // Using numbers makes it easy for showFace() to detect expression changes and avoid redundant display writes
 #define FACE_EYES  0  // Standby: eyes
-#define FACE_SMILE 1  // Card recognized: smiling face
+#define FACE_SMILE 1  // Card recognized: smiley
 
 // 16 bytes correspond to 16 columns, each byte's 8 bits to 8 rows in a column, bit0 is the top row
 
@@ -125,7 +122,7 @@ unsigned char eyes[] = {
   0x00, 0x00, 0x1C, 0x1C, 0x00, 0x00, 0x00, 0x00
 };
 
-// Smiling face
+// Smiley
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
@@ -226,7 +223,7 @@ void loop() {
 //   LEFT     left 50 / right 150, arc to the left
 //   RIGHT    left 150 / right 50, arc to the right
 void doTask(String qr) {
-  showFace(FACE_SMILE);  // Show smiling face
+  showFace(FACE_SMILE);  // Show smiley
 
   // Convert to uppercase before comparing
   String key = qr;
@@ -264,7 +261,7 @@ void showFace(int face) {
   if (face == FACE_EYES) {
     matrix_display(eyes);   // Standby
   } else {
-    matrix_display(smile);  // Smiling face
+    matrix_display(smile);  // Smiley
   }
 }
 
@@ -372,7 +369,6 @@ void stopCar()             { driveMotors(0, 0); }            // Stop: duty cycle
 ```
 
 #### **7. Code Explanation:**
-
 **(1) Four parameters**
 
 ```cpp
@@ -526,15 +522,23 @@ If you scan a self-printed card whose content is not one of the four, the car on
 
 Twenty milliseconds per round is 50 Hz, higher than the vision module's frame rate, so every frame is read and none is missed. This matches the rhythm of Lesson 19.
 
-#### **8. What You Will See:**
+#### **8. Expected Behavior:**
+This lesson needs four task cards: print the four below and cut them out (leave a white margin all round, do not cut into the code), or display them on a phone or computer screen for the car to scan.
+
+> Search for "QR code generator" online and a number of free tools are available. Use whichever you prefer to generate the QR images (keep each code within about 10 characters).
+
+|     |     |
+| :---: | :---: |
+| ![](media/qr_forward.png){width=170px}<br><span style="font-size:0.85em">FORWARD</span> | ![](media/qr_backward.png){width=170px}<br><span style="font-size:0.85em">BACKWARD</span> |
+| ![](media/qr_left.png){width=170px}<br><span style="font-size:0.85em">LEFT</span> | ![](media/qr_right.png){width=170px}<br><span style="font-size:0.85em">RIGHT</span> |
 
 At power-on the pan-tilt first turns to 90°, the dot matrix shows eyes, and the Serial Monitor prints `Vision module serial port started`.
 
-Hold a card 10–25 cm in front of the car, aimed at its nose:
+With a card held 10–25 cm in front of the car, aimed at its nose, the Serial Monitor prints:
 
 ```text
 QR code scanned: FORWARD  Byte count 7
-(Car moves forward 1 s, dot matrix shows smiling face)
+(Car moves forward 1 s, dot matrix shows smiley)
 (Remove the card, dot matrix returns to eyes)
 QR code scanned: LEFT  Byte count 4
 (Car arcs to the left for 1 s)

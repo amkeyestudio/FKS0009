@@ -12,8 +12,7 @@ The trick is to replace "power on all the time" with "on, off, on, off, repeated
 
 Speed can therefore be written as a signed number: positive goes forward, negative goes backward, and zero stops — a convention every later lesson reuses. On power-on the car first stands still with a smiley on the dot matrix, then goes forward for two seconds, backward for two seconds, and turns right and left in place for one and a half seconds each, with a half-second stop between segments. In the last segment the duty cycle is ramped up from 0 and back down to 0, so the car speeds up from slow to fast and then slows to a stop, with the heart on the dot matrix scrolling along in sync.
 
-#### **2. Parts list:**
-
+#### **2. Parts List:**
 The parts used in this lesson:
 
 |     |     |
@@ -22,8 +21,7 @@ The parts used in this lesson:
 | ![](../media/kit_06.png){width=200px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_03.png){width=200px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
 > ⚠️ **The motors come fitted on the chassis at the factory; in Chapter 2 you only stack the expansion board onto the controller. This table is for reference only — nothing needs to be removed; the wiring notes below merely show how the connections are made, again for reference, so no assembly or disassembly is required. For the complete parts list, see the kit list in Section 1.4.**
 #### **3. Parameters:**
-
-| Item | Value |
+| Item | Parameter |
 | --- | --- |
 | Channel A (silkscreen AIN/AEN, physical left wheel) | Direction pin IO38, speed pin IO21 |
 | Channel B (silkscreen BIN/BEN, physical right wheel) | Direction pin IO40, speed pin IO41 |
@@ -34,7 +32,6 @@ The parts used in this lesson:
 | Speed-sweep demo | Duty cycle 0 → 255 → 0, step 5, 20 ms per step |
 | Debug serial | 115200 |
 
-> Note: a speed of 150 has been tested to clear the startup dead zone while keeping drag on both wheels low. Fine-tune it for your own floor surface.
 
 #### **4. Wiring:**
 
@@ -43,7 +40,6 @@ The parts used in this lesson:
 | Left motor (physical left wheel) | Channel A (AIN/AEN) | IO38 | IO21 |
 | Right motor (physical right wheel) | Channel B (BIN/BEN) | IO40 | IO41 |
 
-The dot matrix signal lines are the same as in Lesson 1: CLK = IO9, DIN = IO8.
 
 ![](media/Moter_8x16.png)
 
@@ -53,8 +49,7 @@ Speed is signed, so a single branch settles the direction pin and the duty cycle
 
 ![](media/motor_flow.png)
 
-#### **6. Test code:**
-
+#### **6. Test Code:**
 ```cpp
 // ===== Pins =====
 // Dot matrix display
@@ -297,8 +292,7 @@ void loop() {
 }
 ```
 
-#### **7. Code walkthrough:**
-
+#### **7. Code Explanation:**
 **(1) Six pins, two kinds of job**
 
 ```cpp
@@ -421,9 +415,9 @@ Forward, backward, right turn and left turn each run once, with a `stopCar()` an
 
 `duty % 20 == 0` changes the dot matrix frame only every 20 steps. Without that check, 51 loop rounds would roll through the 16 frames more than three times and look like random flashing. `matrix_display_scroll()` uses the same modulo logic as Lesson 1's scrolling; only the frame calculation has been pulled into a function, and the main loop simply passes an increasing `scroll_step`.
 
-#### **8. What you should see:**
+#### **8. Expected Behavior:**
 
-After power on the car stops with a smiley on the display, then enters the loop after 1 second and runs through:
+After power-on the car stops with a smiley on the display, then enters the loop after 1 second and runs through:
 
 1. Forward for 2 seconds (heart on the dot matrix);
 2. Stop for 0.5 seconds (smiley);

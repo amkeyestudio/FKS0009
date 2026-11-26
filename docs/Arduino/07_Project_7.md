@@ -4,14 +4,13 @@
 
 Put the Mini Tracked Tank V4.0 on a black track, press reset, and let go. The mini tracked tank robot completes a lap on its own: quick on the straights, easing the inner wheel back into line through gentle curves, and pivoting in place when a right-angle corner demands it. The five readings you only watched in the last lesson now actually drive the motors.
 
-Which way the line lies depends entirely on the five sensors under the car. The five 0s and 1s combine into 32 patterns, of which you usually meet about a dozen in real running, and each maps to one set of wheel speeds: on the centre line both wheels at the same speed; slightly off, slow the inner wheel and let the outer one run; further off, reverse the inner wheel to twist the body back.
+Which way the line lies depends entirely on the five sensors under the car. The five 0s and 1s combine into 32 patterns, of which you usually meet about a dozen in real running, and each maps to one set of wheel speeds: on the center line both wheels at the same speed; slightly off, slow the inner wheel and let the outer one run; further off, reverse the inner wheel to twist the body back.
 
 Losing the line has a remedy too. A seam, a reflection, or the nose lifting in a corner can make all five sensors read white at once; the car remembers whether the line was last on its left or its right and searches in that direction for a further 1.5 s — if it finds the line it carries on, and only if it does not does it stop.
 
 With the car running straight along the line, push it sideways and it steers itself back; cut a section out of the line and it charges on in the old direction, only stopping after 1.5 s.
 
-#### **2. Required Parts:**
-
+#### **2. Parts List:**
 Parts used in this lesson:
 
 |     |     |     |
@@ -20,7 +19,6 @@ Parts used in this lesson:
 | ![](../media/kit_39.png){width=170px}<br><span style="font-size:0.85em">5-way IIC line-tracking sensor module ×1</span> |  |  |
 > ⚠️ **This lesson adds no new parts — everything was already installed in Chapter 2, so there's nothing to remove. The wiring notes below only show how the connections are made, for reference; no disassembly is needed. For the full parts list, see 1.4 Kit List.**
 #### **3. Parameters:**
-
 | Item | Parameter |
 | --- | --- |
 | Straight-line speed | 115 |
@@ -40,7 +38,6 @@ Parts used in this lesson:
 | Left wheel AIN / AEN | IO38 / IO21 |
 | Right wheel BIN / BEN | IO40 / IO41 |
 
-
 #### **5. Flowchart:**
 
 The five-bit `state` value is the fork in the road for the whole program — look at this diagram before reading the `switch`:
@@ -48,7 +45,6 @@ The five-bit `state` value is the fork in the road for the whole program — loo
 ![](media/track_car_flow.png)
 
 #### **6. Test Code:**
-
 ```cpp
 #include <Wire.h>
 #include <PCF8574.h>
@@ -215,7 +211,6 @@ void loop() {
 ```
 
 #### **7. Code Explanation:**
-
 **(1) Read five channels and pack them into one byte**
 
 ```cpp
@@ -230,7 +225,7 @@ void loop() {
 
 `A` is the far left and `E` the far right. The left shifts arrange the five channels as the bits `ABCDE`, and `|` packs them into a single byte. "Which channels see the line" now becomes one number from 0 to 31, so `switch` can branch directly on it instead of writing five nested `if`s.
 
-For example, `0b00100` means only the centre channel C is on the line (normal straight travel), while `0b11000` means the far-left and second channels are both on it (well off to the left).
+For example, `0b00100` means only the center channel C is on the line (normal straight travel), while `0b11000` means the far-left and second channels are both on it (well off to the left).
 
 **(2) Three speed constants**
 
@@ -240,7 +235,7 @@ For example, `0b00100` means only the centre channel C is on the line (normal st
 #define RECOVER_OUT  125  // Outer wheel forward speed during sharp turns
 ```
 
-`BASE_SPEED 115` is roughly a 45% duty cycle — the normal line-following speed. On a sharp turn the inner wheel gets `-95` (reverse) and the outer `125` (forward); that 30-point gap pulls the nose back. All three numbers were tuned by trial and depend on the robot's weight, the floor and the battery level.
+`BASE_SPEED 115` is roughly a 45% duty cycle — the normal line-following speed. On a sharp turn the inner wheel gets `-95` (reverse) and the outer `125` (forward); that 30-point gap pulls the nose back. All three numbers were tuned by trial and depend on the car's weight, the floor and the battery level.
 
 **(3) `driveMotors()` takes its arguments in the opposite order from the last lesson**
 
@@ -262,7 +257,7 @@ As long as any channel still sees the line, the timer is reset. Only when all fi
 
 The other memory variable, `lastDir`, isn't set here; it's assigned at the end of each `switch` branch below and exists solely to decide which way to search when all five channels read 0.
 
-**(5) Centred and fine adjustment**
+**(5) Centered and fine adjustment**
 
 ```cpp
     case 0b00100:
@@ -278,7 +273,7 @@ The other memory variable, `lastDir`, isn't set here; it's assigned at the end o
       break;
 ```
 
-Three "centred" states are merged into one case: only C on the line, B+C on the line, and all five on the line (crossing a wide strip of black tape) are all treated as straight travel.
+Three "centered" states are merged into one case: only C on the line, B+C on the line, and all five on the line (crossing a wide strip of black tape) are all treated as straight travel.
 
 When it drifts slightly left (B and C on the line), the left wheel drops from 115 to 85 while the right stays put, so the nose naturally swings back left onto the line. The differential here is only 30 — a gentle correction.
 
@@ -298,9 +293,9 @@ When it drifts slightly left (B and C on the line), the left wheel drops from 11
       break;
 ```
 
-As the error grows, two stages take over: first the left wheel drops to 45 and the right rises to 125; if it gets worse (channel A is on the line too), the left wheel reverses at 95 while the right runs forward at 125, spinning the robot left on the spot.
+As the error grows, two stages take over: first the left wheel drops to 45 and the right rises to 125; if it gets worse (channel A is on the line too), the left wheel reverses at 95 while the right runs forward at 125, spinning the car left on the spot.
 
-The bigger the error, the harder the correction. A single fixed differential causes two problems: too small and the robot sails off the bend; too large and the slightest wobble on a straight makes it yank the wheel, tracing an "S". Three levels strike a balance between those extremes.
+The bigger the error, the harder the correction. A single fixed differential causes two problems: too small and the car sails off the bend; too large and the slightest wobble on a straight makes it yank the wheel, tracing an "S". Three levels strike a balance between those extremes.
 
 The three right-side groups mirror the left side: swap the two wheels and the numbers stay the same.
 
@@ -327,11 +322,11 @@ The three right-side groups mirror the left side: swap the two wheels and the nu
       break;
 ```
 
-Losing the line is common on a track — a seam, a reflection, or the nose lifting in a corner can make all five channels read 0 for an instant. Stop immediately and the robot lurches along, starting and stopping repeatedly. Give it 1.5 seconds to keep turning in the direction it was heading and it usually finds the line itself; only when that time runs out with no line found has it really left the track, and then it stops.
+Losing the line is common on a track — a seam, a reflection, or the nose lifting in a corner can make all five channels read 0 for an instant. Stop immediately and the car lurches along, starting and stopping repeatedly. Give it 1.5 seconds to keep turning in the direction it was heading and it usually finds the line itself; only when that time runs out with no line found has it really left the track, and then it stops.
 
-That's where `lastDir` comes in: 1 means the line was just on the left, 2 means on the right, and 0 means it had been going straight. Without it, the robot has no idea which way to turn after losing the line and can only stop where it stands.
+That's where `lastDir` comes in: 1 means the line was just on the left, 2 means on the right, and 0 means it had been going straight. Without it, the car has no idea which way to turn after losing the line and can only stop where it stands.
 
-That 1.5 seconds was tuned by trial: too short and a normal corner is mistaken for a lost line; too long and the robot spins uselessly for ages after it has run off before finally stopping.
+That 1.5 seconds was tuned by trial: too short and a normal corner is mistaken for a lost line; too long and the car spins uselessly for ages after it has run off before finally stopping.
 
 **(8) One cycle every 5 ms**
 
@@ -339,38 +334,30 @@ That 1.5 seconds was tuned by trial: too short and a normal corner is mistaken f
   delay(5);
 ```
 
-Two hundred decisions per second is far faster than the robot can actually turn, so corrections never lag. Remove the delay and the I2C bus gets saturated with reads, which slows the overall rhythm instead.
+Two hundred decisions per second is far faster than the car can actually turn, so corrections never lag. Remove the delay and the I2C bus gets saturated with reads, which slows the overall rhythm instead.
 
-#### **8. What You'll See:**
+#### **8. Expected Behavior:**
 
-The Serial Monitor prints a startup message once in `setup()` and then goes quiet — there's no `Serial.print` in `loop()`, so the 5 ms rhythm is left entirely to the motors.
+This lesson's code does not print anything to the Serial Monitor while running (there is no `Serial.print` in `setup()` or `loop()`, so the 5 ms rhythm is left entirely to the motors); simply observe the car following the line.
 
-| Situation | What happens |
+| Situation | Behavior |
 | --- | --- |
-| Centred on the line | Straight ahead at speed 115 |
+| Centered on the line | Straight ahead at speed 115 |
 | Gentle curve | Inner wheel slows, the body eases smoothly back onto the line |
-| Right-angle turn | Inner wheel briefly reverses, the robot pivots on the spot |
+| Right-angle turn | Inner wheel briefly reverses, the car pivots on the spot |
 | Ran off the end of the line | Turns on the spot to search; if it finds the line within 1.5 s it carries on |
 | Completely off the line | Stops after 1.5 s |
 
-> [Image to be added] A photo of the robot completing a full lap on the A2 line-tracking track (one shot on a curve and one on a straight would be ideal).
-
-When tuning, try these in order:
-
-1. First run it on a straight. If it weaves from side to side, `BASE_SPEED` is too high or the sensors sit too far off the ground — drop it to 100 and try again.
-2. Then try a gentle curve. If it cuts the inside and runs off, raise `RECOVER_OUT` from 125 to 135 so the outer wheel turns faster.
-3. Finally, a right-angle turn. If it pivots but can't quite make it, raise `RECOVER_IN` from 95 to 110 for more force on the reversing side.
-
-If the robot turns the wrong way, the A and B motor wires are reversed: swap the 2P plugs of the two motors — no code change needed.
+> [Image to be added] A photo of the car completing a full lap on the A2 line-tracking track (one shot on a curve and one on a straight would be ideal).
 
 #### **9. Troubleshooting:**
 
-(1) The robot weaves on straights: lower `BASE_SPEED` from 115, try 100 for example, and check that the sensors aren't too far off the ground — mounted high, the reflection is weak and the direction drifts.
+(1) The car weaves on straights: lower `BASE_SPEED` from 115, try 100 for example, and check that the sensors aren't too far off the ground — mounted high, the reflection is weak and the direction drifts.
 
 (2) It cuts the inside and runs off on a gentle curve: raise `RECOVER_OUT` from 125 to 135; the faster outer wheel brings the body back onto the line.
 
 (3) It pivots on a right-angle turn but can't complete it: raise `RECOVER_IN` from 95 to 110 for more power on the reversing side.
 
-(4) The whole robot turns the wrong way: first check whether the A and B motor wires are reversed — swapping the two motors' 2P plugs is enough, with no code change. If the wiring is fine, look at the two arguments of `driveMotors()`, which puts the left wheel first.
+(4) The whole car turns the wrong way: first check whether the A and B motor wires are reversed — swapping the two motors' 2P plugs is enough, with no code change. If the wiring is fine, look at the two arguments of `driveMotors()`, which puts the left wheel first.
 
-(5) After a corner the robot spins aimlessly and can't find the line: when all five channels read 0 it searches for 1.5 seconds in the direction remembered in `lastDir`, then stops. If this section often loses the line, raise the search time from 1500 to 2000.
+(5) After a corner the car spins aimlessly and can't find the line: when all five channels read 0 it searches for 1.5 seconds in the direction remembered in `lastDir`, then stops. If this section often loses the line, raise the search time from 1500 to 2000.

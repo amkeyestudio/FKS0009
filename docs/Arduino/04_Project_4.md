@@ -12,8 +12,7 @@ Eight actions chain together one after the other: go straight, measure distance,
 
 A book stood up in front of the car is all you need to try it: with the way clear it drives straight and the dot matrix shows a heart; push it to within 15 cm of the book and it stops, flashes an exclamation mark, turns the pan-tilt to one side with a looking-left icon, measures, turns to the other side with a looking-right icon, measures again, compares both sides, turns toward the more open side for half a second, recenters and carries on. Move the book to the car's other side and it will go around the opposite way.
 
-#### **2. Parts list:**
-
+#### **2. Parts List:**
 The parts used in this lesson:
 
 |     |     |     |
@@ -22,8 +21,7 @@ The parts used in this lesson:
 | ![](../media/kit_02.png){width=170px}<br><span style="font-size:0.85em">Mini tracked tank robot bottom assembly ×1</span> | ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
 > ⚠️ **These parts were already fitted on the car in Chapter 2. This table is for reference only — nothing needs to be taken off and put back; the wiring notes below merely show how the connections are made, again for reference, so no assembly or disassembly is required. For the complete parts list, see the kit list in Section 1.4.**
 #### **3. Parameters:**
-
-| Item | Value |
+| Item | Parameter |
 | --- | --- |
 | Ultrasonic | Trig = IO13, Echo = IO12 |
 | Pan-tilt servo | IO42, 50 Hz, pulse width 500–2400 µs for 0–180° |
@@ -57,8 +55,7 @@ The main loop has a single chain of decisions: measure ahead first and keep goin
 
 ![](media/avoid_flow.png)
 
-#### **6. Test code:**
-
+#### **6. Test Code:**
 ```cpp
 #include <ESP32Servo.h>  // Servo library
 
@@ -361,8 +358,7 @@ void IIC_end() {
 }
 ```
 
-#### **7. Code walkthrough:**
-
+#### **7. Code Explanation:**
 **(1) The servo object and its dedicated pin**
 
 ```cpp
@@ -487,9 +483,9 @@ Compare the two readings and turn toward the larger one, at the full speed of 25
 
 `delay(500)` is the duration of the turn. With no encoder in the code, how far it turns can only be estimated as speed × time: 500 ms at full speed comes out around 60–90°; as the battery drops or the floor gets slippery, the same time produces a smaller angle. This is the only adjustable quantity in the lesson — add time if the turn falls short.
 
-#### **8. What you should see:**
+#### **8. Expected Behavior:**
 
-After power on, the pan-tilt returns to center, the dot matrix displays a heart and the car drives straight; each round prints **Distance ahead: XX cm** to the serial port:
+After power-on, the pan-tilt returns to center, the dot matrix displays a heart and the car drives straight; each round prints **Distance ahead: XX cm** to the serial port:
 
 1. **No obstacle** (distance > 15 cm): keep going straight, heart on the dot matrix.
 2. **Obstacle ahead** (distance ≤ 15 cm): stop and flash the exclamation mark; swing the pan-tilt to one side, show the **look-left** icon and measure, then swing to the other side, show **look-right** and measure; compare the two distances, turn for 500 ms toward the side with more space, then recenter and carry straight on.

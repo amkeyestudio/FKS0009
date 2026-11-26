@@ -12,17 +12,15 @@ Run it open and closed a few times with nothing in the jaws, until you can see w
 
 At power-on the fingers first close to 90°, then open and close, taking about 0.75 s each way and pausing half a second at each end; the serial port prints one startup line.
 
-#### **2. Required Parts:**
-
+#### **2. Parts List:**
 Parts used in this lesson:
 
-|     |     |     |
-| :---: | :---: | :---: |
-| ![](../media/kit_08.png){width=170px}<br><span style="font-size:0.85em">Large mechanical gripper (partly assembled) ×1</span> | ![](../media/kit_13.png){width=170px}<br><span style="font-size:0.85em">9G servo (180°, with cross horn) ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
-| ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |  |  |
+|     |     |
+| :---: | :---: |
+| ![](../media/kit_08.png){width=170px}<br><span style="font-size:0.85em">Large mechanical gripper (partly assembled) ×1</span> | ![](../media/kit_13.png){width=170px}<br><span style="font-size:0.85em">9G servo (180°, with cross horn) ×1</span> |
+| ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
 > ⚠️ **The gripper was already installed in Chapter 2. This table is for reference only — do not remove it. The wiring notes below only show how the connections are made, for reference; no disassembly is needed. For the full parts list, see 1.4 Kit List.**
 #### **3. Parameters:**
-
 | Item | Parameter |
 | --- | --- |
 | Signal pin | IO11 |
@@ -35,7 +33,7 @@ Parts used in this lesson:
 
 #### **4. Wiring:**
 
-| Servo wire | Colour (typical) | Connected to |
+| Servo wire | Color (typical) | Connected to |
 | --- | --- | --- |
 | Signal | Orange / yellow | IO11 |
 | Power | Red | 5V |
@@ -45,7 +43,6 @@ Parts used in this lesson:
 
 ![](media/PRO9.png)
 
-
 #### **5. Flowchart:**
 
 The gripper has no branches, just a four-beat loop: open, wait, close, wait. The waits decide whether the movement is easy to see.
@@ -53,7 +50,6 @@ The gripper has no branches, just a four-beat loop: open, wait, close, wait. The
 ![](media/gripper_flow.png)
 
 #### **6. Test Code:**
-
 ```cpp
 #include <ESP32Servo.h>
 
@@ -99,7 +95,6 @@ void loop() {
 ```
 
 #### **7. Code Explanation:**
-
 **(1) Two constants**
 
 ```cpp
@@ -127,7 +122,7 @@ These four lines are in `setup()`. The ESP32-S3 has four hardware timers in tota
   clawServo.attach(CLAW_SERVO_PIN, 500, 2500);
 ```
 
-50 Hz is the standard servo period: one 20 ms frame, with the HIGH width deciding the angle. The three arguments of `attach()` are the pin, the minimum pulse width and the maximum. The pan-tilt in Lesson 8 uses 500–2400; here it goes to 2500 — the same 9G servo, but a slightly higher ceiling gains a few more degrees, useful or not depending on the mechanical travel.
+50 Hz is the standard servo period: one 20 ms frame, with the HIGH width deciding the angle. The three arguments of `attach()` are the pin, the minimum pulse width and the maximum. The pan-tilt in Lesson 4 uses 500–2400; Lesson 8 and this lesson go up to 2500 — the same 9G servo, but a slightly higher ceiling gains a few more degrees, useful or not depending on the mechanical travel.
 
 **(4) Write 90° at power-on**
 
@@ -175,7 +170,7 @@ Half a second at full open and another at full close make the movement easy to f
 
 This lesson only verifies the mechanism. Its real use is "grip → lift → release"; Lessons 16 and 17 will bring the gripper into the actual tasks — once it has grabbed something it moves on to the next step instead of swinging back and forth.
 
-#### **8. What You'll See:**
+#### **8. Expected Behavior:**
 
 At power-on the fingers close to 90°, then the open-close loop begins and the Serial Monitor prints:
 
@@ -183,7 +178,7 @@ At power-on the fingers close to 90°, then the open-close loop begins and the S
 Gripper servo started, opening and closing repeatedly between 90 and 140 degrees...
 ```
 
-| Stage | What happens |
+| Stage | Behavior |
 | --- | --- |
 | At power-on | Closes to 90°, fingers fully together |
 | 90° → 140° | Opens in about 0.75 s |

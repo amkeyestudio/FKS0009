@@ -4,15 +4,13 @@
 
 ![From a distance it looks like a picture; up close, it's all dots](media/intro_01.jpg){width=520px}
 
-From a distance it is a picture; up close, nothing but dots. The 8×16 panel on the front of the car is how it talks to you — a heart when it sets off, an exclamation mark when something gets in its way, a smile when it scores. Lesson 1 leaves the motors and sensors alone and simply brings that face to life.
+From a distance it is a picture; up close, nothing but dots. The 8×16 panel on the front of the car is how it talks to you — a heart when it sets off, an exclamation mark when something gets in its way, a smiley when it scores. Lesson 1 leaves the motors and sensors alone and simply brings that face to life.
 
 Here is the puzzle: the panel has 128 LEDs in total, far more than the controller has spare pins. The trick is a driver chip hidden behind the panel that looks after the lights for you. The controller sends out just two lines, one clock and one data, feeding the picture in bit by bit; the panel scans itself column by column at high speed, and your eye fuses it into a steady image.
 
 What you actually send is only 16 bytes, called the **font bitmap**: one byte per column, and the 8 bits inside a byte cover the 8 rows of that column, with the top row mapping to the lowest bit. A frame adds up to 18 bytes and 144 clock bits, and pushing the whole thing through takes about 1.3 ms — far shorter than the 40 ms the human eye can resolve, so the screen appears to light up "all at once". This lesson provides two bitmaps, a heart and a smiley, and finally sets the smiley scrolling sideways.
 
-
-#### **2. Parts list:**
-
+#### **2. Parts List:**
 The parts used in this lesson:
 
 |     |     |
@@ -21,14 +19,13 @@ The parts used in this lesson:
 | ![](../media/kit_03.png){width=200px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | ![](../media/kit_04.png){width=200px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
 > ⚠️ **The dot matrix was already installed in Chapter 2. This table is for reference only — nothing needs to be removed; the wiring notes below merely show how the connections are made, again for reference, so no assembly or disassembly is required. For the complete parts list, see the kit list in Section 1.4.**
 #### **3. Parameters:**
-
-| Item | Value |
+| Item | Parameter |
 | --- | --- |
 | Display spec | 8×16 LED dot matrix (8 rows × 16 columns) |
 | Signal pins | CLK = IO9, DIN = IO8 |
 | Font bitmap format | 16 bytes, one byte for the 8 rows of one column, bit0 at the top row |
 | Brightness control | Command 0x8A, brightness 8/16 |
-| Display sequence | Heart 3 s → smile 2 s → scrolling smile (150 ms per frame) |
+| Display sequence | Heart 3 s → smiley 2 s → scrolling smiley (150 ms per frame) |
 
 #### **4. Wiring:**
 
@@ -47,8 +44,7 @@ Sending one frame takes four steps: first tell the chip **to write data**, then 
 
 ![](media/matrix_flow.png)
 
-#### **6. Test code:**
-
+#### **6. Test Code:**
 ```cpp
 // Dot matrix display signal lines (see wiring table)
 #define CLK_Pin 9   // Clock, connect to module CLK
@@ -167,8 +163,7 @@ void IIC_end() {
 }
 ```
 
-#### **7. Code walkthrough:**
-
+#### **7. Code Explanation:**
 **(1) Two signal lines**
 
 ```cpp
@@ -210,7 +205,7 @@ void setup() {
 
 Right after `pinMode`, pull both lines high. That combination is the bus idle state — CLK high, DIN high — so the start condition that follows has a clear contrast to work with. On power on the display buffer holds random values, so send 16 zeroes first to clear it and avoid a flash of garbage before the first frame.
 
-**(4) The first two phases of loop: heart for 3 s, smile for 2 s**
+**(4) The first two phases of loop: heart for 3 s, smiley for 2 s**
 
 ```cpp
 void loop() {
@@ -353,13 +348,13 @@ Two spots that commonly trip people up:
 
 > The output generated in the third figure is exactly where `smile[]` in the code came from — use it to check your answer.
 
-#### **8. What you should see:**
+#### **8. Expected Behavior:**
 
-After power on the panel clears first, then loops to the following rhythm:
+After power-on the panel clears first, then loops through the following rhythm:
 
-1. Display the heart for 3 seconds;
-2. Display the smiley for 2 seconds;
-3. Scroll the whole smiley to the left, one column every 150 ms; after 16 columns it returns to the original picture and starts again from step 1.
+1. The heart is displayed for 3 seconds;
+2. The smiley is displayed for 2 seconds;
+3. The smiley scrolls to the left as a whole, one column every 150 ms; after 16 columns it returns to the original picture and the sequence restarts from step 1.
 
 If the heart and smiley light up clearly and the scrolling is continuous with no missing columns, the wiring and the font bitmaps are both correct.
 

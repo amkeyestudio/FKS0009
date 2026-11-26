@@ -10,28 +10,26 @@ The eye is still the ultrasonic module on the pan-tilt, firing a pulse forward e
 
 Each band maps to one action and one expression — heart, smiley, down arrow, question mark. With no remote control and no line on the floor, the car decides whether to advance or retreat from this single number; push your hand toward the car and pull it back again, and you can watch it switch back and forth between the four bands.
 
-#### **2. Required Parts:**
-
+#### **2. Parts List:**
 Parts used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
 | ![](../media/kit_05.png){width=170px}<br><span style="font-size:0.85em">Ultrasonic module ×1</span> | ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
 | ![](../media/kit_02.png){width=170px}<br><span style="font-size:0.85em">Mini tracked tank robot bottom assembly ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |  |
-> ⚠️ **These parts were already installed on the robot in Chapter 2. This table is for reference only — do not remove and reinstall them. The wiring notes below only show how the connections are made, for reference; no disassembly is needed. For the full parts list, see 1.4 Kit List.**
+> ⚠️ **These parts were already installed on the car in Chapter 2. This table is for reference only — do not remove and reinstall them. The wiring notes below only show how the connections are made, for reference; no disassembly is needed. For the full parts list, see 1.4 Kit List.**
 #### **3. Parameters:**
-
 | Item | Parameter |
 | --- | --- |
 | Following range | 30–50 cm, move forward |
-| Stop range | 10–30 cm, stop and show a smiling face |
+| Stop range | 10–30 cm, stop and show a smiley |
 | Back-up range | Less than 10 cm, back up |
 | Target lost | Greater than 50 cm or invalid reading, stop and show a question mark |
 | Distance measurement period | 100 ms |
 | Forward speed | 150 for each wheel |
-| Back-up speed | Left wheel 150, right wheel 105 (the robot drifts slightly when backing up) |
+| Back-up speed | Left wheel 150, right wheel 105 (the car drifts slightly when backing up) |
 | Serial baud rate | 115200 |
-| Dot matrix icons | Heart = following, smiling face = stop, down arrow = back up, question mark = lost |
+| Dot matrix icons | Heart = following, smiley = stop, down arrow = back up, question mark = lost |
 
 #### **4. Wiring:**
 
@@ -46,7 +44,7 @@ Parts used in this lesson:
 | Right motor | BIN (direction) | IO40 |
 | Right motor | BEN (speed) | IO41 |
 
-> **Note**: The components in the wiring diagram are shown only to illustrate the connections. When wiring the robot, you do not need to remove the casings of the components listed above.
+> **Note**: The components in the wiring diagram are shown only to illustrate the connections. When wiring the car, you do not need to remove the casings of the components listed above.
 
 ![](media/PRO5.png)
 
@@ -57,7 +55,6 @@ The main loop is a single chain of decisions, with one set of actions for each r
 ![](media/follow_flow.png)
 
 #### **6. Test Code:**
-
 ```cpp
 // ===== Dot matrix display pins =====
 #define CLK_Pin 9   // Clock, connect to dot matrix CLK
@@ -86,7 +83,7 @@ unsigned char heart[] = {
   0x7c, 0x3e, 0x1c, 0x08, 0x00, 0x00, 0x00, 0x00
 };
 
-// Smiling face: distance OK, stop
+// Smiley: distance OK, stop
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
@@ -127,7 +124,7 @@ void setup() {
   ledcAttach(MOTOR_BEN, 1000, 8);
   ledcAttach(MOTOR_AEN, 1000, 8);
 
-  // Stop and show smiling face on power on
+  // Stop and show smiley on power on
   stopMotor();
   matrix_display(smile);
 }
@@ -290,7 +287,6 @@ void IIC_end() {
 ```
 
 #### **7. Code Explanation:**
-
 **(1) Three thresholds define four ranges**
 
 ```cpp
@@ -338,7 +334,7 @@ The four checks are linked into a chain by `else if`: as soon as an earlier cond
 
 Every condition states both bounds (`> 30` paired with `<= 50`, not just an upper limit), so the value 30 falls only into the second range and never into two at once.
 
-The final `else` catches two cases: a distance above 50 cm, or **a reading of 0**. Note the deliberate `distance > 0` in the third check — without it, 0 cm satisfies `distance < closeDistance`, and the robot would treat "open space with no echo" as "an obstacle right in its face" and jerk backwards. With `> 0` in place, 0 falls through to `else`, which shows the question mark and stays put — the most conservative way to handle untrustworthy data.
+The final `else` catches two cases: a distance above 50 cm, or **a reading of 0**. Note the deliberate `distance > 0` in the third check — without it, 0 cm satisfies `distance < closeDistance`, and the car would treat "open space with no echo" as "an obstacle right in its face" and jerk backwards. With `> 0` in place, 0 falls through to `else`, which shows the question mark and stays put — the most conservative way to handle untrustworthy data.
 
 **(4) `setMotor()` only writes PWM; it never touches direction**
 
@@ -371,9 +367,9 @@ void back(int rightSpeed, int leftSpeed) {
 }
 ```
 
-The order is "set direction first, then speed, and swap the icon along the way." Both direction pins move together, so the robot can only go straight forward or straight back — this lesson has no turning.
+The order is "set direction first, then speed, and swap the icon along the way." Both direction pins move together, so the car can only go straight forward or straight back — this lesson has no turning.
 
-If you call only `setMotor()` while the direction pins still hold their previous values, the robot runs in last cycle's direction — the most common trap when debugging.
+If you call only `setMotor()` while the direction pins still hold their previous values, the car runs in last cycle's direction — the most common trap when debugging.
 
 **(6) Left and right get different values when backing up**
 
@@ -381,7 +377,7 @@ If you call only `setMotor()` while the direction pins still hold their previous
     back(105, 150);
 ```
 
-The differential isn't a typo. With equal speeds the robot backs straight until the obstacle is completely out of sight, then stops abruptly. Giving 105 to the right and 150 to the left makes the nose drift to one side while it retreats, so it comes away at an angle and is more likely to see a clear path on the next reading.
+The differential isn't a typo. With equal speeds the car backs straight until the obstacle is completely out of sight, then stops abruptly. Giving 105 to the right and 150 to the left makes the nose drift to one side while it retreats, so it comes away at an angle and is more likely to see a clear path on the next reading.
 
 Lesson 4's obstacle avoidance was "stop, look left, look right"; this lesson is "back away while veering." Both approaches are valid.
 
@@ -393,9 +389,9 @@ Lesson 4's obstacle avoidance was "stop, look left, look right"; this lesson is 
 
 One cycle takes 100 ms, ten measurements per second. If a target approaches at 1 m/s, it moves only 10 cm between readings — smaller than the narrowest range (10 cm) — so it cannot skip a whole range. Push `delay` beyond 300 ms and a fast-approaching object jumps straight from "following" to "in your face", never stopping in the middle range.
 
-#### **8. What You'll See:**
+#### **8. Expected Behavior:**
 
-After power-on the dot matrix shows a smiling face first, and the Serial Monitor prints a line every 100 ms:
+After power-on the dot matrix shows a smiley first, and the Serial Monitor prints a line every 100 ms:
 
 ```text
 Ultrasonic following started
@@ -406,25 +402,23 @@ Current distance: 7 cm
 Current distance: 0 cm
 ```
 
-Make four moves in front of the robot and you'll see four different responses:
+Four gestures made in front of the car produce four kinds of feedback:
 
-| Hand movement | Distance reading | Robot behaviour | Dot matrix |
+| Hand movement | Distance reading | Car behavior | Dot matrix |
 | --- | --- | --- | --- |
 | Held at 30–50 cm | 30–50 | Follows forward | Heart |
-| Held at 10–30 cm | 10–30 | Stops | Smiling face |
+| Held at 10–30 cm | 10–30 | Stops | Smiley |
 | Brought within 10 cm | Less than 10 | Backs up | Down arrow |
 | Hand removed | 0 or above 50 | Stops | Question mark |
 
 > [Image to be added] A screenshot of the four distance readings in the Serial Monitor, showing the switch between following, stopping and backing up.
 
-If the robot lunges forward as you approach, first check that the two ultrasonic signal wires aren't reversed: swap Trig and Echo and the reading stays at 0.
-
 #### **9. Troubleshooting:**
 
-(1) The closer your hand gets, the more the robot lunges forward: Trig and Echo are reversed, so the reading is always 0. Swap the two signal wires in the 4P connector according to the wiring table.
+(1) The closer your hand gets, the more the car lunges forward: Trig and Echo are reversed, so the reading is always 0. Swap the two signal wires in the 4P connector according to the wiring table.
 
-(2) Your hand hovers around 30 cm and the robot jerks between forward and stop: the thresholds are packed too tightly. Leave enough margin between `safeDistance` and `maxDistance`.
+(2) Your hand hovers around 30 cm and the car jerks between forward and stop: the thresholds are packed too tightly. Leave enough margin between `safeDistance` and `maxDistance`.
 
-(3) The robot keeps showing a question mark and won't move: the distance in the Serial Monitor is 0 or above 50 cm, and both fall into the final `else`. Put your hand between 10 and 50 cm and try again; to follow from further away, raise `maxDistance` to 60.
+(3) The car keeps showing a question mark and won't move: the distance in the Serial Monitor is 0 or above 50 cm, and both fall into the final `else`. Put your hand between 10 and 50 cm and try again; to follow from further away, raise `maxDistance` to 60.
 
-(4) The robot always veers to one side when backing up: the left/right difference in `back(105, 150)` is deliberate, giving it an angle as it retreats. It's not a fault.
+(4) The car always veers to one side when backing up: the left/right difference in `back(105, 150)` is deliberate, giving it an angle as it retreats. It's not a fault.

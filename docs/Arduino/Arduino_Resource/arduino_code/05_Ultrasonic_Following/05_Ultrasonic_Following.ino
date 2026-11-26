@@ -25,7 +25,7 @@ unsigned char heart[] = {
   0x7c, 0x3e, 0x1c, 0x08, 0x00, 0x00, 0x00, 0x00
 };
 
-// Smiling face: distance OK, stop
+// Smiley: distance OK, stop
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
@@ -66,7 +66,7 @@ void setup() {
   ledcAttach(MOTOR_BEN, 1000, 8);
   ledcAttach(MOTOR_AEN, 1000, 8);
 
-  // Stop and show smiling face on power on
+  // Stop and show smiley on power on
   stopMotor();
   matrix_display(smile);
 }

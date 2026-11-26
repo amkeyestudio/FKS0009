@@ -13,7 +13,6 @@ The trouble is the scale. Different firmware reports coordinates over different 
 Stand straight ahead and the car drives toward you; move left and the left wheel slows while the right speeds up, turning the car with you; step out of frame and after 300 ms it stops, the dot matrix changing from a smiley back to eyes.
 
 #### **2. Parts List:**
-
 Parts used in this lesson:
 
 |     |     |     |
@@ -21,15 +20,11 @@ Parts used in this lesson:
 | ![](../media/kit_09.jpg){width=170px}<br><span style="font-size:0.85em">TinyVision AI vision camera ×1</span> | ![](../media/kit_13.png){width=170px}<br><span style="font-size:0.85em">9G servo (180°) ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
 | ![](../media/kit_02.png){width=170px}<br><span style="font-size:0.85em">Mini tracked tank robot bottom assembly ×1</span> | ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
 #### **3. Parameters:**
-
 | Item | Parameter |
 | --- | --- |
 | Recognition mode | `face` |
 | Report format | `FACE:x,y` |
 | Following speed | 100 |
-| Proportional coefficient KP | 0.5 |
-| Correction limit | ±80 |
-| Alignment dead zone | ±8 |
 | Calibration frames | 20 |
 | Lost-target stop delay | 300 ms |
 | Pan-tilt angle | 90° (fixed, not part of following) |
@@ -37,7 +32,6 @@ Parts used in this lesson:
 #### **4. Wiring:**
 
 This lesson returns to mounting B: the module sits on the pan-tilt with the lens facing straight ahead, locked to the bracket as described in 2.2.9. `setup()` turns the pan-tilt to 90° and leaves it there; left/right following is handled by the differential speed of the two wheels — whichever side of the frame the target is on, the car corrects toward that side.
-
 
 | Vision module | Controller | Description |
 | --- | :---: | --- |
@@ -50,7 +44,7 @@ This lesson returns to mounting B: the module sits on the pan-tilt with the lens
 | Pan-tilt servo | IO42 (fixed at 90°) |
 | Left wheel AIN / AEN | IO38 / IO21 |
 | Right wheel BIN / BEN | IO40 / IO41 |
-
+| Dot matrix CLK / DIN | IO9 / IO8 |
 
 **Mounting B:**
 
@@ -58,10 +52,9 @@ This lesson returns to mounting B: the module sits on the pan-tilt with the lens
 
 ![](media/B-2.png)
 
-![](media/IMG_9095.JPG)
+![](media/IMG_9095.jpg)
 
 ![](media/B-3.png)
-
 
 #### **5. Flowchart:**
 
@@ -70,7 +63,6 @@ Calibrate for 20 frames at power-on; following begins only after calibration:
 ![](media/face_follow_flow.png)
 
 #### **6. Test Code:**
-
 > **This lesson's project has three files**: `19_Face_Following.ino`, `AiCam.h`, and `AiCam.cpp`. All serial traffic and string parsing for the vision module live in `AiCam.cpp`; put all three files in the same folder — compilation fails if any is missing.
 
 ```cpp
@@ -110,7 +102,7 @@ Calibrate for 20 frames at power-on; following begins only after calibration:
 
 // ===== Expression numbers =====
 #define FACE_EYES  0  // No person: eyes
-#define FACE_SMILE 1  // Person seen: smiling face
+#define FACE_SMILE 1  // Person seen: smiley
 
 // 16 bytes correspond to 16 columns, each byte's 8 bits correspond to 8 rows in one column
 
@@ -120,7 +112,7 @@ unsigned char eyes[] = {
   0x00, 0x00, 0x1C, 0x1C, 0x00, 0x00, 0x00, 0x00
 };
 
-// Smiling face: person seen
+// Smiley: person seen
 unsigned char smile[] = {
   0x00, 0x00, 0x1C, 0x02, 0x02, 0x02, 0x5C, 0x40,
   0x40, 0x5C, 0x02, 0x02, 0x02, 0x1C, 0x00, 0x00
@@ -183,7 +175,7 @@ void loop() {
 
   // Person detected
   lastSeen = millis();   // Refresh detection time
-  showFace(FACE_SMILE);  // Show smiling face
+  showFace(FACE_SMILE);  // Show smiley
 
   int x = aiCam.getFaceX();  // Face center X
 
@@ -232,7 +224,7 @@ void showFace(int face) {
   if (face == FACE_EYES) {
     matrix_display(eyes);   // Standby
   } else {
-    matrix_display(smile);  // Smiling face
+    matrix_display(smile);  // Smiley
   }
 }
 
@@ -338,7 +330,6 @@ void stopCar()             { driveMotors(0, 0); }            // Stop: duty cycle
 ```
 
 #### **7. Code Explanation:**
-
 **(1) Six parameters**
 
 ```cpp
@@ -398,7 +389,7 @@ The grace period matters: the module occasionally misses a frame or two when the
 
 ```cpp
   lastSeen = millis();   // Refresh detection time
-  showFace(FACE_SMILE);  // Show smiling face
+  showFace(FACE_SMILE);  // Show smiley
 
   int x = aiCam.getFaceX();  // Face center X
 ```
@@ -474,7 +465,7 @@ The skeleton of this lesson is almost the same as Lesson 18's line tracking: `re
 
 Lesson 18 has to "search" when the line is lost because the line does not move; Lesson 19 has to "stop" when the person is lost because you cannot catch someone who has walked away — chasing them would be dangerous.
 
-#### **8. What You Will See:**
+#### **8. Expected Behavior:**
 
 With `DEBUG_OUT` enabled, the Serial Monitor prints:
 

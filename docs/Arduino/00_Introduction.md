@@ -7,7 +7,7 @@ Resource pack: [Arduino Resources](./Arduino_Resource.7z)
 Unzip the download and you will find two folders:
 
 - `arduino_code/`: sample programs for all 20 lessons, named by lesson number, such as `01_LED_Dot_Matrix` and `02_Motor_Driving`.
-- `arduino_libraries/`: the third-party libraries the course depends on; see Section 4.4 for how to add libraries in Arduino.
+- `arduino_libraries/`: the third-party libraries the course depends on; see Section 4.4, Installing libraries.
 ![](media/a1.png)
 
 ## 4.2 Installing Arduino IDE
