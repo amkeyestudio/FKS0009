@@ -2,7 +2,7 @@
 
 #### **1. Introduction:**
 
-![A bat flying at night](media/intro_03.jpg){width=520px}
+![A bat flying at night](media/intro_03.jpg)
 
 A bat in a pitch-black cave shouts once and listens for the echo to tell whether there is a wall ahead. The ultrasonic module does the same thing, except that the sound is changed to 40 kHz, which human ears cannot hear.
 
@@ -15,7 +15,7 @@ Components used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
-| ![](../media/kit_05.png){width=170px}<br><span style="font-size:0.85em">Ultrasonic module ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
+| ![](../media/kit_05.png)<br><span style="font-size:0.85em">Ultrasonic module ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
 > ⚠️ **The ultrasonic module was already installed together with the pan-tilt in Chapter 2. This table is for reference only, so there is no need to disassemble it; the wiring notes below only describe the wiring method for reference and do not require disassembly. See the kit list in 1.4 for the full bill of materials.**
 
 #### **3. Parameters:**

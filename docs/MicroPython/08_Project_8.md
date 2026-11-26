@@ -2,7 +2,7 @@
 
 #### **1. Introduction:**
 
-![A micro servo and its accessories](media/intro_08.jpg){width=520px}
+![A micro servo and its accessories](media/intro_08.jpg)
 
 In the obstacle avoidance of Lesson 4 the car turns its head left and right to take a look each way — the part doing the turning is this small servo: the ultrasonic module sits on a pan-tilt bracket mounted on top of it, so when the servo turns, the sensor sweeps with it. The assembly instructions asked you to set it to 90° before fixing it in place, precisely so that the sensor pointing straight ahead matches 90° in the program.
 
@@ -17,7 +17,7 @@ Components used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
-| ![](../media/kit_13.png){width=170px}<br><span style="font-size:0.85em">9G servo (180°, with cross arm) ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
+| ![](../media/kit_13.png)<br><span style="font-size:0.85em">9G servo (180°, with cross arm) ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
 > ⚠️ **The servo was centered at 90° and installed in Chapter 2. This table is for reference only, so there is no need to remove anything; the wiring notes below only describe the wiring method for reference and do not require disassembly. See the kit list in 1.4 for the full bill of materials.**
 
 #### **3. Parameters:**

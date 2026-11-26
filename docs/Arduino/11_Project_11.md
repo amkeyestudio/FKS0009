@@ -2,7 +2,7 @@
 
 #### **1. Introduction:**
 
-![RC car clearing an obstacle](media/intro_11.jpg){width=520px}
+![RC car clearing an obstacle](media/intro_11.jpg)
 
 Give the car a remote: press a direction key and it moves, release and it stops. But infrared is one-way — the car can't answer back — so how do you know it still hears you? Add a 1.5 s watchdog: every valid key restarts the timer, and if no new command arrives before it runs out, the car stops by itself.
 
@@ -17,8 +17,8 @@ Parts used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
-| ![](../media/kit_12.png){width=200px}<br><span style="font-size:0.85em">17-key IR remote control (JMFP-4) ×1</span> | ![](../media/ir_receiver.png){width=200px}<br><span style="font-size:0.85em">IR receiver ×1</span> | ![](../media/kit_04.png){width=200px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
-| ![](../media/kit_03.png){width=200px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | ![](../media/kit_02.png){width=200px}<br><span style="font-size:0.85em">Mini tracked tank robot bottom assembly ×1</span> |  |
+| ![](../media/kit_12.png)<br><span style="font-size:0.85em">17-key IR remote control (JMFP-4) ×1</span> | ![](../media/ir_receiver.png)<br><span style="font-size:0.85em">IR receiver ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
+| ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | ![](../media/kit_02.png)<br><span style="font-size:0.85em">Mini tracked tank robot bottom assembly ×1</span> |  |
 > ⚠️ **All parts were installed back in Chapter 2; this table is for reference only — there is nothing to take apart. The wiring notes below only show how the connections are made, for reference; no assembly or disassembly is required. For the complete parts list, see 1.4 Kit Parts List.**
 #### **3. Parameters:**
 | Item | Parameter |

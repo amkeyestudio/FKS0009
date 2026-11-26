@@ -2,7 +2,7 @@
 
 #### **1. Introduction:**
 
-![Controlling a car with a phone](media/intro_14.jpg){width=520px}
+![Controlling a car with a phone](media/intro_14.jpg)
 
 Use the phone as a remote — this time to drive the car. A direction pad on the page: hold a key and the car goes, release and it stops. Unlike an IR remote, Wi-Fi has no directionality — it works through a wall or from behind the car, as long as everything is on the same LAN.
 
@@ -17,8 +17,8 @@ Parts used in this lesson:
 
 |     |     |
 | :---: | :---: |
-| ![](../media/kit_04.png){width=200px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_02.png){width=200px}<br><span style="font-size:0.85em">Mini tracked tank robot bottom assembly ×1</span> |
-| ![](../media/kit_03.png){width=200px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | <span style="font-size:0.85em">2.4 GHz wireless router or phone hotspot ×1</span> |
+| ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_02.png)<br><span style="font-size:0.85em">Mini tracked tank robot bottom assembly ×1</span> |
+| ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | <span style="font-size:0.85em">2.4 GHz wireless router or phone hotspot ×1</span> |
 > ⚠️ **All parts were installed back in Chapter 2; this table is for reference only — there is nothing to take apart. The wiring notes below only show how the connections are made, for reference; no assembly or disassembly is required. For the complete parts list, see 1.4 Kit Parts List.**
 #### **3. Parameters:**
 | Item | Parameter |
@@ -316,7 +316,7 @@ The phone page shows a direction pad; hold a button and the car keeps moving, re
 
 (2) **Nothing at all on serial?** Press the RESET button on the board and try again — the previous sketch may be stuck.
 
-![](media/RESET.png){width=340px}
+![](media/RESET.png)
 
 (3) **Dots keep printing on serial, no IP?** Wi-Fi connection failed. The router must be **2.4 GHz**; the board doesn't support 5 GHz. If you have no 2.4 G network, turn on a phone hotspot (hotspots default to 2.4 G).
 

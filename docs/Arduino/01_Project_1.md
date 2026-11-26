@@ -2,7 +2,7 @@
 
 #### **1. Introduction:**
 
-![From a distance it looks like a picture; up close, it's all dots](media/intro_01.jpg){width=520px}
+![From a distance it looks like a picture; up close, it's all dots](media/intro_01.jpg)
 
 From a distance it is a picture; up close, nothing but dots. The 8×16 panel on the front of the car is how it talks to you — a heart when it sets off, an exclamation mark when something gets in its way, a smiley when it scores. Lesson 1 leaves the motors and sensors alone and simply brings that face to life.
 
@@ -15,8 +15,8 @@ The parts used in this lesson:
 
 |     |     |
 | :---: | :---: |
-| ![](../media/kit_06.png){width=200px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_10.png){width=200px}<br><span style="font-size:0.85em">8×16 bent acrylic mounting plate for the dot matrix ×1</span> |
-| ![](../media/kit_03.png){width=200px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | ![](../media/kit_04.png){width=200px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
+| ![](../media/kit_06.png)<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_10.png)<br><span style="font-size:0.85em">8×16 bent acrylic mounting plate for the dot matrix ×1</span> |
+| ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
 > ⚠️ **The dot matrix was already installed in Chapter 2. This table is for reference only — nothing needs to be removed; the wiring notes below merely show how the connections are made, again for reference, so no assembly or disassembly is required. For the complete parts list, see the kit list in Section 1.4.**
 #### **3. Parameters:**
 | Item | Parameter |

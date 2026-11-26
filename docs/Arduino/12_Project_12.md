@@ -2,7 +2,7 @@
 
 #### **1. Introduction:**
 
-![LED sign at a station](media/intro_12.jpg){width=520px}
+![LED sign at a station](media/intro_12.jpg)
 
 Back in Project 1 the dot matrix could only loop through a few patterns baked into the code. Now turn it into a real message board: connect your phone to the same Wi-Fi as the car, open the board's address in a browser, type a sentence, tap send — and the words roll across the dots.
 
@@ -17,8 +17,8 @@ Parts used in this lesson:
 
 |     |     |
 | :---: | :---: |
-| ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
-| ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | <span style="font-size:0.85em">2.4 GHz wireless router or phone hotspot ×1</span> |
+| ![](../media/kit_06.png)<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
+| ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | <span style="font-size:0.85em">2.4 GHz wireless router or phone hotspot ×1</span> |
 > ⚠️ **The dot matrix was installed back in Chapter 2; this table is for reference only — there is nothing to take apart. The wiring notes below only show how the connections are made, for reference; no assembly or disassembly is required. For the complete parts list, see 1.4 Kit Parts List.**
 #### **3. Parameters:**
 | Item | Parameter |
@@ -561,7 +561,7 @@ With the phone on the same Wi-Fi and that address opened in a browser, a dark pa
 
 (2) **Nothing at all on serial?** Press the RESET button on the board and try again — the previous sketch may be stuck.
 
-![](media/RESET.png){width=340px}
+![](media/RESET.png)
 
 (3) **Dots keep printing on serial, no IP?** Wi-Fi connection failed. The router must be **2.4 GHz**; the board doesn't support 5 GHz. If you have no 2.4 G network, turn on a phone hotspot (hotspots default to 2.4 G).
 

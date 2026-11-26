@@ -15,9 +15,9 @@ Components used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
-| ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_02.png){width=170px}<br><span style="font-size:0.85em">Mini Tracked Tank Robot bottom assembly ×1</span> |
-| ![](../media/kit_05.png){width=170px}<br><span style="font-size:0.85em">Ultrasonic module ×1</span> | ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_13.png){width=170px}<br><span style="font-size:0.85em">9G servo (180°) ×2</span> |
-| ![](../media/kit_39.png){width=170px}<br><span style="font-size:0.85em">5-channel IIC line-tracking sensor module ×1</span> | <span style="font-size:0.85em">2.4 GHz wireless router or phone hotspot ×1</span> |  |
+| ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_02.png)<br><span style="font-size:0.85em">Mini Tracked Tank Robot bottom assembly ×1</span> |
+| ![](../media/kit_05.png)<br><span style="font-size:0.85em">Ultrasonic module ×1</span> | ![](../media/kit_06.png)<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_13.png)<br><span style="font-size:0.85em">9G servo (180°) ×2</span> |
+| ![](../media/kit_39.png)<br><span style="font-size:0.85em">5-channel IIC line-tracking sensor module ×1</span> | <span style="font-size:0.85em">2.4 GHz wireless router or phone hotspot ×1</span> |  |
 > ⚠️ **Everything was installed in Chapter 2. This table is for reference only, so there is no need to remove anything; the wiring notes below only describe the wiring method for reference and do not require disassembly. See the kit list in 1.4 for the full bill of materials.**
 
 #### **3. Parameters:**
@@ -135,8 +135,8 @@ p.tip{font-size:14px;color:#999;margin:14px 0 0}
         onpointerleave="go('stop')">↓</button>
 <button class="c" onclick="go('claw_open')">Claw open</button>
 </div>
-<p class="tip">Hold a direction button to drive, release to stop | Tap the pan-tilt and claw buttons to step them</p>
 </div>
+
 <script>
 var names={manual:'Manual control',line:'Line tracking',avoid:'Ultrasonic avoidance',follow:'Ultrasonic following'};
 function mode(m){
@@ -716,7 +716,7 @@ All four modes can be switched at any time, and the car stops briefly at the mom
 
 (2) **Nothing at all in the Shell.** Press the RESET button on the board and try again; the previous program may be stuck.
 
-![](media/RESET.png){width=340px}
+![](media/RESET.png)
 
 (3) **The Shell keeps printing dots and never gets an IP.** The Wi-Fi connection failed. The router must be **2.4 GHz**; the board does not support 5 GHz, and if you have no 2.4 GHz network, turn on your phone's hotspot (hotspots default to 2.4 GHz).
 

@@ -17,9 +17,9 @@ Parts used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
-| ![](../media/kit_08.png){width=170px}<br><span style="font-size:0.85em">Large mechanical gripper (partially assembled) ×1</span> | ![](../media/kit_27.png){width=170px}<br><span style="font-size:0.85em">3D-printed soccer ball (31.25 mm diameter) ×1</span> | ![](../media/kit_13.png){width=170px}<br><span style="font-size:0.85em">9G servo (180°, with cross horn) ×1</span> |
-| ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
-| ![](../media/kit_07.png){width=170px}<br><span style="font-size:0.85em">Large gripper launcher sleeve (one left, one right) ×1</span> | <span style="font-size:0.85em">2.4 GHz Wi-Fi router or phone hotspot ×1</span> |  |
+| ![](../media/kit_08.png)<br><span style="font-size:0.85em">Large mechanical gripper (partially assembled) ×1</span> | ![](../media/kit_27.png)<br><span style="font-size:0.85em">3D-printed soccer ball (31.25 mm diameter) ×1</span> | ![](../media/kit_13.png)<br><span style="font-size:0.85em">9G servo (180°, with cross horn) ×1</span> |
+| ![](../media/kit_06.png)<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
+| ![](../media/kit_07.png)<br><span style="font-size:0.85em">Large gripper launcher sleeve (one left, one right) ×1</span> | <span style="font-size:0.85em">2.4 GHz Wi-Fi router or phone hotspot ×1</span> |  |
 > ⚠️ **All parts were assembled in Chapter 2; this table is only for reference and nothing needs to be taken apart. The wiring notes below only show how the connections are made, also for reference — no disassembly is needed. For the full parts list, see 1.4 Kit Contents.**
 
 #### **3. Parameters:**
@@ -588,7 +588,7 @@ How the match is actually played:
 
 (2) **Nothing at all in the Serial Monitor**: press the board's RESET button and try again; the previous sketch may be stuck.
 
-![](media/RESET.png){width=340px}
+![](media/RESET.png)
 
 (3) **Dots keep printing but no IP appears**: Wi-Fi connection failed. The router must be **2.4 GHz** — the board does not support 5 GHz. If you have no 2.4 GHz band, use a phone hotspot (hotspots default to 2.4 GHz).
 

@@ -2,7 +2,7 @@
 
 #### **1. Introduction:**
 
-![The remote-controlled car driving over an obstacle](media/intro_11.jpg){width=520px}
+![The remote-controlled car driving over an obstacle](media/intro_11.jpg)
 
 Fit the car with a remote control: press an arrow key and it drives, let go and it stops. Infrared is one-way, so the car cannot answer back — how do you know whether it can still hear you? The trick is to run a 1.5 second timer in the program, restart it whenever a valid key arrives, and stop the car yourself when no new command arrives before it expires.
 
@@ -17,8 +17,8 @@ Components used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
-| ![](../media/kit_12.png){width=200px}<br><span style="font-size:0.85em">17-key infrared remote control (JMFP-4) ×1</span> | ![](../media/ir_receiver.png){width=200px}<br><span style="font-size:0.85em">Infrared receiver ×1</span> | ![](../media/kit_04.png){width=200px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
-| ![](../media/kit_03.png){width=200px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | ![](../media/kit_02.png){width=200px}<br><span style="font-size:0.85em">Mini Tracked Tank Robot bottom assembly ×1</span> |  |
+| ![](../media/kit_12.png)<br><span style="font-size:0.85em">17-key infrared remote control (JMFP-4) ×1</span> | ![](../media/ir_receiver.png)<br><span style="font-size:0.85em">Infrared receiver ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
+| ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | ![](../media/kit_02.png)<br><span style="font-size:0.85em">Mini Tracked Tank Robot bottom assembly ×1</span> |  |
 > ⚠️ **Everything here was installed in Chapter 2. This table is for reference only, so there is no need to remove anything; the wiring notes below only describe the wiring method for reference and do not require disassembly. See the kit list in 1.4 for the full bill of materials.**
 
 #### **3. Parameters:**

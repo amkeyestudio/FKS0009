@@ -2,7 +2,7 @@
 
 #### **1. Introduction:**
 
-![A face calibrated by a grid](media/intro_19.jpg){width=520px}
+![A face calibrated by a grid](media/intro_19.jpg)
 
 Stand in front of the car and it turns to look at you; walk to the left and it turns left; step away and it follows. Lesson 5 followed with ultrasound, which only knows whether something is in front and how far away it is; with a camera we also know which side of the picture the person is on.
 
@@ -17,8 +17,8 @@ Components used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
-| ![](../media/kit_09.jpg){width=170px}<br><span style="font-size:0.85em">TinyVision AI vision camera ×1</span> | ![](../media/kit_13.png){width=170px}<br><span style="font-size:0.85em">9G servo (180°) ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
-| ![](../media/kit_02.png){width=170px}<br><span style="font-size:0.85em">Mini Tracked Tank Robot chassis kit ×1</span> | ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
+| ![](../media/kit_09.jpg)<br><span style="font-size:0.85em">TinyVision AI vision camera ×1</span> | ![](../media/kit_13.png)<br><span style="font-size:0.85em">9G servo (180°) ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
+| ![](../media/kit_02.png)<br><span style="font-size:0.85em">Mini Tracked Tank Robot chassis kit ×1</span> | ![](../media/kit_06.png)<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
 
 #### **3. Parameters:**
 | Item | Parameter |

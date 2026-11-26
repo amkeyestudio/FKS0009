@@ -10,7 +10,7 @@ Download code file
    Note: All course code is available for download here. To avoid forgetting, we recommend downloading the code now for future tutorial learning.
    </span>
    
-:download:`Click to download <./Arduino_Resource.zip>`
+:download:`Click to download <./Arduino_Resource.7z>`
 
 
 .. toctree::

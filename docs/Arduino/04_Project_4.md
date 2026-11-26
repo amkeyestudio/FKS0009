@@ -2,7 +2,7 @@
 
 #### **1. Introduction:**
 
-![A robot vacuum cleaner](media/intro_04.jpg){width=520px}
+![A robot vacuum cleaner](media/intro_04.jpg)
 
 Ultrasound for eyes, a servo for a neck, motors for legs, and the dot matrix for a face — all four parts take the stage together for the first time: the car reads the road for itself and decides which way to go around.
 
@@ -17,8 +17,8 @@ The parts used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
-| ![](../media/kit_05.png){width=170px}<br><span style="font-size:0.85em">Ultrasonic module ×1</span> | ![](../media/kit_13.png){width=170px}<br><span style="font-size:0.85em">9G servo (180°, with cross horn) ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
-| ![](../media/kit_02.png){width=170px}<br><span style="font-size:0.85em">Mini tracked tank robot bottom assembly ×1</span> | ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
+| ![](../media/kit_05.png)<br><span style="font-size:0.85em">Ultrasonic module ×1</span> | ![](../media/kit_13.png)<br><span style="font-size:0.85em">9G servo (180°, with cross horn) ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
+| ![](../media/kit_02.png)<br><span style="font-size:0.85em">Mini tracked tank robot bottom assembly ×1</span> | ![](../media/kit_06.png)<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
 > ⚠️ **These parts were already fitted on the car in Chapter 2. This table is for reference only — nothing needs to be taken off and put back; the wiring notes below merely show how the connections are made, again for reference, so no assembly or disassembly is required. For the complete parts list, see the kit list in Section 1.4.**
 #### **3. Parameters:**
 | Item | Parameter |

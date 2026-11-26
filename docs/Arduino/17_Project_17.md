@@ -2,7 +2,7 @@
 
 #### **1. Introduction:**
 
-![Sorting robotic arm on a production line](media/intro_17.jpg){width=520px}
+![Sorting robotic arm on a production line](media/intro_17.jpg)
 
 From this lesson on, the car can see colors. The little camera on the pan-tilt does not beam video back for the controller to analyze — it is a small computer in its own right. Recognition is finished inside the module, and all that comes back over serial is a single word: RED or YELLOW.
 
@@ -17,9 +17,9 @@ Parts used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
-| ![](../media/kit_09.jpg){width=170px}<br><span style="font-size:0.85em">TinyVision AI vision camera ×1</span> | ![](../media/kit_13.png){width=170px}<br><span style="font-size:0.85em">9G servo (180°) ×2</span> | ![](../media/kit_08.png){width=170px}<br><span style="font-size:0.85em">Large mechanical gripper (partially assembled) ×1</span> |
-| ![](../media/kit_05.png){width=170px}<br><span style="font-size:0.85em">Ultrasonic module ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> |
-| ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |  |  |
+| ![](../media/kit_09.jpg)<br><span style="font-size:0.85em">TinyVision AI vision camera ×1</span> | ![](../media/kit_13.png)<br><span style="font-size:0.85em">9G servo (180°) ×2</span> | ![](../media/kit_08.png)<br><span style="font-size:0.85em">Large mechanical gripper (partially assembled) ×1</span> |
+| ![](../media/kit_05.png)<br><span style="font-size:0.85em">Ultrasonic module ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_06.png)<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> |
+| ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |  |  |
 #### **3. Parameters:**
 | Item | Parameter |
 | --- | --- |

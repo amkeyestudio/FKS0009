@@ -2,7 +2,7 @@
 
 #### **1. Introduction:**
 
-![A wireless router](media/intro_13.jpg){width=520px}
+![A wireless router](media/intro_13.jpg)
 
 The web page in Lesson 12 could only push text to the dot matrix; the page in this lesson really reaches out and moves hardware: three buttons on the phone screen swing the pan-tilt and one button measures distance, and the reading comes straight back to the page so you no longer have to watch the Shell.
 
@@ -17,8 +17,8 @@ Components used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
-| ![](../media/kit_13.png){width=200px}<br><span style="font-size:0.85em">9G servo (180°, with cross arm) ×1</span> | ![](../media/kit_05.png){width=200px}<br><span style="font-size:0.85em">Ultrasonic module ×1</span> | ![](../media/kit_04.png){width=200px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
-| ![](../media/kit_03.png){width=200px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | <span style="font-size:0.85em">2.4 GHz wireless router or phone hotspot ×1</span> |  |
+| ![](../media/kit_13.png)<br><span style="font-size:0.85em">9G servo (180°, with cross arm) ×1</span> | ![](../media/kit_05.png)<br><span style="font-size:0.85em">Ultrasonic module ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
+| ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | <span style="font-size:0.85em">2.4 GHz wireless router or phone hotspot ×1</span> |  |
 > ⚠️ **The pan-tilt and the ultrasonic sensor were installed back in Chapter 2. This table is for reference only, so there is no need to remove anything; the wiring notes below only describe the wiring method for reference and do not require disassembly. See the kit list in 1.4 for the full bill of materials.**
 
 #### **3. Parameters:**
@@ -284,7 +284,7 @@ With that address opened on the phone, the page appears:
 
 (2) **Nothing at all in the Shell.** Press the RESET button on the board and try again; the previous program may be stuck.
 
-![](media/RESET.png){width=340px}
+![](media/RESET.png)
 
 (3) **The Shell keeps printing dots and never gets an IP.** The Wi-Fi connection failed. The router must be **2.4 GHz**; the board does not support 5 GHz, and if you have no 2.4 GHz network, turn on your phone's hotspot (hotspots default to 2.4 GHz).
 

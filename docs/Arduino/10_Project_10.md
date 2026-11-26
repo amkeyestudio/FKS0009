@@ -2,7 +2,7 @@
 
 #### **1. Introduction:**
 
-![TV remote control](media/intro_10.jpg){width=520px}
+![TV remote control](media/intro_10.jpg)
 
 The remotes for the TV, the air conditioner and toys all use infrared. Press a key and what leaves the remote isn't a steady beam — it's a stream of invisible light blinking 38,000 times a second. Your eye sees nothing, but the receiver turns that flicker into a clean sequence of 0s and 1s.
 
@@ -17,8 +17,8 @@ Parts used in this lesson:
 
 |     |     |
 | :---: | :---: |
-| ![](../media/kit_12.png){width=170px}<br><span style="font-size:0.85em">17-key IR remote control (JMFP-4) ×1</span> | ![](../media/ir_receiver.png){width=170px}<br><span style="font-size:0.85em">IR receiver ×1</span> |
-| ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
+| ![](../media/kit_12.png)<br><span style="font-size:0.85em">17-key IR remote control (JMFP-4) ×1</span> | ![](../media/ir_receiver.png)<br><span style="font-size:0.85em">IR receiver ×1</span> |
+| ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
 > ⚠️ **The IR receiver is already mounted on the expansion board; this table is for reference only — there is nothing to take apart. The wiring notes below only show how the connections are made, for reference; no assembly or disassembly is required. For the complete parts list, see 1.4 Kit Parts List.**
 #### **3. Parameters:**
 | Item | Parameter |

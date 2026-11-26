@@ -2,7 +2,7 @@
 
 #### **1. Introduction:**
 
-![A delivery robot following a person](media/intro_05.jpg){width=520px}
+![A delivery robot following a person](media/intro_05.jpg)
 
 The car in Lesson 4 goes around an obstacle; this lesson flips that and makes it actively follow a person. Hold your hand 40 cm in front of its nose and it comes after you; pull your hand back and it keeps coming; bring it to within 10 cm and it backs away instead; take the hand away and it stops with a question mark popping up on the dot matrix.
 
@@ -15,8 +15,8 @@ Parts used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
-| ![](../media/kit_05.png){width=170px}<br><span style="font-size:0.85em">Ultrasonic module ×1</span> | ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
-| ![](../media/kit_02.png){width=170px}<br><span style="font-size:0.85em">Mini tracked tank robot bottom assembly ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |  |
+| ![](../media/kit_05.png)<br><span style="font-size:0.85em">Ultrasonic module ×1</span> | ![](../media/kit_06.png)<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
+| ![](../media/kit_02.png)<br><span style="font-size:0.85em">Mini tracked tank robot bottom assembly ×1</span> | ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |  |
 > ⚠️ **These parts were already installed on the car in Chapter 2. This table is for reference only — do not remove and reinstall them. The wiring notes below only show how the connections are made, for reference; no disassembly is needed. For the full parts list, see 1.4 Kit List.**
 #### **3. Parameters:**
 | Item | Parameter |

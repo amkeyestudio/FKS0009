@@ -2,7 +2,7 @@
 
 #### **1. Introduction:**
 
-![The gripper on the robotic arm](media/intro_09.jpg){width=520px}
+![The gripper on the robotic arm](media/intro_09.jpg)
 
 There's a gripper on the front of the car: two 3D-printed fingers driven by a 9G servo. It only has two poses — closed at 90°, open at 140° — and the object grabbing and ball kicking later on both rely on those two angles.
 
@@ -17,8 +17,8 @@ Parts used in this lesson:
 
 |     |     |
 | :---: | :---: |
-| ![](../media/kit_08.png){width=170px}<br><span style="font-size:0.85em">Large mechanical gripper (partly assembled) ×1</span> | ![](../media/kit_13.png){width=170px}<br><span style="font-size:0.85em">9G servo (180°, with cross horn) ×1</span> |
-| ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
+| ![](../media/kit_08.png)<br><span style="font-size:0.85em">Large mechanical gripper (partly assembled) ×1</span> | ![](../media/kit_13.png)<br><span style="font-size:0.85em">9G servo (180°, with cross horn) ×1</span> |
+| ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
 > ⚠️ **The gripper was already installed in Chapter 2. This table is for reference only — do not remove it. The wiring notes below only show how the connections are made, for reference; no disassembly is needed. For the full parts list, see 1.4 Kit List.**
 #### **3. Parameters:**
 | Item | Parameter |

@@ -35,45 +35,45 @@ Assembly is simple: most parts are fixed with screws and standoffs, and the expa
 
 | No. | Name | Qty | Image |
 | :---: | --- | :---: | :---: |
-| 1 | 6mm single-head open-end wrench | 1 | ![](media/kit_01.png){width=150px} |
-| 2 | Mini tracked tank robot bottom assembly | 1 | ![](media/kit_02.png){width=150px} |
-| 3 | Keyestudio ESP32 S3 PRO development board | 1 | ![](media/kit_03.png){width=150px} |
-| 4 | Keyestudio ESP32S3 DRV8835 <br>motor expansion board | 1 | ![](media/kit_04.png){width=150px} |
-| 5 | Ultrasonic module | 1 | ![](media/kit_05.png){width=150px} |
-| 6 | keyestudio 8x16 LED board | 1 | ![](media/kit_06.png){width=150px} |
-| 7 | Gripper launch sleeve <br>(one left, one right) | 1 | ![](media/kit_07.png){width=150px} |
-| 8 | Large mechanical gripper <br>(partly assembled) | 1 | ![](media/kit_08.png){width=150px} |
-| 9 | TinyVision AI vision camera | 1 | ![](media/kit_09.jpg){width=150px} |
-| 10 | 8×16 dot matrix mounting <br>bent acrylic plate | 1 | ![](media/kit_10.png){width=150px} |
-| 11 | Top acrylic plate | 1 | ![](media/kit_11.png){width=150px} |
-| 12 | Line-tracking and gripper <br>connecting acrylic plate | 1 | ![](media/kit_38.png){width=110px} |
-| 13 | 5-way IIC line-tracking sensor module | 1 | ![](media/kit_39.png){width=150px} |
-| 14 | 17-key infrared remote control | 1 | ![](media/kit_12.png){width=150px} |
-| 15 | Servo | 1 | ![](media/kit_13.png){width=150px} |
-| 16 | Cable sleeve | 1 | ![](media/kit_14.png){width=150px} |
-| 17 | 6-cell AA battery holder | 1 | ![](media/kit_15.png){width=150px} |
-| 18 | Dual-cell 18650 battery holder + wires | 1 | ![](media/kit_16.png){width=150px} |
-| 19 | Phillips screwdriver | 1 | ![](media/kit_17.png){width=150px} |
-| 20 | Cable ties | 5 | ![](media/kit_18.png){width=150px} |
-| 21 | USB Type-C cable | 1 | ![](media/kit_19.jpg){width=150px} |
-| 22 | M2+M3 small wrench | 1 | ![](media/kit_20.png){width=85px} |
-| 23 | 4P double-ended XH2.54 cable | 2 | ![](media/kit_21.png){width=150px} |
-| 24 | 4P double-ended HX-2.54 cable | 1 | ![](media/kit_22.png){width=150px} |
-| 25 | LEGO 5×7 frame hole arm | 1 | ![](media/kit_23.png){width=150px} |
-| 26 | LEGO friction pin, black | 6 | ![](media/kit_24.png){width=150px} |
-| 27 | MX1.25 to Dupont female cable | 1 | ![](media/kit_25.png){width=150px} |
-| 28 | Hook-and-loop tape | 3 | ![](media/kit_26.png){width=150px} |
-| 29 | 3D-printed soccer ball | 1 | ![](media/kit_27.png){width=150px} |
-| 30 | Line-following track | 1 | ![](media/kit_28.png){width=150px} |
-| 31 | M2 nuts | 8 | ![](media/kit_29.png){width=45px} |
-| 32 | M2×8mm round-head Phillips screws | 8 | ![](media/kit_30.png){width=105px} |
-| 33 | M3×6mm round-head Phillips screws | 22 | ![](media/kit_32.png){width=105px} |
-| 34 | M3×10mm round-head Phillips screws | 3 | ![](media/kit_33.png){width=105px} |
-| 35 | M3×10mm flat-head Phillips screws | 5 | ![](media/kit_34.png){width=65px} |
-| 36 | M3 nuts | 7 | ![](media/kit_35.png){width=45px} |
-| 37 | M3×10mm hex standoffs (through-hole) | 4 | ![](media/kit_36.png){width=105px} |
-| 38 | M3×45mm hex standoffs (through-hole) | 4 | ![](media/kit_37.png){width=105px} |
-| 39 | M3×30mm hex standoffs (through-hole) | 2 | ![](media/kit_40.png){width=105px} |
+| 1 | 6mm single-head open-end wrench | 1 | ![](media/kit_01.png) |
+| 2 | Mini tracked tank robot bottom assembly | 1 | ![](media/kit_02.png) |
+| 3 | Keyestudio ESP32 S3 PRO development board | 1 | ![](media/kit_03.png) |
+| 4 | Keyestudio ESP32S3 DRV8835 <br>motor expansion board | 1 | ![](media/kit_04.png) |
+| 5 | Ultrasonic module | 1 | ![](media/kit_05.png) |
+| 6 | keyestudio 8x16 LED board | 1 | ![](media/kit_06.png) |
+| 7 | Gripper launch sleeve <br>(one left, one right) | 1 | ![](media/kit_07.png) |
+| 8 | Large mechanical gripper <br>(partly assembled) | 1 | ![](media/kit_08.png) |
+| 9 | TinyVision AI vision camera | 1 | ![](media/kit_09.jpg) |
+| 10 | 8×16 dot matrix mounting <br>bent acrylic plate | 1 | ![](media/kit_10.png) |
+| 11 | Top acrylic plate | 1 | ![](media/kit_11.png) |
+| 12 | Line-tracking and gripper <br>connecting acrylic plate | 1 | ![](media/kit_38.png) |
+| 13 | 5-way IIC line-tracking sensor module | 1 | ![](media/kit_39.png) |
+| 14 | 17-key infrared remote control | 1 | ![](media/kit_12.png) |
+| 15 | Servo | 1 | ![](media/kit_13.png) |
+| 16 | Cable sleeve | 1 | ![](media/kit_14.png) |
+| 17 | 6-cell AA battery holder | 1 | ![](media/kit_15.png) |
+| 18 | Dual-cell 18650 battery holder + wires | 1 | ![](media/kit_16.png) |
+| 19 | Phillips screwdriver | 1 | ![](media/kit_17.png) |
+| 20 | Cable ties | 5 | ![](media/kit_18.png) |
+| 21 | USB Type-C cable | 1 | ![](media/kit_19.jpg) |
+| 22 | M2+M3 small wrench | 1 | ![](media/kit_20.png) |
+| 23 | 4P double-ended XH2.54 cable | 2 | ![](media/kit_21.png) |
+| 24 | 4P double-ended HX-2.54 cable | 1 | ![](media/kit_22.png) |
+| 25 | LEGO 5×7 frame hole arm | 1 | ![](media/kit_23.png) |
+| 26 | LEGO friction pin, black | 6 | ![](media/kit_24.png) |
+| 27 | MX1.25 to Dupont female cable | 1 | ![](media/kit_25.png) |
+| 28 | Hook-and-loop tape | 3 | ![](media/kit_26.png) |
+| 29 | 3D-printed soccer ball | 1 | ![](media/kit_27.png) |
+| 30 | Line-following track | 1 | ![](media/kit_28.png) |
+| 31 | M2 nuts | 8 | ![](media/kit_29.png) |
+| 32 | M2×8mm round-head Phillips screws | 8 | ![](media/kit_30.png) |
+| 33 | M3×6mm round-head Phillips screws | 22 | ![](media/kit_32.png) |
+| 34 | M3×10mm round-head Phillips screws | 3 | ![](media/kit_33.png) |
+| 35 | M3×10mm flat-head Phillips screws | 5 | ![](media/kit_34.png) |
+| 36 | M3 nuts | 7 | ![](media/kit_35.png) |
+| 37 | M3×10mm hex standoffs (through-hole) | 4 | ![](media/kit_36.png) |
+| 38 | M3×45mm hex standoffs (through-hole) | 4 | ![](media/kit_37.png) |
+| 39 | M3×30mm hex standoffs (through-hole) | 2 | ![](media/kit_40.png) |
 
 ## 1.5 Main Controller Board (ESP32-S3)
 

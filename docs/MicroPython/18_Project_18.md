@@ -2,7 +2,7 @@
 
 #### **1. Introduction:**
 
-![A self-driving car on the road](media/intro_18.jpg){width=520px}
+![A self-driving car on the road](media/intro_18.jpg)
 
 Lesson 7 followed the line with five infrared probes mounted close to the ground; here the eyes are lifted — a camera looks at the line instead. With the lens facing the ground it sees the line a dozen centimetres ahead of the car, further than probes mounted down low, so it can start steering earlier.
 
@@ -17,8 +17,8 @@ Components used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
-| ![](../media/kit_09.jpg){width=170px}<br><span style="font-size:0.85em">TinyVision AI vision camera ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_02.png){width=170px}<br><span style="font-size:0.85em">Mini Tracked Tank Robot chassis kit ×1</span> |
-| ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |  |
+| ![](../media/kit_09.jpg)<br><span style="font-size:0.85em">TinyVision AI vision camera ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_02.png)<br><span style="font-size:0.85em">Mini Tracked Tank Robot chassis kit ×1</span> |
+| ![](../media/kit_06.png)<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |  |
 
 #### **3. Parameters:**
 | Item | Parameter |

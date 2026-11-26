@@ -2,7 +2,7 @@
 
 #### **1. Introduction:**
 
-![A street-side LED screen is all dots up close](media/intro_01.jpg){width=520px}
+![A street-side LED screen is all dots up close](media/intro_01.jpg)
 
 From a distance it is a picture; up close it is nothing but dots. The 8×16 screen on the front of the car is how the car speaks: a heart while it drives, an exclamation mark when it finds an obstacle, a smiley when it scores a goal. This first lesson does not touch the motors or the sensors — it just lights up that face.
 
@@ -15,8 +15,8 @@ Components used in this lesson:
 
 |     |     |
 | :---: | :---: |
-| ![](../media/kit_06.png){width=200px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_10.png){width=200px}<br><span style="font-size:0.85em">8×16 dot matrix fixing bent acrylic plate ×1</span> |
-| ![](../media/kit_03.png){width=200px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | ![](../media/kit_04.png){width=200px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
+| ![](../media/kit_06.png)<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_10.png)<br><span style="font-size:0.85em">8×16 dot matrix fixing bent acrylic plate ×1</span> |
+| ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
 > ⚠️ **The dot matrix was already installed in Chapter 2. This table is for reference only, so there is no need to remove it; the wiring notes below only describe the wiring method for reference and do not require disassembly. See the kit list in 1.4 for the full bill of materials.**
 
 #### **3. Parameters:**

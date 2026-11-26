@@ -2,7 +2,7 @@
 
 #### **1. Introduction:**
 
-![A delivery robot following a pedestrian](media/intro_05.jpg){width=520px}
+![A delivery robot following a pedestrian](media/intro_05.jpg)
 
 The car from Lesson 4 goes around obstacles; this lesson does the opposite and makes it actively follow a person: hold your hand 40 cm in front of the car and it follows; move your hand back and it chases forward; bring it within 10 cm and it backs away instead; take your hand away and it stops, with a question mark popping up on the dot matrix.
 
@@ -15,8 +15,8 @@ Components used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
-| ![](../media/kit_05.png){width=170px}<br><span style="font-size:0.85em">Ultrasonic module ×1</span> | ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
-| ![](../media/kit_02.png){width=170px}<br><span style="font-size:0.85em">Mini Tracked Tank Robot bottom assembly ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |  |
+| ![](../media/kit_05.png)<br><span style="font-size:0.85em">Ultrasonic module ×1</span> | ![](../media/kit_06.png)<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
+| ![](../media/kit_02.png)<br><span style="font-size:0.85em">Mini Tracked Tank Robot bottom assembly ×1</span> | ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |  |
 > ⚠️ **These components were already installed on the car in Chapter 2. This table is for reference only, so there is no need to remove and reinstall them; the wiring notes below only describe the wiring method for reference and do not require disassembly. See the kit list in 1.4 for the full bill of materials.**
 
 #### **3. Parameters:**

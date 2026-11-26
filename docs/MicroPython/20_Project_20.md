@@ -2,7 +2,7 @@
 
 #### **1. Introduction:**
 
-![A QR code on a phone screen](media/intro_20.jpg){width=520px}
+![A QR code on a phone screen](media/intro_20.jpg)
 
 Hold a card with a QR code in front of the car, wave it once, and the car takes a look and drives forward for a second; swap the card and it traces an arc to the left. Four cards each hide one command — FORWARD, BACKWARD, LEFT, RIGHT — nothing on the card surface gives it away, only the car knows once it has scanned.
 
@@ -17,8 +17,8 @@ Components used in this lesson:
 
 |     |     |     |
 | :---: | :---: | :---: |
-| ![](../media/kit_09.jpg){width=170px}<br><span style="font-size:0.85em">TinyVision AI vision camera ×1</span> | ![](../media/kit_13.png){width=170px}<br><span style="font-size:0.85em">9G servo (180°) ×1</span> | ![](../media/kit_04.png){width=170px}<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
-| ![](../media/kit_02.png){width=170px}<br><span style="font-size:0.85em">Mini Tracked Tank Robot chassis kit ×1</span> | ![](../media/kit_06.png){width=170px}<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_03.png){width=170px}<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
+| ![](../media/kit_09.jpg)<br><span style="font-size:0.85em">TinyVision AI vision camera ×1</span> | ![](../media/kit_13.png)<br><span style="font-size:0.85em">9G servo (180°) ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
+| ![](../media/kit_02.png)<br><span style="font-size:0.85em">Mini Tracked Tank Robot chassis kit ×1</span> | ![](../media/kit_06.png)<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
 
 #### **3. Parameters:**
 | Item | Parameter |
@@ -352,8 +352,8 @@ This lesson needs four task cards: print the four below and cut them out (leave 
 
 |     |     |
 | :---: | :---: |
-| ![](media/qr_forward.png){width=170px}<br><span style="font-size:0.85em">FORWARD</span> | ![](media/qr_backward.png){width=170px}<br><span style="font-size:0.85em">BACKWARD</span> |
-| ![](media/qr_left.png){width=170px}<br><span style="font-size:0.85em">LEFT</span> | ![](media/qr_right.png){width=170px}<br><span style="font-size:0.85em">RIGHT</span> |
+| ![](media/qr_forward.png)<br><span style="font-size:0.85em">FORWARD</span> | ![](media/qr_backward.png)<br><span style="font-size:0.85em">BACKWARD</span> |
+| ![](media/qr_left.png)<br><span style="font-size:0.85em">LEFT</span> | ![](media/qr_right.png)<br><span style="font-size:0.85em">RIGHT</span> |
 
 After power-on the pan-tilt turns to 90° first, the matrix shows the eyes and the Shell prints `QR task cards ready`.
 

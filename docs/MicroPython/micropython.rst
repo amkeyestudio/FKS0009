@@ -7,10 +7,10 @@ Download code file
 .. raw:: html
 
    <span style="color:red;font-size:24px;">
-   Note: All course code is available for download here. Download links will not be provided later. To avoid forgetting, we recommend downloading the code now for future tutorial learning.
+   Note: All course code is available for download here. To avoid forgetting, we recommend downloading the code now for future tutorial learning.
    </span>
    
-:download:`Click to download <./MicroPython_Resource.zip>`
+:download:`Click to download <./MicroPython_Resource.7z>`
 
 .. toctree::
     :maxdepth: 2

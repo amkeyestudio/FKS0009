@@ -70,6 +70,8 @@ p.tip{font-size:14px;color:#999;margin:14px 0 0}
 <button class="b" onpointerdown="go('backward')" onpointerup="go('stop')" onpointercancel="go('stop')"
         onpointerleave="go('stop')">↓</button>
 <button class="c" onclick="go('claw_open')">Claw open</button>
+</div>
+</div>
 
 <script>
 var names={manual:'Manual control',line:'Line tracking',avoid:'Ultrasonic avoidance',follow:'Ultrasonic following'};
