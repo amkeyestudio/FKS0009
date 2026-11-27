@@ -15,10 +15,11 @@ Stand straight ahead and the car drives toward you; move left and the left wheel
 #### **2. Parts List:**
 Parts used in this lesson:
 
-|     |     |     |
+| TinyVision AI vision camera ×1 | 9G servo (180°) ×1 | DRV8835 motor expansion board ×1 |
 | :---: | :---: | :---: |
-| ![](../media/kit_09.jpg)<br><span style="font-size:0.85em">TinyVision AI vision camera ×1</span> | ![](../media/kit_13.png)<br><span style="font-size:0.85em">9G servo (180°) ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
-| ![](../media/kit_02.png)<br><span style="font-size:0.85em">Mini tracked tank robot bottom assembly ×1</span> | ![](../media/kit_06.png)<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
+| ![](../media/kit_09.jpg) | ![](../media/kit_13.png) | ![](../media/kit_04.png) |
+| Mini tracked tank robot bottom assembly ×1 | 8×16 LED dot matrix display ×1 | ESP32-S3 development board ×1 |
+| ![](../media/kit_02.png) | ![](../media/kit_06.png) | ![](../media/kit_03.png) |
 #### **3. Parameters:**
 | Item | Parameter |
 | --- | --- |

@@ -15,9 +15,9 @@ At power-on the servo gives a click and turns to 0° (facing right), then sweeps
 #### **2. Parts List:**
 Parts used in this lesson:
 
-|     |     |     |
+| 9G servo (180°, with cross horn) ×1 | DRV8835 motor expansion board ×1 | ESP32-S3 development board ×1 |
 | :---: | :---: | :---: |
-| ![](../media/kit_13.png)<br><span style="font-size:0.85em">9G servo (180°, with cross horn) ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
+| ![](../media/kit_13.png) | ![](../media/kit_04.png) | ![](../media/kit_03.png) |
 > ⚠️ **The servo was already centered at 90° and installed in Chapter 2. This table is for reference only — do not remove it. The wiring notes below only show how the connections are made, for reference; no disassembly is needed. For the full parts list, see 1.4 Kit List.**
 #### **3. Parameters:**
 | Item | Parameter |

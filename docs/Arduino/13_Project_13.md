@@ -15,10 +15,11 @@ Once the board joins the router, the serial port prints the address it obtained;
 #### **2. Parts List:**
 Parts used in this lesson:
 
-|     |     |     |
+| 9G servo (180°, with cross horn) ×1 | Ultrasonic module ×1 | DRV8835 motor expansion board ×1 |
 | :---: | :---: | :---: |
-| ![](../media/kit_13.png)<br><span style="font-size:0.85em">9G servo (180°, with cross horn) ×1</span> | ![](../media/kit_05.png)<br><span style="font-size:0.85em">Ultrasonic module ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
-| ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | <span style="font-size:0.85em">2.4 GHz wireless router or phone hotspot ×1</span> |  |
+| ![](../media/kit_13.png) | ![](../media/kit_05.png) | ![](../media/kit_04.png) |
+| ESP32-S3 development board ×1 | 2.4 GHz wireless router or phone hotspot ×1 |  |
+| ![](../media/kit_03.png) |  |  |
 > ⚠️ **The pan-tilt and ultrasonic module were installed back in Chapter 2; this table is for reference only — there is nothing to take apart. The wiring notes below only show how the connections are made, for reference; no assembly or disassembly is required. For the complete parts list, see 1.4 Kit Parts List.**
 #### **3. Parameters:**
 | Item | Parameter |

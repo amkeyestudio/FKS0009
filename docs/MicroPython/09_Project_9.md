@@ -15,10 +15,11 @@ At power-on the jaws close to 90° first, then open and close again, taking abou
 #### **2. Parts List:**
 Components used in this lesson:
 
-|     |     |
+| Large mechanical gripper (semi-finished) ×1 | 9G servo (180°, with cross arm) ×1 |
 | :---: | :---: |
-| ![](../media/kit_08.png)<br><span style="font-size:0.85em">Large mechanical gripper (semi-finished) ×1</span> | ![](../media/kit_13.png)<br><span style="font-size:0.85em">9G servo (180°, with cross arm) ×1</span> |
-| ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
+| ![](../media/kit_08.png) | ![](../media/kit_13.png) |
+| DRV8835 motor expansion board ×1 | ESP32-S3 development board ×1 |
+| ![](../media/kit_04.png) | ![](../media/kit_03.png) |
 > ⚠️ **The gripper was already fitted in Chapter 2. This table is for reference only, so there is no need to remove anything; the wiring notes below only describe the wiring method for reference and do not require disassembly. See the kit list in 1.4 for the full bill of materials.**
 
 #### **3. Parameters:**

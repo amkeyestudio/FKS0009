@@ -13,10 +13,11 @@ What you actually send is only 16 bytes, called the **font bitmap**: one byte pe
 #### **2. Parts List:**
 The parts used in this lesson:
 
-|     |     |
+| 8×16 LED dot matrix display ×1 | 8×16 bent acrylic mounting plate for the dot matrix ×1 |
 | :---: | :---: |
-| ![](../media/kit_06.png)<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_10.png)<br><span style="font-size:0.85em">8×16 bent acrylic mounting plate for the dot matrix ×1</span> |
-| ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
+| ![](../media/kit_06.png) | ![](../media/kit_10.png) |
+| ESP32-S3 development board ×1 | DRV8835 motor expansion board ×1 |
+| ![](../media/kit_03.png) | ![](../media/kit_04.png) |
 > ⚠️ **The dot matrix was already installed in Chapter 2. This table is for reference only — nothing needs to be removed; the wiring notes below merely show how the connections are made, again for reference, so no assembly or disassembly is required. For the complete parts list, see the kit list in Section 1.4.**
 #### **3. Parameters:**
 | Item | Parameter |

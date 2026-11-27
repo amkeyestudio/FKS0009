@@ -13,9 +13,9 @@ The distance is then just one formula: time × speed of sound ÷ 2. The speed of
 #### **2. Parts List:**
 The parts used in this lesson:
 
-|     |     |     |
+| Ultrasonic module ×1 | DRV8835 motor expansion board ×1 | ESP32-S3 development board ×1 |
 | :---: | :---: | :---: |
-| ![](../media/kit_05.png)<br><span style="font-size:0.85em">Ultrasonic module ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
+| ![](../media/kit_05.png) | ![](../media/kit_04.png) | ![](../media/kit_03.png) |
 > ⚠️ **The ultrasonic module was already installed together with the pan-tilt in Chapter 2. This table is for reference only — nothing needs to be removed; the wiring notes below merely show how the connections are made, again for reference, so no assembly or disassembly is required. For the complete parts list, see the kit list in Section 1.4.**
 #### **3. Parameters:**
 | Item | Parameter |

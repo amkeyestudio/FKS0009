@@ -15,10 +15,11 @@ The board-level library wraps direction and speed control into a few actions: fo
 #### **2. Parts List:**
 Components used in this lesson:
 
-|     |     |
+| DRV8835 motor expansion board ×1 | Mini Tracked Tank Robot bottom assembly ×1 |
 | :---: | :---: |
-| ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_02.png)<br><span style="font-size:0.85em">Mini Tracked Tank Robot bottom assembly ×1</span> |
-| ![](../media/kit_06.png)<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
+| ![](../media/kit_04.png) | ![](../media/kit_02.png) |
+| 8×16 LED dot matrix display ×1 | ESP32-S3 development board ×1 |
+| ![](../media/kit_06.png) | ![](../media/kit_03.png) |
 > ⚠️ **The motors are installed on the chassis at the factory; Chapter 2 only stacks the expansion board onto the controller. This table is for reference only, so there is no need to disassemble anything; the wiring notes below only describe the wiring method for reference and do not require disassembly. See the kit list in 1.4 for the full bill of materials.**
 
 #### **3. Parameters:**

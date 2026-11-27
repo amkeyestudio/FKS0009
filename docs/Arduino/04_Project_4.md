@@ -15,10 +15,11 @@ A book stood up in front of the car is all you need to try it: with the way clea
 #### **2. Parts List:**
 The parts used in this lesson:
 
-|     |     |     |
+| Ultrasonic module ×1 | 9G servo (180°, with cross horn) ×1 | DRV8835 motor expansion board ×1 |
 | :---: | :---: | :---: |
-| ![](../media/kit_05.png)<br><span style="font-size:0.85em">Ultrasonic module ×1</span> | ![](../media/kit_13.png)<br><span style="font-size:0.85em">9G servo (180°, with cross horn) ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
-| ![](../media/kit_02.png)<br><span style="font-size:0.85em">Mini tracked tank robot bottom assembly ×1</span> | ![](../media/kit_06.png)<br><span style="font-size:0.85em">8×16 LED dot matrix display ×1</span> | ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
+| ![](../media/kit_05.png) | ![](../media/kit_13.png) | ![](../media/kit_04.png) |
+| Mini tracked tank robot bottom assembly ×1 | 8×16 LED dot matrix display ×1 | ESP32-S3 development board ×1 |
+| ![](../media/kit_02.png) | ![](../media/kit_06.png) | ![](../media/kit_03.png) |
 > ⚠️ **These parts were already fitted on the car in Chapter 2. This table is for reference only — nothing needs to be taken off and put back; the wiring notes below merely show how the connections are made, again for reference, so no assembly or disassembly is required. For the complete parts list, see the kit list in Section 1.4.**
 #### **3. Parameters:**
 | Item | Parameter |

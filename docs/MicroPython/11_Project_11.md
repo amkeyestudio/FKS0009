@@ -15,10 +15,11 @@ Press up and the car drives forward; let go and about 1.5 seconds later it stops
 #### **2. Parts List:**
 Components used in this lesson:
 
-|     |     |     |
+| 17-key infrared remote control (JMFP-4) ×1 | Infrared receiver ×1 | DRV8835 motor expansion board ×1 |
 | :---: | :---: | :---: |
-| ![](../media/kit_12.png)<br><span style="font-size:0.85em">17-key infrared remote control (JMFP-4) ×1</span> | ![](../media/ir_receiver.png)<br><span style="font-size:0.85em">Infrared receiver ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
-| ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | ![](../media/kit_02.png)<br><span style="font-size:0.85em">Mini Tracked Tank Robot bottom assembly ×1</span> |  |
+| ![](../media/kit_12.png) | ![](../media/ir_receiver.png) | ![](../media/kit_04.png) |
+| ESP32-S3 development board ×1 | Mini Tracked Tank Robot bottom assembly ×1 |  |
+| ![](../media/kit_03.png) | ![](../media/kit_02.png) |  |
 > ⚠️ **Everything here was installed in Chapter 2. This table is for reference only, so there is no need to remove anything; the wiring notes below only describe the wiring method for reference and do not require disassembly. See the kit list in 1.4 for the full bill of materials.**
 
 #### **3. Parameters:**

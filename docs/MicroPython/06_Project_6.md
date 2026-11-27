@@ -13,10 +13,11 @@ Five 0s and 1s lined up from left to right are the car's entire knowledge of the
 #### **2. Parts List:**
 Components used in this lesson:
 
-|     |     |
+| Mini Tracked Tank Robot bottom assembly ×1 | DRV8835 motor expansion board ×1 |
 | :---: | :---: |
-| ![](../media/kit_02.png)<br><span style="font-size:0.85em">Mini Tracked Tank Robot bottom assembly ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> |
-| ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> | ![](../media/kit_39.png)<br><span style="font-size:0.85em">5-channel IIC line-tracking sensor module ×1</span> |
+| ![](../media/kit_02.png) | ![](../media/kit_04.png) |
+| ESP32-S3 development board ×1 | 5-channel IIC line-tracking sensor module ×1 |
+| ![](../media/kit_03.png) | ![](../media/kit_39.png) |
 
 > ⚠️ **This set of sensors was fixed in place and its wiring was run during the Chapter 2 assembly. This table is for reference only, so there is no need to remove anything; the wiring notes below only describe the wiring method for reference and do not require disassembly. See the kit list in 1.4 for the full bill of materials.**
 

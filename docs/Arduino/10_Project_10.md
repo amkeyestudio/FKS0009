@@ -15,10 +15,11 @@ Those values are not universal — the set in the files is only the sample we ha
 #### **2. Parts List:**
 Parts used in this lesson:
 
-|     |     |
+| 17-key IR remote control (JMFP-4) ×1 | IR receiver ×1 |
 | :---: | :---: |
-| ![](../media/kit_12.png)<br><span style="font-size:0.85em">17-key IR remote control (JMFP-4) ×1</span> | ![](../media/ir_receiver.png)<br><span style="font-size:0.85em">IR receiver ×1</span> |
-| ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
+| ![](../media/kit_12.png) | ![](../media/ir_receiver.png) |
+| DRV8835 motor expansion board ×1 | ESP32-S3 development board ×1 |
+| ![](../media/kit_04.png) | ![](../media/kit_03.png) |
 > ⚠️ **The IR receiver is already mounted on the expansion board; this table is for reference only — there is nothing to take apart. The wiring notes below only show how the connections are made, for reference; no assembly or disassembly is required. For the complete parts list, see 1.4 Kit Parts List.**
 #### **3. Parameters:**
 | Item | Parameter |

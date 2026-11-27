@@ -13,10 +13,11 @@ With the car running straight along the line, push it sideways and it steers its
 #### **2. Parts List:**
 Parts used in this lesson:
 
-|     |     |     |
+| Mini tracked tank robot bottom assembly ×1 | DRV8835 motor expansion board ×1 | ESP32-S3 development board ×1 |
 | :---: | :---: | :---: |
-| ![](../media/kit_02.png)<br><span style="font-size:0.85em">Mini tracked tank robot bottom assembly ×1</span> | ![](../media/kit_04.png)<br><span style="font-size:0.85em">DRV8835 motor expansion board ×1</span> | ![](../media/kit_03.png)<br><span style="font-size:0.85em">ESP32-S3 development board ×1</span> |
-| ![](../media/kit_39.png)<br><span style="font-size:0.85em">5-way IIC line-tracking sensor module ×1</span> |  |  |
+| ![](../media/kit_02.png) | ![](../media/kit_04.png) | ![](../media/kit_03.png) |
+| 5-way IIC line-tracking sensor module ×1 |  |  |
+| ![](../media/kit_39.png) |  |  |
 > ⚠️ **This lesson adds no new parts — everything was already installed in Chapter 2, so there's nothing to remove. The wiring notes below only show how the connections are made, for reference; no disassembly is needed. For the full parts list, see 1.4 Kit List.**
 #### **3. Parameters:**
 | Item | Parameter |
